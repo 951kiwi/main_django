@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <title>ダイヤルパッド</title>
@@ -18,7 +18,12 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
+         /* タッチイベントを禁止 */
+            * {
+                touch-action: none; /* 上下左右のスクロールやピンチ操作を禁止 */
+            }
 
         .number-display {
             font-size: 50px;
@@ -246,7 +251,9 @@
             <div class="modal-content">
                 <h2>名前と誕生日を入力してください</h2>
                 <input type="text" name="name" id="name" placeholder="名前" required>
-                <input type="date" name="birth_date" id="birthdate" required>
+                <br>
+                <label for="birthdate">誕生日:</label>
+                <input type="date" name="birth_date" id="birthdate" placeholder="誕生日" required>
                 <br>
                 <button type="submit">送信</button>
             </div>
@@ -332,6 +339,11 @@
             // フォーム送信後にモーダルを閉じる
             document.getElementById('myModal').style.display = 'none';
         }
+        document.addEventListener('touchmove', function (event) {
+        if (event.scale !== 1) {
+            event.preventDefault();
+        }
+        }, { passive: false });
     </script>
 </body>
 
