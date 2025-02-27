@@ -1,8 +1,0 @@
-<!-- selection_confirm_delete.html -->
-<h2>本当に削除しますか？</h2>
-<p>選択した企業: {{ selection.company_name }}</p>
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit">削除する</button>
-    <a href="{% url 'selection_list' %}">キャンセル</a>
-</form>
