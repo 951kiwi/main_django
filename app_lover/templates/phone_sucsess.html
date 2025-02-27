@@ -8,6 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* スクロールを無効にする */
+        }
         body {
             background-image: url('{% static "lover/images/sucsess.jpg" %}');
             /* 画像のURL */
