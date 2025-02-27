@@ -1,0 +1,26 @@
+<!-- templates/babanuki_app/room_detail.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ room.name }} - Room Detail</title>
+</head>
+<body>
+    <h1>{{ room.name }}</h1>
+    <p>Current Players: {{ room.current_players }}/3</p>
+
+    <h2>Players:</h2>
+    <ul>
+        {% for player in players %}
+            <li>{{ player.name }}</li>
+        {% endfor %}
+    </ul>
+
+    <form method="post" action="{% url 'join_room' room.id %}">
+        {% csrf_token %}
+        <label for="player_name">Your Name:</label>
+        <input type="text" name="player_name" required>
+        <button type="submit">Join</button>
+    </form>
+</body>
+</html>

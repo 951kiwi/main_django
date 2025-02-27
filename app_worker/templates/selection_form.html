@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選考状況 編集</title>
+</head>
+<body>
+    <h1>{% if editing %}選考状況 編集{% else %}選考状況 新規作成{% endif %}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">保存</button>
+    </form>
+    <a href="{% url 'selection_list' %}"><button>戻る</button></a>
+</body>
+</html>

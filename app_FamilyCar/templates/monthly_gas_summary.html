@@ -1,0 +1,105 @@
+{% load static %}
+{% load mathfilters %}
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="{% static 'FamilyCar/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>月ごとのガソリン合計</title>
+    <style>/* ヘッダーのスタイル */
+    body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            position: sticky;
+            display: flex;
+            top: 0;
+            justify-content: space-between; /* 子要素を左右に配置 */
+            background-color: #333;
+            color: white;
+            padding: 10px 40px;
+            align-items: center;
+            z-index: 1000; /* 他のコンテンツよりも上に表示 */
+        }
+
+        .header .welcome {
+            font-size: 16px; /* 文字サイズ調整 */
+        }
+        .header .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 25px;
+
+        }
+        </style>
+</head>
+<body>
+    <button type="button" class="btn">Base class</button>
+    
+    <div class="header">
+        <!-- ログイン状態のチェック -->
+        {% if user.is_authenticated %}
+            <p class="welcome">ようこそ、{{ user.username }}さん！</p>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="button" style="background-color: #333;">ログアウト</button>
+            </form>
+        {% else %}
+            <p class="welcome">ログインしていません。</p>
+            <form action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="button">ログイン</button>
+            </form>
+        {% endif %}
+    </div>
+    <h1>ガソリン走行距離</h1>
+    
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for record in monthly_summary %}
+            <div class="month_card" id="month_card{{record.month}}">
+                <h3>{{ record.month|date:"Y年m月" }}</h3>
+                <button type="button" class="bootstrap btn btn-lg btn-danger" data-bs-toggle="popover" data-bs-title="Popover title" data-bs-content="And here's some amazing content. It's very engaging. Right?">Click to toggle popover</button>
+                <h5>{{ record.month_data.fuel_efficiency }} km/L {{ record.month_data.cost_per_liter }}円<i id="settingicon{{record.month}}" class="bi bi-gear-wide-connected"></i></h5>
+                {% if record.month_data.is_check == True%}
+                <script>
+                    var icon = document.getElementById("settingicon{{record.month}}");
+                    icon.className = "bi bi-coin"
+                    icon.classList.add("checked"); // ✅ クラスを追加する
+                 </script>
+                {% endif %}
+                {% if record.month_data.is_payed == True%}
+                <script>
+                    var card = document.getElementById("month_card{{record.month}}");
+                    card.id = "ispayed"
+                    var icon = document.getElementById("settingicon{{record.month}}");
+                    icon.className = "bi bi-check-circle-fill"
+                    
+                 </script>
+                {% endif %}
+                <p>走行距離合計</p>
+                <p>{{ record.total_distance }} km  {{ record.total_distance|div:record.month_data.fuel_efficiency|mul:record.month_data.cost_per_liter|floatformat:1 }}円</p>
+                <hr>
+                <div class="daily-distance">
+                    <h4>日ごとの走行距離:</h4>
+                    {% for daily in record.gas_datas %}
+                        <p>{{ daily.date|date:"m月d日" }}: {{ daily.distance }} km <i class="bi bi-receipt"></i></p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

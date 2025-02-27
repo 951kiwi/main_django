@@ -1,0 +1,65 @@
+<!-- templates/babanuki_app/room_detail.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ room.name }} - Room Detail</title>
+</head>
+<body>
+    <script>
+        function previewImage(inputId, previewId) {
+            var input = document.getElementById(inputId);
+            var preview = document.getElementById(previewId);
+            console.log('Preview Element:', preview);
+            var file = input.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+
+            reader.readAsDataURL(file);
+            var saveButton = document.getElementById('save');
+            saveButton.style.display = 'block';
+        }
+
+        function set_image_data(){
+            var image = []
+            var container = document.getElementById('imageContainer');  // 画像を表示するコンテナの要素を取得
+            var table = document.createElement('table');
+            var set_table = document.getElementById('set_table');
+
+            '{% for image in select_card %}'
+                image.push('{{image.image_card.image.url}}');
+                console.log("a");
+            '{% endfor %}'
+            console.log(image.length)
+            
+                var row = table.insertRow();
+                for(var tx=0;tx<image.length;tx++){
+                    console.log("a")
+
+                    var imgElement = document.createElement('img');
+                                imgElement.id = 'image' + tx;  // idを設定
+                                imgElement.src = image[tx];
+                                imgElement.width = 200;
+                                container.appendChild(imgElement);
+
+            }
+        }
+        window.onload = function() {
+            set_image_data();
+        }
+
+        
+    </script>
+    <h1>ルーム名：{{ room.name }}</h1>
+
+        <p id="imageContainer"></p>
+        <p id="set_table"></p>
+    
+</body>
+
+
+</html>

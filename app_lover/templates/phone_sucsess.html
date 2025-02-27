@@ -1,0 +1,55 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+        body {
+            background-image: url('{% static "lover/images/sucsess.jpg" %}'); /* 画像のURL */
+            background-size: cover; /* 画面いっぱいに画像を表示 */
+            background-position: center; /* 画像の位置を中央に */
+            background-repeat: no-repeat; /* 画像の繰り返しをなしにする */
+            margin: 0; /* 余白をなくす */
+            height: 100vh; /* ビューポートの高さに合わせる */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* 3つのdivを横に並べる */
+        }
+        .section {
+            width: 100%; /* 各divが全体の3分の1を占める */
+            height: 33.33%; /* 高さを全体に合わせる */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section">ようこそ。<span id="userName">{{data.name}}</span> さん</div>
+    <div class="section"></div>
+    <div class="section">ゲームが開始します。<br>モニターを御覧ください</div>
+</body>
+
+<script>
+        function fetchNotifications() {
+            fetch('/lover/get_data/')
+            .then(response => response.json())  // ここで JSON を取得
+            .then(data => {  // JSON 取得後に処理
+                document.getElementById("userName").textContent = data.name;  // JSON の "name" をセット
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // 5秒ごとに通知を取得
+    setInterval(fetchNotifications, 1000);
+</script>
+
+</html>
