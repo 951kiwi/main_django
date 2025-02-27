@@ -1,0 +1,12 @@
+# SEOに乗せたくないページやディレクトリ
+User-agent: *
+Disallow: /app_FamilyCar/
+Disallow: /app_lover/
+Disallow: /app_minecraft/
+Disallow: /app_worker/
+Disallow: /admin/
+
+# SEOに乗せたいページやディレクトリ
+User-agent: *
+Allow: /app_main/
+Allow: /app_dareyaomae/
