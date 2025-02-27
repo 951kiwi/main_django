@@ -5,17 +5,14 @@ from .forms import SelectionForm
 from django.db.models import Case, When, Value, IntegerField
 
 def selection_list(request):
-    selections = Selection.objects.all().order_by('company_name')  # 企業名順にソート
-    selections = selections.order_by(
-        Case(
-            When(interview_status="rejected", then=Value(1)),  # "落ちた" を最後に
-            default=Value(0),  # それ以外の企業は先に
-            output_field=IntegerField(),  # 整数として出力
-        )
-    )
-    for i in selections:
-        print(i.interview_status)
-    return render(request, "selection_list.html", {"selections": selections})
+    selections = Selection.objects.all()
+    sorted_selections = sorted(selections, key=lambda x: (x.company_name, 1 if x.interview_status == "rejected" else 0))
+    sorted_selections = sorted(sorted_selections, key=lambda x: (x.interview_status == "rejected", x.company_name))
+
+    print(selections)
+    for i in sorted_selections:
+        print(i.id,i.interview_status)
+    return render(request, "selection_list.html", {"selections": sorted_selections})
 
 
 def update_status(request, pk):
