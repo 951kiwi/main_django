@@ -1,0 +1,587 @@
+html {
+    touch-action: manipulation;
+  }
+body {
+    background-image: url('/static/dareyaomae/images/background.jpg');
+    background-size: cover; /* 画像を全体に表示 */
+    background-repeat: no-repeat; /* 画像を繰り返し表示しないようにする */
+    overflow: hidden; /*スクロールを制限？？？？*/
+    /* その他のモバイルデバイス用のスタイルプロパティ */
+}
+@font-face {
+    font-family: "pixelFont";
+    src: url("/static/dareyaomae/fonts/x12y16pxMaruMonica.ttf") format("truetype");
+  }
+
+@media only screen and (max-width: 1024px) {
+    .title{
+        text-align: center;
+        width: 100%;
+        max-height: 30%;
+        margin-top: 10%;
+        mix-blend-mode: Difference;
+    }
+    .namefont{
+      color: #000;
+      font-family: "pixelFont", sans-serif;
+    }
+    .namefont2{
+      color: white;
+      font-size: 10vw;
+      font-family: "pixelFont", sans-serif;
+      width: 100%; /* 切り捨てる幅を指定 */
+      overflow: hidden; /* 隠れた部分を隠す */
+      text-overflow: ellipsis; /* 超過した部分を省略記号で表示 */
+    }
+    .empty-element_top{
+        height: 20%;
+    }
+    .empty-element_under{
+        height: 20%;
+    }
+    /*！！！！！！！！！！！！！！！ボタンの中！！！！！！！！！！！！！！！！！*/
+    .empty-in_button{
+        height: 10%;
+    }
+    .buttonIndex{
+        position: relative;
+        margin: 0 auto;
+        display: block; 
+        text-align: center;
+    }
+    
+
+    /*！！！！！！！！！！！！！！！ボタンの中！！！！！！！！！！！！！！！！！*/
+    .p_text {
+        position: absolute;
+        color: #ffff;
+        font-size: 2em;
+        text-shadow: 3px 3px 4px coral,
+                    -3px -3px 4px coral,
+                    -3px 3px 4px coral,
+                    3px -3px 4px coral,
+                    3px 0 4px coral,
+                    -3px  0 4px coral,
+                    0 3px 4px coral,
+                    0 -3px 4px coral;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* 中央に配置するための修正 */
+        pointer-events: none;
+    }
+      
+      .imgButton {
+        height: 40%;
+        width: 80%;
+        touch-action: manipulation;
+        transition: transform .2s;
+      }
+      .imgButton:hover{
+        transform: scale(.95);
+      }
+      
+    /*！！！！！！！！！！！！！！！ボタンの中！！！！！！！！！！！！！！！！！*/
+    .select_button{
+        height: 30%;
+    }
+    .button_container{
+        display: flex; /* Flexboxを使用して子要素を水平に配置 */
+        justify-content: center; /* 子要素を中央に配置 */
+        align-items: center; /* 子要素を垂直に中央に配置 */
+        height: 30%;
+    }
+
+    .neon_button {
+        background-color: transparent;
+        --main-bg-color: #00A1FF;
+        text-shadow:
+            0 0 4px var(--main-bg-color),
+            0 0 11px var(--main-bg-color),
+            0 0 19px var(--main-bg-color),
+            0 0 40px var(--main-bg-color),
+            0 0 80px var(--main-bg-color),
+            0 0 90px var(--main-bg-color),
+            0 0 100px var(--main-bg-color),
+            0 0 150px var(--main-bg-color);
+        box-shadow : 0 0 10px transparent,
+            0 0 10px transparent inset,
+            0 0 10px var(--main-bg-color),
+            0 0 10px var(--main-bg-color) inset,
+            0 0 10px var(--main-bg-color),
+            0 0 10px var(--main-bg-color) inset;
+        border: 2px solid white;
+        color: white;
+        padding: 2% 10%;
+        font-size: 5vw;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform .2s;
+    }
+    .neon_button:hover{
+        transform: scale(.95);
+    }
+    /*！！！！！！！！！！！！！！！on offボタン！！！！！！！！！！！！！！！！！*/
+    .toggle {
+        position: relative;
+        width: 78px;
+        height: 48px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .toggle input[type=checkbox] {
+        display: none;
+      }
+      .toggle:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: #e9e9eb;
+        -webkit-transition: 0.2s ease-out;
+        transition: 0.2s ease-out;
+      }
+      .toggle:after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 42px;
+        height: 42px;
+        display: block;
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: 0 9px 28px -6px rgba(0, 0, 0, 0.3);
+        -webkit-transition: 0.2s ease-out;
+        transition: 0.2s ease-out;
+      }
+      .toggle.checked:before {
+        background: #35c759;
+      }
+      .toggle.checked:after {
+        left: 33px;
+        box-shadow: 0 9px 28px -6px rgba(0, 0, 0, 0.5);
+      }
+
+    /*！！！！！！！！！！！！！！！createのカード！！！！！！！！！！！！！！！！！*/
+    .card-overlay {
+        position: fixed; /* 画面上部に固定 */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* 半透明の背景色 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+  
+    .create_card {
+    background: #fff;
+    width: 80%;
+    height: 90%;
+    background-color: rgb(53, 53, 53);
+    color: #fff;    /*文字の色を変更*/
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .create_card > .box1{ 
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        height: 20%;
+        padding: 10% 5% 10% 5%;
+    }
+    .create_card > .box1 > p{
+        position: absolute;
+        font-size: 1.3em;
+        text-shadow: 3px 3px 4px coral,
+                    -3px -3px 4px coral,
+                    -3px 3px 4px coral,
+                    3px -3px 4px coral,
+                    3px 0 4px coral,
+                    -3px  0 4px coral,
+                    0 3px 4px coral,
+                    0 -3px 4px coral;
+        margin: 0px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* 中央に配置するための修正 */
+        text-align: center;
+    }
+    .create_card > .box2{
+        position: relative;
+        width: 100%;
+        height: 70%;
+    }
+    .create_card > .box2 > p{
+        font-size: 1.5em;
+        padding-top: 10%;
+        margin: 0px;
+        text-align: center;
+    }
+    .create_card > .box2 > .error{
+        position: absolute;
+        width: 100%;
+        bottom: 0%;
+    }
+    .create_card > .box2 > .members{
+        display: flex;
+        justify-content: space-between; 
+        margin: 0% 5% 0% 5%;
+        color: #fff;
+        font-size: 1.5em;
+    }
+    .create_card > .box2 > .members > .memberButton{
+        background-color: transparent;  /* 背景を透明にする */
+        border: none;                   /* 枠をなくす */
+        cursor: pointer;                /* カーソルをポインターに変更 */
+        padding: 0%;
+        width: 30%;
+        color: #fff;
+    }
+    .create_card > .box2 > .members > .memberinput{
+        width: 30%;
+        background-color: transparent;
+        outline: none;
+        border: none;
+        color: white;
+        text-align: center;
+    }
+    .create_card > .box3{
+        position: relative;
+        width: 100%;
+        height: 10%;
+        
+    }
+    .box3 > .listOverlay {
+        width: 100%;
+        height: 80%;
+        top: 0;
+        left: 50%;
+        display: flex;
+        background: rgba(0, 0, 0, 0.5); /* 半透明の背景色 */
+        justify-content: center;
+      }
+    .box3 > .listOverlay > .listCard{
+        background: #fff;
+        width: 80%;
+        height: 80%;
+        background-color: rgb(53, 53, 53);
+        color: #fff;    /*文字の色を変更*/
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .box3 > p{
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translate(-50%, -100%); /* 中央に配置するための修正 */
+    }
+    
+    /* カード型横スクロール */
+    .scrollCard {
+        scroll-snap-type: x mandatory;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        overflow-x: scroll;
+        
+        padding: 0 10%; /* 適切な padding を追加してください */
+        
+    }
+    .scrollCard_in {
+        position: relative;
+        scroll-snap-align: center;
+        width: 100%;
+        height: 100%;
+        margin: 0% auto;
+        flex-shrink: 0;
+        overflow: visible; /* 横から少し見えるようにする */
+    }
+    .scrollCard_in > .create_card{
+        overflow: visible; /* 横から少し見えるようにする */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* 中央に配置するための修正 */
+    }
+    .memberList{
+        height: 80%;
+        overflow-x:hidden;
+        box-sizing: border-box;
+    }
+    span.aks {
+        display: inline-block;
+     }
+
+    .room_states { 
+        width: 100%;
+        height: 20%;
+        border: 1px solid #000;
+        background-color: #fff;
+        overflow: hidden;
+        align-items: center;
+    }
+    .room_states p {
+        padding: 0% 0% 0% 0%;
+        margin: 0%;
+        font-size: 4.5vw; /* 任意の初期フォントサイズを設定 */
+        max-height: 23%; /* テキストの高さを20%のボックスに収めるための制限 */
+        max-width: 100%;
+        color: #000;
+    }
+    .statusBar{
+        position: relative;
+    }
+    .statusBar > p{
+        position: absolute;
+        font-size: 1.3em;
+        text-shadow: 3px 3px 4px coral,
+                    -3px -3px 4px coral,
+                    -3px 3px 4px coral,
+                    3px -3px 4px coral,
+                    3px 0 4px coral,
+                    -3px  0 4px coral,
+                    0 3px 4px coral,
+                    0 -3px 4px coral;
+        margin: 0px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* 中央に配置するための修正 */
+        text-align: center;
+    }
+    .joinContentBox{
+        margin: 5% 2%;
+        height: 30%;
+        text-align: center;
+        display:flex;
+        flex-flow: column;
+        padding-top: 0%;
+        padding-bottom: 10%;
+        background-color: rgb(58, 58, 58);
+        border: 2px solid rgb(62, 62, 62);
+    }
+    /*ゲームルームボックス*/
+    .gameDisplay {
+        width: 100%;
+        height: 100%;
+        }
+    .gameDisplay > .box1{ 
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        height: 20%;
+    }
+    .gameDisplay > .box1 > p{
+        position: absolute;
+        font-size: 2em;
+        text-shadow: 3px 3px 4px coral,
+                    -3px -3px 4px coral,
+                    -3px 3px 4px coral,
+                    3px -3px 4px coral,
+                    3px 0 4px coral,
+                    -3px  0 4px coral,
+                    0 3px 4px coral,
+                    0 -3px 4px coral;
+        margin: 0px;
+        top: 5%;
+        left: 5%;
+    }
+    .gameDisplay > .box2{
+        width: 100%;
+        height: 70%;
+        display: flex;
+        justify-content: center;
+        align-items: center
+    }
+    .gameDisplay > .box3{
+        position: relative;
+        width: 100%;
+        height: 10%;
+        color: red;
+        
+    }
+    .gameCard{
+        height: 40%;
+        width: 80%;
+        position: absolute;
+        cursor: pointer;
+        transform-style: preserve-3d;
+      transition: transform 1.5s;
+    }
+    .gameCard img{
+        height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+    /* 擬似要素とpadding-topでカードの高さを指定 */
+    .gameCard::before {
+        content: "";
+        display: block;
+    }
+    /* カード裏面・表面の共通スタイル */
+    .gameCard > .back,
+    .gameCard > .front {
+    position: absolute;
+    display: flex;
+        justify-content: center;
+        align-items: center;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    backface-visibility: hidden;
+    }
+    /* カード表面のスタイル */
+    .gameCard > .front {
+        transform: rotateY(180deg);
+      }
+    .gameCard >.back {
+        transform: rotateY(0);
+      }
+      .gameCard.flipped{
+        transform: rotateY(180deg);
+      }
+      .joinBox{
+        color: #fff;
+      }
+      .joinBox > .box1 {
+        font-size: 5vh;
+        height: 10%;
+      }
+      .joinBox > .box2 {
+        height: 10%;
+        display: flex;
+        justify-content: center;
+      }
+      .joinBox > .box2 > .namePlate{
+        width: 80%;
+        height: 100%;
+        background-color: rgb(53, 53, 53);
+        color: #fff;    /*文字の色を変更*/
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 5vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .joinBox > .box2 > .namePlate > p {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "pixelFont", sans-serif;
+        padding-top: 0%;
+        padding-bottom: 0%;
+        margin-bottom: 0%;
+      }
+      
+      .joinBox > .box3 {
+        height: 55%;
+          /* カード型横スクロール */
+        scroll-snap-type: x mandatory;
+        display: flex;
+        overflow-x: scroll;
+        padding: 0 10%; /* 適切な padding を追加してください */
+      }
+      .box3:not(:has(.imageCard)) {
+        justify-content: center;
+      }
+      
+      .joinBox > .box3 > .imageCard {
+        
+        position: relative;
+        width: auto;
+        text-align: center;
+        scroll-snap-align: center;
+        margin: 5% 5%;
+        flex-shrink: 0;
+        overflow: visible; /* 横から少し見えるようにする */
+      }
+      .joinBox > .box3 > .imageCard > img{
+        
+        height: 70%;
+        width: auto;
+      }
+      .joinBox > .box3 > .imageCard > .Deletebutton{
+        position: absolute;
+        bottom: 20px; /* 任意の適切な値を設定してください */
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        background-color: #660000;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .joinBox > .box3 > .plusCard{
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        scroll-snap-align: center;
+        margin: 0% 0%;
+        flex-shrink: 0;
+        overflow: visible; /* 横から少し見えるようにする */
+      }
+      /*主な共通部分は省略*/
+      .joinBox > .box3 > .plusCard > .Plusbutton{
+        color: #fff;
+        background-color: #eb6100;
+        -webkit-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        font-size: 60px;
+        line-height: 80px;
+        width: 100px;
+        height: 100px;
+        padding: 0;
+      }
+
+
+      .joinBox > .box4 {
+        height: 25%;
+        display: flex;
+        justify-content: center;
+      }
+      .joinBox > .box4 > .contentBox{
+        border-radius: 10px 10px 0 0;
+        width: 70%;
+        height: 100%;
+        background-color: dimgray;
+        text-align: center;
+      }
+      .joinBox > .box4 > .contentBox > p {
+        padding-top: 10%;
+        font-size: 7vw;
+      }
+      .joinBox > .box4 > .contentBox > button{
+        position: absolute;
+        bottom: 20px; /* 任意の適切な値を設定してください */
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      
+      .bi.bi-info-circle{
+        color: #e9e9eb;
+        position: absolute;
+        bottom: 15;
+        right: 15;
+      }
+}

@@ -1,0 +1,655 @@
+{% extends "base.html" %}
+{% load mathfilters %}
+{% load static %}
+
+
+{% block body %}
+
+<script>
+    const mainURL = 'https://951kiwi.com';
+    var count_cards = {};
+</script>
+<div class="scrollCard">
+    <div class="scrollCard_in">
+        <div class="create_card" style="width: 90%;">
+            <div class="box1">
+                <img src="{% static 'dareyaomae/images/button.png' %}" width="100%" height="100%">
+                <p>メンバー編集</p>
+            </div>
+            <div class="box2" style="height: 80%;">
+                <form class="create_member" method="post" action="{% url 'host_room' room.id %}">{% csrf_token %}
+                    <p style="padding: 0;">人数 : {{ players.count }}</p>
+                    <label name="player_name">Member Name</label>
+                    <input type="text" name="player_name" style="left: 0;" required>
+                    <button type="submit" name="create_player"
+                        style="background-color: blue;  border-radius: 15px;">追加</button>
+                </form>
+                <ul>
+                    <form class="memberList" method="post" action="{% url 'host_room' room.id %}">{% csrf_token %}
+                        {% for player in players %}
+                        <li style="border: 1 chartreuse;">
+                            <span class="aks"><a id="player_herf_{{player.id}}">{{ player.name }}</a></span>(
+                                    <script>
+                                        count_cards["{{ player.id }}"] = 0;
+                                        '{% for card in card_in_room %}'
+                                            '{% if card.player.id == player.id %}'
+                                            count_cards["{{ player.id }}"]++;
+                                            '{% endif %}'                                    
+                                        '{% endfor %}'
+                                        // カウントを表示する要素を更新
+                                        document.addEventListener("DOMContentLoaded", function() {
+                                            document.getElementById('cards_count_{{ player.id }}').innerText = count_cards["{{ player.id }}"]; // プレイヤーIDを使って特定
+                                            document.getElementById("player_herf_{{player.id}}").href = mainURL + "/dareyaomae/join/{{room.id}}?your={{player.id}}&host=true"
+                                        });
+                                        </script>
+                                        <var id="cards_count_{{ player.id }}">0</var> /{{ room.s_one_image }} )</span>
+                            <button type="submit" name="delete_player" value="{{ player.id }}"
+                                style="background-color: brown; color:white; border-radius: 15px;">削除</button>
+                        </li>
+                        {% endfor %}
+                    </form>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="scrollCard_in">
+        <div class="create_card" style="width: 90%;">
+            <div class="box1">
+                <img src="{% static 'dareyaomae/images/button.png' %}" width="100%" height="100%">
+                <p>ゲーム設定</p>
+            </div>
+            <div class="box2" style="height: 80%;">
+                <p>一人あたりの画像投稿数</p>
+                <div class="Members">
+                    <button class="memberButton" type="button" onclick="settingCounter('oneImageDown')">&lt;</button>
+                    <input class="memberinput" type="number" id="oneImage" min="1" max="20"
+                        onchange="settingCounter('Inp_oneImage')">
+                    <button class="memberButton" onclick="settingCounter('oneImageUp')">&gt;</button>
+                </div>
+                <p>ゲームに使う画像数</p>
+                <div class="Members">
+                    <button class="memberButton" type="button" onclick="settingCounter('setImageDown')">&lt;</button>
+                    <input class="memberinput" type="number" id="setImage" min="1" max="99"
+                        onchange="settingCounter('Inp_setImage')">
+                    <button class="memberButton" onclick="settingCounter('setImageUp')">&gt;</button>
+                </div>
+                <p>同カード数(def=5)</p>
+                <div class="Members">
+                    <button class="memberButton" type="button" onclick="settingCounter('dupeImageDown')">&lt;</button>
+                    <input class="memberinput" type="number" id="dupeImage" min="1" max="10"
+                        onchange="settingCounter('Inp_dupeImage')">
+                    <button class="memberButton" onclick="settingCounter('dupeImageUp')">&gt;</button>
+                </div>
+                <div style="height: 20%;text-align: center;padding-top: 10%;padding-bottom: 10%;">
+                    <button class="neon_button" type="submit" name="create" style="--main-bg-color: #dc143c;"
+                        onclick="reesetSettings()">初期化</button>
+                    <button class="neon_button" type="submit" name="create" onclick="submitsettings()">保存</button>
+
+                </div>
+                <div style="text-align: center;">
+                    <button class="neon_button" type="submit" name="create" onclick="reset_member_allImages_show()"
+                        style="font-size: medium; --main-bg-color: #dc143c; " disabled>メンバーの画像をすべて削除<br>（未実装）</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="scrollCard_in">
+        <div class="create_card" style="width: 90%;">
+            <div class="box1">
+                <img src="{% static 'dareyaomae/images/button.png' %}" width="100%" height="100%">
+                <p>ルーム状況</p>
+            </div>
+            <div class="box2" style="height: 80%;">
+                <div class="Members" width="100%" style="margin: 0% 10% 0% 0%; height: 10%;">
+                    <p style="padding-top: 0;">ルーム状況</p>
+                    <img src="{% static 'dareyaomae/images/reload.png' %}" height="100%">
+                </div>
+
+                <div class="room_states">
+                    <p>プレイ人数：{{ players.count }}</p>
+                    <p id="cardStatus">設定 画像数/使用数 ({{room.s_one_image|mul:players.count}}/{{room.s_set_image}})</p>
+                    <p id="nowCardStatus">現在 投稿数/使用数 ({{card_in_room.count}}/{{room.s_set_image}})</p>
+                    <p>カードの重複 : x{{room.s_dupe}} 合計カード数 : {{room.s_set_image|mul:room.s_dupe}}</p>
+
+                </div>
+                <div class="statusBar">
+                    <canvas style=" height: 20%; width: 100%;" id="canvas"></canvas>
+                    <p id="statusText" style="width: 100%;">aaa</p>
+                </div>
+                <!--<div class="toggle">
+                        <input type="checkbox" name="check" />
+                    </div>-->
+                <div class="joinContentBox">
+                    <p>画像投稿者用</p>
+                    <button class="neon_button" id="URLshare">リンク共有</button>
+                    <button class="neon_button" id="QRshare">QRコード表示</button>
+                </div>
+                <div style="text-align: center;">
+                    <button class="neon_button" type="submit" onclick="startgame_btn();"
+                        style="--main-bg-color: OrangeRed;">ゲームを開始</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="QRmodal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="setmodal_title">画像投稿用QRコード</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="setQR">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">閉じる</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="startErrorModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="startModal_title">ゲームを開始できません</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>使用する画像の枚数が足りていないか、設定がおかしいです。ルーム状況で文字が赤くならないように設定・調整をして<br>再度ゲームを始めてください。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">閉じる</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="startModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="startModal_title">開始方法を選択</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="startModal_01">
+                    <h3 class="fs-5">新規で始める</h3>
+                    <p>途中データがない場合、これしか選択できません</p>
+                    <button class="btn btn-success" id="start01" onclick="send_startgame_btn('new')">選択</button>
+                    <hr>
+                </div>
+                <div id="startModal_02">
+                    <h3 class="fs-5">使用したカードを変えずに始める</h3>
+                    <p>使用するカードを変えずにデータのみ初期化する</p>
+                    <button class="btn btn-warning" id="start02" onclick="send_startgame_btn('data_reset')">選択</button>
+                    <hr>
+                </div>
+                <div id="startModal_03">
+                    <h3 class="fs-5">途中から始める</h3>
+                    <p>途中でやめたゲームを再開する</p>
+                    <button class="btn btn-warning" id="start03" onclick="send_startgame_btn('continue')">選択</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="reset_member_allImages">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="startModal_title">警告</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="startModal_01">
+                    <h3 class="fs-5">全メンバーの画像をリセットしますか？</h3>
+                    <p>この操作はサーバーで確実に行われ、一切の復元ができません。</p>
+                    <button class="btn btn-danger" id="start01" onclick="AllImageDelete()">全画像削除</button>
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">削除しないで閉じる</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+    crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+<script>
+    let oneImage = '{{room.s_one_image}}';
+    let useImage = '{{room.s_set_image}}';
+    let dupeImage = '{{room.s_dupe}}';
+    function settingCounter(settings) {
+        let _oneImage = oneImage;
+        let _useImage = useImage;
+        let _dupeImage = dupeImage;
+
+        if (settings === "oneImageUp") {
+            oneImage++;
+        }
+        else if (settings === "oneImageDown") {
+            oneImage--;
+        }
+        else if (settings === "setImageUp") {
+            useImage++;
+        }
+        else if (settings === "setImageDown") {
+            useImage--;
+        }
+        else if (settings === "dupeImageUp") {
+            dupeImage++;
+        }
+        else if (settings === "dupeImageDown") {
+            dupeImage--;
+        }
+        else if (settings === "Inp_oneImage") {
+            oneImage = parseInt(document.getElementById("oneImage").value);
+        }
+        else if (settings === "Inp_setImage") {
+            useImage = parseInt(document.getElementById("setImage").value);
+        }
+        else if (settings === "Inp_dupeImage") {
+            dupeImage = parseInt(document.getElementById("dupeImage").value);
+        }
+        else {
+            console.log("errorButtonFunctions");
+            console.log(settings);
+        }
+        if (1 > oneImage || 20 < oneImage) {
+            oneImage = _oneImage
+        }
+        if (1 > useImage || 99 < useImage) {
+            useImage = _useImage
+        }
+        if (1 > dupeImage || 10 < dupeImage) {
+            dupeImage = _dupeImage
+        }
+        gamesettingTextDirecter();
+    }
+    function gamesettingTextDirecter() {
+        document.getElementById('oneImage').value = oneImage
+        document.getElementById('setImage').value = useImage;
+        document.getElementById('dupeImage').value = dupeImage;
+    }
+    function reesetSettings() {
+        oneImage = 3;
+        useImage = 10;
+        dupeImage = 5;
+        gamesettingTextDirecter();
+    }
+    function submitsettings() {
+        let index_;
+        const formData = new FormData();
+
+        const promises = [];
+        // それぞれの数字の値を、フォームに追加
+        formData.append('oneImage', oneImage);
+        formData.append('useImage', useImage);
+        formData.append('dupeImage', dupeImage);
+
+        // フォームを作成して送信
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/dareyaomae/host/{{ room.id }}/');
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+
+        // リクエストが完了したらページをリロード
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                console.log('Request succeeded:', xhr.responseText);
+                // リクエストが成功したらページをリロード
+                window.location.href = "/dareyaomae/host/{{ room.id }}/";
+            } else {
+                console.error('Request failed:', xhr.statusText);
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error('Error occurred while sending the request.');
+        };
+
+        xhr.send(formData);
+    }
+    function reset_member_allImages_show(){
+        var StartModal = new bootstrap.Modal(document.getElementById("reset_member_allImages"));
+            StartModal.show();
+    }
+    function reset_member_allImages() {
+
+        let index_;
+
+    }
+    function startgame_btn() {
+        console.log("a");
+
+        if (document.getElementById('cardStatus').style.color === 'red' || document.getElementById('nowCardStatus').style.color === 'red') {
+            var StartModal = new bootstrap.Modal(document.getElementById("startErrorModal"));
+            StartModal.show();
+        }
+        else {
+            var StartModal = new bootstrap.Modal(document.getElementById("startModal"));
+            StartModal.show();
+        }
+    }
+    function send_startgame_btn(text) {
+        let index_;
+        const formData = new FormData();
+
+        const promises = [];
+        // それぞれの数字の値を、フォームに追加
+        formData.append("game_start", text);
+
+        // フォームを作成して送信
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/dareyaomae/host/{{ room.id }}/');
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        new_button = document.getElementById("start01")
+        data_reset_button = document.getElementById("start02")
+        continue_button = document.getElementById("start03")
+        if (text === 'new') {
+            new_button.textContent = "処理中..."
+            new_button.disabled = true;
+            data_reset_button.disabled = true;
+            continue_button.disabled = true;
+        }
+        else if (text === 'data_reset') {
+            data_reset_button.textContent = "処理中..."
+            new_button.disabled = true;
+            data_reset_button.disabled = true;
+            continue_button.disabled = true;
+        }
+        else if (text === 'continue') {
+            continue_button.textContent = "処理中..."
+            new_button.disabled = true;
+            data_reset_button.disabled = true;
+            continue_button.disabled = true;
+        }
+        // リクエストが完了したらページをリロード
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                console.log(xhr.responseText);
+                const jsonObject = JSON.parse(xhr.responseText);
+                if (jsonObject.set_result === "sucsess") {
+                    var button_moved;
+                    if (text === 'new') {
+                        new_button.textContent = "新規作成:成功"
+                        button_moved = new_button;
+                        document.getElementById("startModal_02").style.display = "none";
+                        document.getElementById("startModal_03").style.display = "none";
+                    }
+                    else if (text === 'data_reset') {
+                        data_reset_button.textContent = "セーブ初期化:成功"
+                        button_moved = data_reset_button;
+                        document.getElementById("startModal_01").style.display = "none";
+                        document.getElementById("startModal_03").style.display = "none";
+                    }
+                    else if (text === 'continue') {
+                        continue_button.textContent = "データ取得:成功"
+                        button_moved = continue_button;
+                        document.getElementById("startModal_01").style.display = "none";
+                        document.getElementById("startModal_02").style.display = "none";
+                    }
+                    setTimeout(function () {
+                        button_moved.textContent = "ページが移行します"
+                        setTimeout(function () {
+                            button_moved.textContent = "ページが移行します."
+                            setTimeout(function () {
+                                button_moved.textContent = "ページが移行します.."
+                                setTimeout(function () {
+                                    button_moved.textContent = "ページが移行します..."
+                                    setTimeout(function () {
+                                        window.location.href = "/dareyaomae/game_room/{{ room.id }}/";
+                                    }, 200)
+                                }, 200)
+                            }, 200)
+                        }, 400)
+                    }, 500)
+                }
+                else {
+                    if (text === 'new') {
+                        new_button.textContent = "技術的エラー[お問い合わせしてください]\n" + jsonObject.set_result
+                    }
+                    else if (text === 'data_reset') {
+                        data_reset_button.textContent = "技術的エラー[お問い合わせしてください]\n" + jsonObject.set_result
+                    }
+                    else if (text === 'continue') {
+                        continue_button.textContent = "技術的エラー[お問い合わせしてください]\n" + jsonObject.set_result
+                    }
+                }
+
+
+            } else {
+                console.error('Request failed:', xhr.statusText);
+                if (text === 'new') {
+                    new_button.textContent = "失敗"
+                }
+                else if (text === 'data_reset') {
+                    data_reset_button.textContent = "失敗"
+                }
+                else if (text === 'continue') {
+                    continue_button.textContent = "失敗"
+                }
+                setTimeout(function () {
+                    window.location.href = "/dareyaomae/host/{{ room.id }}/";
+                }, 1000);
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error('Error occurred while sending the request.');
+        };
+
+        xhr.send(formData);
+    }
+    function memberList() {
+        const container = document.querySelector('.box2');
+        const inset = document.querySelector('.create_member');
+        // containerの下端までの座標
+        const containerBottom = container.offsetHeight;
+        const insetBottom = inset.offsetHeight;
+
+        console.log('container:', containerBottom);
+        console.log('inset:', insetBottom);
+        const gap = containerBottom - insetBottom;
+        console.log('Gap:', gap);
+        const list = document.querySelector('.memberList');
+        // containerの高さを修正
+        list.style.height = (gap - 16) + 'px';
+    }
+    function settingCardStatus(totalImages, usedImages) {
+        if (parseInt(totalImages) < parseInt(usedImages)) {
+            document.getElementById('cardStatus').style.color = 'red';
+            console.warn("設定のカード枚数が足りないです");
+            return '設定を確認して使用するカードが合計のカードを超えるようにしてください';
+
+        } else {
+            document.getElementById('cardStatus').style.color = 'green';
+            document.getElementById('canvas').style.backgroundColor = 'rgb(53, 55, 75)';
+            console.log("設定のカードの枚数は足りてます");
+            return 0;
+        }
+    }
+
+    function updateCardStatus(totalImages, usedImages) {   //画像枚数が足りない場合エラーを表示する
+
+        if (parseInt(totalImages) < parseInt(usedImages)) {
+            document.getElementById('nowCardStatus').style.color = 'red';
+            console.warn("現在のカード枚数が足りないです");
+            return '投稿数が使用するカードより少ないです。';
+        } else {
+            document.getElementById('nowCardStatus').style.color = 'green';
+            document.getElementById('canvas').style.backgroundColor = 'rgb(53, 55, 75)';
+            console.log("現在のカード枚数は足りてます");
+            return 0;
+        }
+    }
+    /*document.querySelector(".toggle").addEventListener("click", function() {
+        document.querySelector(".toggle").classList.toggle("checked");
+        
+        var checkBox = document.querySelector('input[name="check"]');
+        
+        if (!checkBox.checked) {
+            checkBox.checked = true;
+        } else {
+            checkBox.checked = false;
+        }
+    });*/
+
+
+    document.getElementById('URLshare').addEventListener('click', async function () {
+        console.log("asdasd");
+        var content = "ダレヤオマエに参加して画像を投稿しよう！\n\nroom({{room.name}})\n--------[player]-------\n"
+        '{% for player in players %}'
+        content += "・[{{player.name}}]:\n  " + mainURL + "/dareyaomae/join/{{room.id}}/?your=" + '{{player.id}}\n\n'
+        '{% endfor %}'
+        content += "---------------"
+        await navigator.share({ text: content });
+    })
+    document.getElementById('QRshare').addEventListener('click', function () {
+        console.log('QEs='+String(mainURL));
+        const myModal_ = document.getElementById('QRmodal')
+        var modal_ = new bootstrap.Modal(myModal_);
+        modal_.show();
+        if (document.getElementById("setQR").childElementCount !== 0) {
+            return 0;
+        }
+        var qrcode = new QRCode('setQR', {
+            text: String(String(mainURL)+"/dareyaomae/join/{{room.id}}/"),
+            width: 128,
+            height: 128,
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        return 0;
+    })
+
+
+    window.onload = function () {
+        var result = [];
+        var sel = 0;
+        result.push(settingCardStatus("{{room.s_one_image|mul:players.count}}", "{{room.s_set_image}}"));
+        result.push(updateCardStatus("{{card_in_room.count}}", "{{room.s_set_image}}"));
+        for (var i = 0; i < result.length; i++) {
+            if (result[i] !== 0) {
+                sel++;
+                document.getElementById('canvas').style.backgroundColor = 'rgb(155, 68, 68)';
+                document.getElementById('statusText').textContent = result[i];
+            }
+            else if (result[i] === 0) {
+                document.getElementById('canvas').style.backgroundColor = 'rgb(15, 68, 68)';
+                document.getElementById('statusText').textContent = result[i];
+            }
+        }
+        if (sel !== 0) {
+            document.getElementById('canvas').style.backgroundColor = 'rgb(155, 68, 68)';
+            if (result[0] !== 0) {
+                document.getElementById('statusText').textContent = result[0]
+            };
+        }
+        else {
+            document.getElementById('statusText').textContent = "ゲームを開始できます"
+        }
+        document.getElementById('oneImage').value = "{{ room.s_one_image }}";
+        document.getElementById('setImage').value = "{{ room.s_set_image }}";
+        document.getElementById('dupeImage').value = "{{ room.s_dupe }}";
+        memberList();
+    }
+</script>
+
+<script>// ルーム状況のアニメーション
+    var Canvas = document.getElementById('canvas');
+    var ctx = Canvas.getContext('2d');
+    var resize = function () {
+        Canvas.width = Canvas.clientWidth;
+        Canvas.height = Canvas.clientHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
+    var elements = [];
+    var presets = {};
+    presets.o = function (x, y, s, dx, dy) {
+        return {
+            x: x,
+            y: y,
+            r: 12 * s,
+            w: 5 * s,
+            dx: dx,
+            dy: dy,
+            draw: function (ctx, t) {
+                this.x += this.dx;
+                this.y += this.dy;
+
+                ctx.beginPath();
+                ctx.arc(this.x + + Math.sin((50 + x + (t / 10)) / 100) * 3, this.y + + Math.sin((45 + x + (t / 10)) / 100) * 4, this.r, 0, 2 * Math.PI, false);
+                ctx.lineWidth = this.w;
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+            }
+        }
+    };
+    presets.x = function (x, y, s, dx, dy, dr, r) {
+        r = r || 0;
+        return {
+            x: x,
+            y: y,
+            s: 20 * s,
+            w: 5 * s,
+            r: r,
+            dx: dx,
+            dy: dy,
+            dr: dr,
+            draw: function (ctx, t) {
+                this.x += this.dx;
+                this.y += this.dy;
+                this.r += this.dr;
+
+                var _this = this;
+                var line = function (x, y, tx, ty, c, o) {
+                    o = o || 0;
+                    ctx.beginPath();
+                    ctx.moveTo(-o + ((_this.s / 2) * x), o + ((_this.s / 2) * y));
+                    ctx.lineTo(-o + ((_this.s / 2) * tx), o + ((_this.s / 2) * ty));
+                    ctx.lineWidth = _this.w;
+                    ctx.strokeStyle = c;
+                    ctx.stroke();
+                };
+
+                ctx.save();
+
+                ctx.translate(this.x + Math.sin((x + (t / 10)) / 100) * 5, this.y + Math.sin((10 + x + (t / 10)) / 100) * 2);
+                ctx.rotate(this.r * Math.PI / 180);
+
+                line(-1, -1, 1, 1, '#fff');
+                line(1, -1, -1, 1, '#fff');
+
+                ctx.restore();
+            }
+        }
+    };
+    for (var x = 0; x < Canvas.width; x++) {
+        for (var y = 0; y < Canvas.height; y++) {
+            if (Math.round(Math.random() * 1000) == 1) {
+                var s = ((Math.random() * 5) + 1) / 10;
+                if (Math.round(Math.random()) == 1)
+                    elements.push(presets.o(x, y, s, 0, 0));
+                else
+                    elements.push(presets.x(x, y, s, 0, 0, ((Math.random() * 3) - 1) / 10, (Math.random() * 360)));
+            }
+        }
+    }
+    setInterval(function () {
+        ctx.clearRect(0, 0, Canvas.width, Canvas.height);
+
+        var time = new Date().getTime();
+        for (var e in elements)
+            elements[e].draw(ctx, time);
+    }, 10);
+
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+# Python関連
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# データベース
+*.sqlite3
+db.sqlite3
+
+# Venv関係
+pyvenv.cfg
+/bin/
+
+# 秘密情報
+.env
+*.env
+config.json
+secrets.json
+
+# Django関連
+/staticfiles/
+media/
+
