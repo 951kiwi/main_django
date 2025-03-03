@@ -71,7 +71,7 @@
             const formData = new FormData();
             formData.append("message", "gamestart");
 
-            fetch("{% url 'phone' %}", {  // DjangoのURL
+            fetch("{% url 'PC_view' %}", {  // DjangoのURL
                 method: "POST",
                 headers: {
                     "X-CSRFToken": "{{ csrf_token }}"
