@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>誕生日PC用ページ</title>
+</head>
+<style>
+    body {
+        width: 100%;
+        height: 100vh;
+        background-color: #000;
+        overflow: hidden;
+    }
+
+    .backgroundVideo {
+        margin: 0;
+        padding: 0%;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #000;
+    }
+
+    video,
+    audio {
+        width: 100%;
+        height: 100vh;
+        object-fit: cover;
+        position: absolute;
+    }
+
+    button {
+        position: absolute;
+        z-index: 100;
+        padding: 10px;
+        background-color: #fff;
+        color: #000;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+    }
+</style>
+
+<body>
+    <div class="backgroundVideo">
+        <video id="myVideo" autoplay playsinline>
+            <source src="{% static 'lover/movies/PC_main01.mp4' %}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+
+
+    <script>
+
+        document.getElementById("myVideo").playbackRate = 10;
+        let video = document.getElementById("myVideo");
+
+        // ユーザーがボタンをクリックしたら音声を解除
+        video.addEventListener("click", function () {
+            video.play();
+            video.muted = false; // 動画音声解除
+        });
+        video.addEventListener("ended", function () {
+            const formData = new FormData();
+            formData.append("message", "gamestart");
+
+            fetch("{% url 'phone' %}", {  // DjangoのURL
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData  // フォームデータとして送信
+            })
+                .then(response => response.json())
+                .then(data => {
+                    window.location.reload();
+                })
+                .catch(error => console.error("Error:", error));
+        });
+
+
+
+    </script>
+</body>
+
+</html>

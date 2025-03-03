@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'app_worker',
     'mathfilters',
     'channels',
+    'sslserver',
 ]
 
 MIDDLEWARE = [

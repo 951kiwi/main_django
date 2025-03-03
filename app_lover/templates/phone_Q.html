@@ -1,0 +1,372 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="black">
+    <title>クイズ</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ヘッダーのスタイル */
+        .header {
+            position: sticky;
+            display: flex;
+            top: 0;
+            justify-content: space-between;
+            /* 子要素を左右に配置 */
+            background-color: #333;
+            color: white;
+            padding: 10px 40px;
+            align-items: center;
+            z-index: 1000;
+            /* 他のコンテンツよりも上に表示 */
+        }
+
+        .header .welcome {
+            font-size: 16px;
+            /* 文字サイズ調整 */
+        }
+
+        .header .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 25px;
+
+        }
+
+        /* メインコンテンツのスタイル */
+        .content {
+            padding: 20px;
+            height: 2000px;
+            /* スクロールのために高さを追加 */
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .link-card {
+            position: relative;
+            width: 40vw;
+            height: 40vw;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            padding: 10px 10px 10px 10px;
+        }
+
+        .link-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+        .clear-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            pointer-events: none;
+            /* クリックできないようにする */
+            animation: clear_zoomIn 0.8s cubic-bezier(1, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes clear_zoomIn {
+            0% {
+                transform: scale(2);
+                /* 初期状態 */
+            }
+
+            100% {
+                transform: scale(1);
+                /* 終了状態 */
+            }
+        }
+
+
+        /* モーダルのスタイル */
+        .modal {
+            display: none;
+            /* 初期状態では非表示 */
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+            /* 初期表示時のフェードイン */
+        }
+
+        /* モーダルが表示されるとき */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+                /* 上からスライドイン */
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* モーダルを閉じる時のアニメーション */
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(50px);
+                /* 下にスライドアウト */
+            }
+        }
+
+        .modal-content {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+            /* 閉じるボタンを右上に配置するために親要素にrelativeを追加 */
+        }
+
+        .modal input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 200px;
+            font-size: 16px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: red;
+        }
+
+        /* モーダルが閉じるとき */
+        .modal.hide {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        .modal button {
+            padding: 10px 20px;
+            background-color: green;
+            color: white;
+            border: none;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background-color: darkgreen;
+        }
+    </style>
+</head>
+
+<body>
+    <!--完了 Q01,Q2-->
+    <!-- モーダル -->
+    <div id="Q01" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('Q01')">&times;</span>
+            Q01,画像の通りにしろ
+            <hr color="#fffff">
+            <img src="{% static 'lover/images/phone_rotate.jpg' %}" width="60%">
+
+        </div>
+        <script>
+            window.addEventListener("orientationchange", function () {
+                if (window.getComputedStyle(document.getElementById("Q01")).display != "none") {
+                    alert("Q01クリア！！\n向きが変わった！！！");
+                    const formData = new FormData();
+                    formData.append("message", "Q01=True");
+
+                    fetch("{% url 'phone' %}", {  // DjangoのURL
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: formData  // フォームデータとして送信
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            window.location.reload();
+                        })
+                        .catch(error => console.error("Error:", error));
+                }
+            });
+        </script>
+    </div>
+    <div id="Q02" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('Q02')">&times;</span>
+            Q02, 合言葉を埋めろ
+            <hr color="#fffff">
+            座標:X=470 Y=64 Z=-375
+            <input type="text" name="message" id="Q2_message" placeholder="合言葉を入力" required>
+            <button id="Q2_button">送信</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("Q2_button").addEventListener("click", function (event) {
+            var message = document.getElementById("Q2_message").value;
+            if (message == "パズル") {  // 合言葉チェック
+                alert("Q02クリア！！\n合言葉を入力した！！！");
+                const formData = new FormData();
+                formData.append("message", "Q02=True");
+
+                fetch("{% url 'phone' %}", {  // DjangoのURL
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: formData  // フォームデータとして送信
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        window.location.reload();
+                    })
+                    .catch(error => console.error("Error:", error));
+
+            }
+            else {
+                alert("違うよ！もう一度考えてみよう。");  // 警告を表示
+            }
+        });
+    </script>
+
+    </div>
+    <div id="Q03" class="modal">
+        <form method="POST" action="{% url 'phone_name_birthday' %}">
+            {% csrf_token %}
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeModal('Q03')">&times;</span>
+                <h2>名前と誕生日を入力してください</h2>
+                <input type="text" name="name" id="name" placeholder="名前" required>
+                <br>
+                <label for="birthdate">誕生日:</label>
+                <input type="date" name="birth_date" id="birthdate" placeholder="誕生日" required>
+                <br>
+                <button type="submit">送信</button>
+            </div>
+        </form>
+    </div>
+    <h1>クイズを選択</h1>
+    <div class="container" id="container">
+    </div>
+
+    <script>
+        function showModal(id) {
+            var modal = document.getElementById(id);
+            modal.classList.remove('hide'); // 閉じるアニメーションをリセット
+            modal.style.display = 'flex';
+        }
+        function closeModal(id) {
+            var modal = document.getElementById(id);
+            modal.classList.add('hide'); // モーダルを閉じる
+            setTimeout(function () {
+                modal.style.display = 'none'; // アニメーション後に完全に非表示にする
+            }, 500); // アニメーションの時間と合わせる
+        }
+
+        window.onload = function () {
+            // container 要素を取得
+            const container = document.getElementById('container');
+
+            // 6回繰り返し
+            for (let i = 1; i <= 6; i++) {
+                // link-card の div を作成
+                const linkCard = document.createElement('div');
+                linkCard.classList.add('link-card');
+                linkCard.setAttribute('onclick', `showModal('Q0${i}')`);
+                linkCard.id = `Q0${i}_card`;
+                image = document.createElement('img')
+                image.src = "{% static 'lover/images/q'%}" + i.toString() + ".png";
+                linkCard.appendChild(image);
+                // link-card を container に追加
+                container.appendChild(linkCard);
+            }
+
+            if ('{{data.game01}}' == "True") {
+                // クリアした場合の処理
+                clear_card(1);
+            }
+            if ('{{data.game02}}' == "True") {
+                // クリアした場合の処理
+                clear_card(2);
+            }
+            if ('{{data.game03}}' == "True") {
+                // クリアした場合の処理
+                clear_card(3);
+            }
+            if ('{{data.game04}}' == "True") {
+                // クリアした場合の処理
+                clear_card(4);
+            }
+            if ('{{data.game05}}' == "True") {
+                // クリアした場合の処理
+                clear_card(5);
+            }
+            if ('{{data.game06}}' == "True") {
+                // クリアした場合の処理
+                clear_card(6);
+            }
+            function clear_card(id) {
+                const overlayImage = document.createElement('img');
+                overlayImage.src = "{% static 'lover/images/clear.png' %}";
+                overlayImage.classList.add("clear-overlay");
+                document.getElementById(`Q0${id}_card`).appendChild(overlayImage);  // clear.png を linkCard に追加
+                document.getElementById(`Q0${id}_card`).removeAttribute('onclick');
+            }
+        };
+
+    </script>
+</body>
+
+</html>

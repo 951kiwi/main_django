@@ -16,12 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import phone_view,phone_name_birthday,get_data
+from .views import phone_view,phone_name_birthday,get_data,PC_view,phone_data_save,Q3_QR
 
 urlpatterns = [
     path('phone/', phone_view, name='phone'),
+    path('PC_view/',PC_view,name="PC_view"),
 
     #データ変更用
     path('phone_name_birthday/',phone_name_birthday, name='phone_name_birthday'),   
+    path('phone_data_save/',phone_data_save,name="phone_data_save"),
     path('get_data/',get_data,name="get_data"),
+    path('Q3_QRload',Q3_QR,name="Q3_QRload"),
 ]

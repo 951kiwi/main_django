@@ -5,8 +5,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>dddd</title>
     <style>
         html, body {
             margin: 0;
@@ -66,7 +67,9 @@
         fetch('/lover/get_data/')
             .then(response => response.json())  // ここで JSON を取得
             .then(data => {  // JSON 取得後に処理
-                document.getElementById("userName").textContent = data.name;  // JSON の "name" をセット
+                if(data.gamestart == true){
+                    window.location.reload();
+                }
             })
             .catch(error => console.error('Error:', error));
     }

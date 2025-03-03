@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>誕生日PC用ページ</title>
+</head>
+<style>
+    body {
+        width: 100%;
+        height: 100vh;
+        background-color: #000;
+        overflow: hidden;
+    }
+
+    .backgroundVideo {
+        margin: 0;
+        padding: 0%;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        /* 横方向の中央 */
+        align-items: center;
+        /* 縦方向の中央 */
+        background-color: #000;
+    }
+
+    video {
+        filter: brightness(20%);
+    }
+</style>
+
+<body>
+    <div class="backgroundVideo">
+        <video id="myVideo" src="{% static 'lover/movies/PC_view01.mp4' %}" autoplay loop muted playsinline>
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <script>
+        // 再生速度を変更（例: 1.5倍速）
+        document.getElementById("myVideo").playbackRate = 0.5;
+
+
+        function fetchNotifications() {
+        fetch('/lover/get_data/')
+            .then(response => response.json())  // ここで JSON を取得
+            .then(data => {  // JSON 取得後に処理
+                console.log(data.login);
+                if(data.login == true){
+                    window.location.reload();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // 1秒ごとに通知を取得
+    setInterval(fetchNotifications, 2000);
+    </script>
+</body>
+
+</html>
+
+</html>
