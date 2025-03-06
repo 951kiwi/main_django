@@ -205,6 +205,67 @@
         .modal button:hover {
             background-color: darkgreen;
         }
+
+
+        #my_container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-flow: wrap;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        #my_inner {
+            margin: 0px;
+            padding: 10px 10px;
+            border-radius: 20px;
+            background-color: gray;
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        #my_quagga {
+            width: 320px;
+            height: 240px;
+            margin: 5px;
+            padding: 0px;
+            position: relative;
+            background-color: silver;
+        }
+
+        #my_quagga video {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        #my_quagga canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        #my_result {
+            width: 100%;
+            height: 100%;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        #my_barcode {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-flow: wrap;
+            justify-content: space-around;
+            align-items: center;
+        }
     </style>
 </head>
 
@@ -287,7 +348,8 @@
             {% csrf_token %}
             <div class="modal-content">
                 <span class="modal-close" onclick="closeModal('Q03')">&times;</span>
-                <h2>名前と誕生日を入力してください</h2>
+                <hr>
+                <h2>特定の場所へ行け</h2>
                 <input type="text" name="name" id="name" placeholder="名前" required>
                 <br>
                 <label for="birthdate">誕生日:</label>
@@ -296,6 +358,76 @@
                 <button type="submit">送信</button>
             </div>
         </form>
+    </div>
+    <div id="Q04" class="modal">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeModal('Q04')">&times;</span>
+                <hr>
+                <div id="my_container">
+                    <div id="my_inner">
+                        <div>= QuaggaJS =</div>
+                        <div>
+                            <button id="my_start">Start</button>
+                            <button id="my_stop">Stop</button>
+                        </div>
+                        <div id="my_quagga"></div>
+                        <div id="my_result">***</div>
+                        <div id="my_barcode">
+                            <div>***</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script src="//code.jquery.com/jquery-3.6.1.min.js"></script>
+            <script src="//unpkg.com/@ericblade/quagga2@1.7.4/dist/quagga.min.js"></script>
+            <script src="//cdn.jsdelivr.net/gh/mtaketani113/jquery-barcode@master/jquery-barcode.js"></script>
+            <script>
+
+                $("#my_start").click(() => {
+                    console.log("Start!!");
+
+                    // Quagga
+                    Quagga.init({
+                        inputStream: {
+                            name: "Live",
+                            type: "LiveStream",
+                            target: document.getElementById("my_quagga")
+                        },
+                        decoder: {
+                            readers: ["ean_reader"]
+                        }
+                    }, err => {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        console.log("Initialization finished!!");
+                        Quagga.start();
+                    });
+
+                    Quagga.onProcessed(result => {
+                        if (result == null) return;
+                        if (typeof (result) != "object") return;
+                        if (result.boxes == undefined) return;
+                        const ctx = Quagga.canvas.ctx.overlay;
+                        const canvas = Quagga.canvas.dom.overlay;
+                        ctx.clearRect(0, 0, parseInt(canvas.width), parseInt(canvas.height));
+                        Quagga.ImageDebug.drawPath(result.box,
+                            { x: 0, y: 1 }, ctx, { color: "blue", lineWidth: 5 });
+                    });
+
+                    Quagga.onDetected(result => {
+                        console.log(result.codeResult.code);
+                        $("#my_result").text(result.codeResult.code);
+                        $("#my_barcode div").barcode(result.codeResult.code, "ean13");
+                    });
+                });
+
+                $("#my_stop").click(() => {
+                    console.log("Stop!!");
+                    Quagga.stop();
+                });
+            </script>
     </div>
     <h1>クイズを選択</h1>
     <div class="container" id="container">
