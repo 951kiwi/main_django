@@ -15,6 +15,7 @@
         background-color: #ca2b2b;
         overflow: hidden;
         display: flex;
+        margin: 0;
     }
 
     .box1 {
@@ -41,6 +42,60 @@
         height: 100hv;
         margin: 20px;
         position: relative;
+    }
+
+    .clear_card {
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        padding: 10px;
+        bottom: 0px;
+        left: 10px;
+        overflow: hidden;
+    }
+
+    .link-card {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        padding: 5px;
+    }
+
+    .link-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 15px;
+    }
+
+    .clear-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 20px;
+        pointer-events: none;
+        /* クリックできないようにする */
+        animation: clear_zoomIn 2.8s cubic-bezier(1, 1, 0.5, 1) forwards;
+    }
+
+    @keyframes clear_zoomIn {
+        0% {
+            transform: scale(2);
+            /* 初期状態 */
+        }
+
+        100% {
+            transform: scale(1);
+            /* 終了状態 */
+        }
     }
 
     .time {
@@ -87,7 +142,8 @@
 
 <body>
     <div class="box1" id="box1">
-        <img id="myImage" data-value="5" src="{% static 'lover/images/q01.jpg' %}" style="transition: filter 3s linear;">
+        <img id="myImage" data-value="5" src="{% static 'lover/images/q01.jpg' %}"
+            style="transition: filter 3s linear;">
     </div>
     <div class="box2">
         <h1>{{data.name}}さんゲームを開始してください。<h1>
@@ -102,6 +158,27 @@
                 <span class="time" id="time">現在時刻：00:00:00</span>
 
     </div>
+    <div class="clear_card">
+        <div class="link-card" id="Q01_card">
+            <img src="{% static 'lover/images/q1.png'%}" alt="">
+        </div>
+        <div class="link-card" id="Q02_card">
+            <img src="{% static 'lover/images/q2.png'%}" alt="">
+        </div>
+        <div class="link-card" id="Q03_card">
+            <img src="{% static 'lover/images/q3.png'%}" alt="">
+        </div>
+        <div class="link-card" id="Q04_card">
+            <img src="{% static 'lover/images/q4.png'%}" alt="">
+        </div>
+        <div class="link-card" id="Q05_card">
+            <img src="{% static 'lover/images/q5.png'%}" alt="">
+        </div>
+        <div class="link-card" id="Q06_card">
+            <img src="{% static 'lover/images/q6.png'%}" alt="">
+        </div>
+    </div>
+
     <!--画像用-->
     <script>
         let img = document.getElementById("myImage");
@@ -120,40 +197,30 @@
             img.style.filter = filters[value];
         }
 
-        let i = 6;
-        let interval = setInterval(function () {
-            console.log(i);
-            if (i == 0) {
-                imagefilter(i);
-                i = 6;
-            } else {
-                i--;
-                imagefilter(i);
-            }
-        }, 3000);
+        imagefilter(6);
 
-    </script>
 
     <!--動画用-->
-    <script>
         let staticPath = "{% static 'lover/BGM/' %}";
         let video = document.getElementById("myVideo");
 
         // ユーザーがボタンをクリックしたら音声を解除
         video.addEventListener("click", function () {
+            document.getElementById("myVideo").playbackRate = 10;
             video.play();
             video.muted = false; // 動画音声解除
         });
         video.addEventListener("ended", function () {
             let videoFileName = video.src.split('/').pop().replace('.mp4', '');
             console.log(videoFileName);  // 例えば "video.mp4" と表示される
-            if (videoFileName == "2") {
+            if (videoFileName == "5") {
                 video.src = staticPath + "1.mp4";
             }
             else {
 
                 video.src = staticPath + (parseInt(videoFileName) + 1) + ".mp4";
             }
+            document.getElementById("myVideo").playbackRate = 10;
             video.play();
         });
         function updateTime() {
@@ -168,9 +235,58 @@
             // 時刻をHTMLに表示
             document.getElementById('time').textContent = "現在時刻：" + timeString;
         }
-
-        // 1秒ごとに時刻を更新
         setInterval(updateTime, 1000);
+        function clear_card(id) {
+            let cardElement = document.getElementById(`Q0${id}_card`);
+            if (cardElement && cardElement.querySelector(".clear-overlay")) {
+                
+            }
+            else {
+                const overlayImage = document.createElement('img');
+                overlayImage.src = "{% static 'lover/images/clear.png' %}";
+                overlayImage.classList.add("clear-overlay");
+                document.getElementById(`Q0${id}_card`).appendChild(overlayImage);  // clear.png を linkCard に追加
+            }
+
+        }
+        function fetchNotifications() {
+            fetch('/lover/get_data/')
+                .then(response => response.json())  // ここで JSON を取得
+                .then(data => {  // JSON 取得後に処理
+                    if (data.game01 == true) {
+                        // クリアした場合の処理
+                        clear_card(1);
+                    }
+                    if (data.game02 == true) {
+                        // クリアした場合の処理
+                        clear_card(2);
+                    }
+                    if (data.game03 == true) {
+                        // クリアした場合の処理
+                        clear_card(3);
+                    }
+                    if (data.game04 == true) {
+                        // クリアした場合の処理
+                        clear_card(4);
+                    }
+                    if (data.game05 == true) {
+                        // クリアした場合の処理
+                        clear_card(5);
+                    }
+                    if (data.game06 == true) {
+                        // クリアした場合の処理
+                        clear_card(6);
+                    }
+                    var p=6;
+                    const overlayCount = document.querySelectorAll('.clear-overlay').length;
+                    imagefilter(6-overlayCount);
+                    
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // 1秒ごとに通知を取得
+        setInterval(fetchNotifications, 2000);
 
     </script>
 </body>

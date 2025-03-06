@@ -270,7 +270,7 @@
 </head>
 
 <body>
-    <!--完了 Q01,Q2-->
+    <!--完了 Q01,Q2,Q04-->
     <!-- モーダル -->
     <div id="Q01" class="modal">
         <div class="modal-content">
@@ -347,9 +347,9 @@
         <form method="POST" action="{% url 'phone_name_birthday' %}">
             {% csrf_token %}
             <div class="modal-content">
+                特定の場所へ行け
                 <span class="modal-close" onclick="closeModal('Q03')">&times;</span>
                 <hr>
-                <h2>特定の場所へ行け</h2>
                 <input type="text" name="name" id="name" placeholder="名前" required>
                 <br>
                 <label for="birthdate">誕生日:</label>
@@ -361,8 +361,10 @@
     </div>
     <div id="Q04" class="modal">
         <div class="modal-content">
+            ポカリスエット500mlを購入して<br>バーコードを読み込め
             <span class="modal-close" onclick="closeModal('Q04')">&times;</span>
             <hr>
+            
             <div id="my_container">
                 <div id="my_inner">
                     <div>= QuaggaJS =</div>

@@ -39,8 +39,7 @@ def PC_view(request):
             selection.gamestart = True
             selection.save()
         return JsonResponse({"status": "success"})  # JSONレスポンスを返す
-
-
+    
     if(selection.login == True):
         if(selection.gamestart == True):
             return render(request, 'PC_startgame.html',context={"data":selection})
