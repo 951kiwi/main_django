@@ -367,6 +367,7 @@
                 <div id="my_inner">
                     <div>= QuaggaJS =</div>
                     <div>
+                        <button id="startCamera">Start</button>
                         <button id="changeCamera">Change Camera</button>
 
                     </div>
@@ -425,7 +426,17 @@
                 }
             });
 
-            startQuagga();
+            document.getElementById("startCamera").addEventListener("click",()=>{
+                if(document.getElementById("startCamera").textContent == "Start"){
+                    startQuagga();
+                    document.getElementById("startCamera").textContent = "Stop";
+                }
+                else{
+                    Quagga.stop();
+                    document.getElementById("startCamera").textContent = "Start";
+                }
+            })
+            
 
 
             Quagga.onProcessed(result => {
@@ -442,6 +453,10 @@
             Quagga.onDetected(result => {
                 console.log(result.codeResult.code);
                 $("#my_result").text(result.codeResult.code);
+                if(result.codeResult.code == "45019517"){//ポカリ
+                    Quagga.stop();
+                    $("#my_result").text("成功");
+                }
                 $("#my_barcode div").barcode(result.codeResult.code, "ean13");
             });
 
