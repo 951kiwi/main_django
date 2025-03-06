@@ -404,14 +404,7 @@
                         }
                     },
                     decoder: {
-                        readers: [{
-                            format: "ean_reader",
-                            config: {
-                                supplements: [
-                                    'ean_8_reader'
-                                ]
-                            }
-                        }]
+                        readers: ["ean_reader", "ean_8_reader"]
                     }
                 }, err => {
                     if (err) {
