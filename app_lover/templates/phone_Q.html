@@ -417,6 +417,22 @@
                     console.log("Quagga started!");
                 });
             }
+            function stopQuagga() {
+                let video = document.querySelector("#my_quagga video");
+                if (video) {
+                    let canvas = document.createElement("canvas");
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    let ctx = canvas.getContext("2d");
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    let container = document.getElementById("my_quagga");
+                    container.innerHTML = "";
+                    container.appendChild(canvas);
+                }
+
+                Quagga.stop();
+            }
 
             document.getElementById("changeCamera").addEventListener("click", () => {
                 if (cameras.length > 1) {
@@ -426,17 +442,17 @@
                 }
             });
 
-            document.getElementById("startCamera").addEventListener("click",()=>{
-                if(document.getElementById("startCamera").textContent == "Start"){
+            document.getElementById("startCamera").addEventListener("click", () => {
+                if (document.getElementById("startCamera").textContent == "Start") {
                     startQuagga();
                     document.getElementById("startCamera").textContent = "Stop";
                 }
-                else{
-                    Quagga.stop();
+                else {
+                    stopQuagga();
                     document.getElementById("startCamera").textContent = "Start";
                 }
             })
-            
+
 
 
             Quagga.onProcessed(result => {
@@ -453,8 +469,8 @@
             Quagga.onDetected(result => {
                 console.log(result.codeResult.code);
                 $("#my_result").text(result.codeResult.code);
-                if(result.codeResult.code == "45019517"){//ポカリ
-                    Quagga.stop();
+                if (result.codeResult.code == "45019517") {//ポカリ
+                    stopQuagga();
                     $("#my_result").text("成功");
                 }
                 $("#my_barcode div").barcode(result.codeResult.code, "ean13");
