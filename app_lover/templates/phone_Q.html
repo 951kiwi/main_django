@@ -419,16 +419,12 @@
             }
             function stopQuagga() {
                 let video = document.querySelector("#my_quagga video");
-                if (video) {
-                    let canvas = document.createElement("canvas");
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                let canvas = Quagga.canvas.dom.overlay; // Quaggaのオーバーレイを取得
+
+                if (video && canvas) {
                     let ctx = canvas.getContext("2d");
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    let container = document.getElementById("my_quagga");
-                    container.innerHTML = "";
-                    container.appendChild(canvas);
+                    video.remove(); // 動画ストリームを削除
                 }
 
                 Quagga.stop();
