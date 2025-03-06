@@ -22,10 +22,12 @@
             margin: 0;
             overflow: hidden;
         }
-         /* タッチイベントを禁止 */
-            * {
-                touch-action: none; /* 上下左右のスクロールやピンチ操作を禁止 */
-            }
+
+        /* タッチイベントを禁止 */
+        * {
+            touch-action: none;
+            /* 上下左右のスクロールやピンチ操作を禁止 */
+        }
 
         .number-display {
             font-size: 50px;
@@ -344,10 +346,17 @@
             document.getElementById('myModal').style.display = 'none';
         }
         document.addEventListener('touchmove', function (event) {
-        if (event.scale !== 1) {
-            event.preventDefault();
-        }
+            if (event.scale !== 1) {
+                event.preventDefault();
+            }
         }, { passive: false });
+
+        //アプリかどうか
+        if (window.navigator.standalone) {
+        } 
+        else{
+            document.body.innerHTML = '';
+        }
     </script>
 </body>
 

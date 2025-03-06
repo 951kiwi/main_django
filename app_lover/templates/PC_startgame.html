@@ -12,7 +12,7 @@
     body {
         width: 100%;
         height: 100vh;
-        background-color: #ca2b2b;
+        background-color: #000000;
         overflow: hidden;
         display: flex;
         margin: 0;
@@ -21,26 +21,28 @@
     .box1 {
         width: 70%;
         height: 100hv;
-        background-color: aquamarine;
+        background-color: rgb(36, 36, 36);
         position: relative;
+        border-radius: 0 40px 40px 0;
     }
 
     .box1 img {
         position: absolute;
-        width: 90%;
+        width: 95%;
         top: 50%;
         /* 親要素の縦中央に配置 */
-        left: 50%;
+        left: 47.5%;
         /* 親要素の横中央に配置 */
         transform: translate(-50%, -50%);
         /* 画像の中心を基準にして正確に中央に配置 */
-        border-radius: 30px;
+        border-radius: 0 30px 30px 0;
     }
 
     .box2 {
         width: 30%;
         height: 100hv;
         margin: 20px;
+        color: #fff;
         position: relative;
     }
 
@@ -108,7 +110,7 @@
         /* 画面の右から10px */
         color: white;
         /* 文字の色 */
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgb(36, 36, 36);
         /* 背景色 */
         padding: 10px;
         /* 余白 */
@@ -127,6 +129,7 @@
         /* 横方向中央 */
         align-items: flex-end;
         /* 垂直方向下部 */
+        
     }
 
     /* 動画のスタイル */
@@ -136,6 +139,7 @@
         max-width: 1200px;
         /* 最大幅を指定 */
         border-radius: 20px;
+        border: 2px solid #333333;
         /* 動画の角を丸くする */
     }
 </style>
@@ -200,7 +204,7 @@
         imagefilter(6);
 
 
-    <!--動画用-->
+        <!--動画用-->
         let staticPath = "{% static 'lover/BGM/' %}";
         let video = document.getElementById("myVideo");
 
@@ -239,7 +243,7 @@
         function clear_card(id) {
             let cardElement = document.getElementById(`Q0${id}_card`);
             if (cardElement && cardElement.querySelector(".clear-overlay")) {
-                
+
             }
             else {
                 const overlayImage = document.createElement('img');
@@ -277,10 +281,10 @@
                         // クリアした場合の処理
                         clear_card(6);
                     }
-                    var p=6;
+                    var p = 6;
                     const overlayCount = document.querySelectorAll('.clear-overlay').length;
-                    imagefilter(6-overlayCount);
-                    
+                    imagefilter(6 - overlayCount);
+
                 })
                 .catch(error => console.error('Error:', error));
         }
