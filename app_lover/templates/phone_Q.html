@@ -360,74 +360,100 @@
         </form>
     </div>
     <div id="Q04" class="modal">
-            <div class="modal-content">
-                <span class="modal-close" onclick="closeModal('Q04')">&times;</span>
-                <hr>
-                <div id="my_container">
-                    <div id="my_inner">
-                        <div>= QuaggaJS =</div>
-                        <div>
-                            <button id="my_start">Start</button>
-                            <button id="my_stop">Stop</button>
-                        </div>
-                        <div id="my_quagga"></div>
-                        <div id="my_result">***</div>
-                        <div id="my_barcode">
-                            <div>***</div>
-                        </div>
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('Q04')">&times;</span>
+            <hr>
+            <div id="my_container">
+                <div id="my_inner">
+                    <div>= QuaggaJS =</div>
+                    <div>
+                        <button id="changeCamera">Change Camera</button>
+
+                    </div>
+                    <div id="my_quagga"></div>
+                    <div id="my_result">***</div>
+                    <div id="my_barcode">
+                        <div>***</div>
                     </div>
                 </div>
             </div>
-            <script src="//code.jquery.com/jquery-3.6.1.min.js"></script>
-            <script src="//unpkg.com/@ericblade/quagga2@1.7.4/dist/quagga.min.js"></script>
-            <script src="//cdn.jsdelivr.net/gh/mtaketani113/jquery-barcode@master/jquery-barcode.js"></script>
-            <script>
+        </div>
+        <script src="//code.jquery.com/jquery-3.6.1.min.js"></script>
+        <script src="//unpkg.com/@ericblade/quagga2@1.7.4/dist/quagga.min.js"></script>
+        <script src="//cdn.jsdelivr.net/gh/mtaketani113/jquery-barcode@master/jquery-barcode.js"></script>
+        <script>
 
-                $("#my_start").click(() => {
-                    console.log("Start!!");
+            let cameras = [];
+            let currentCameraIndex = 0;
 
-                    // Quagga
-                    Quagga.init({
-                        inputStream: {
-                            name: "Live",
-                            type: "LiveStream",
-                            target: document.getElementById("my_quagga")
-                        },
-                        decoder: {
-                            readers: ["ean_reader"]
+            navigator.mediaDevices.enumerateDevices()
+                .then(devices => {
+                    cameras = devices.filter(device => device.kind === "videoinput");
+                })
+                .catch(err => console.log("Camera enumeration error:", err));
+
+            function startQuagga(cameraId) {
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: "#my_quagga",
+                        constraints: {
+                            facingMode: "environment",
+                            deviceId: cameraId ? { exact: cameraId } : undefined
                         }
-                    }, err => {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                        console.log("Initialization finished!!");
-                        Quagga.start();
-                    });
-
-                    Quagga.onProcessed(result => {
-                        if (result == null) return;
-                        if (typeof (result) != "object") return;
-                        if (result.boxes == undefined) return;
-                        const ctx = Quagga.canvas.ctx.overlay;
-                        const canvas = Quagga.canvas.dom.overlay;
-                        ctx.clearRect(0, 0, parseInt(canvas.width), parseInt(canvas.height));
-                        Quagga.ImageDebug.drawPath(result.box,
-                            { x: 0, y: 1 }, ctx, { color: "blue", lineWidth: 5 });
-                    });
-
-                    Quagga.onDetected(result => {
-                        console.log(result.codeResult.code);
-                        $("#my_result").text(result.codeResult.code);
-                        $("#my_barcode div").barcode(result.codeResult.code, "ean13");
-                    });
+                    },
+                    decoder: {
+                        readers: [{
+                            format: "ean_reader",
+                            config: {
+                                supplements: [
+                                    'ean_8_reader'
+                                ]
+                            }
+                        }]
+                    }
+                }, err => {
+                    if (err) {
+                        console.log("Quagga init error:", err);
+                        return;
+                    }
+                    console.log("Initialization finished!!");
+                    Quagga.start();
+                    console.log("Quagga started!");
                 });
+            }
 
-                $("#my_stop").click(() => {
-                    console.log("Stop!!");
+            document.getElementById("changeCamera").addEventListener("click", () => {
+                if (cameras.length > 1) {
+                    currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
                     Quagga.stop();
-                });
-            </script>
+                    startQuagga(cameras[currentCameraIndex].deviceId);
+                }
+            });
+
+            startQuagga();
+
+
+            Quagga.onProcessed(result => {
+                if (result == null) return;
+                if (typeof (result) != "object") return;
+                if (result.boxes == undefined) return;
+                const ctx = Quagga.canvas.ctx.overlay;
+                const canvas = Quagga.canvas.dom.overlay;
+                ctx.clearRect(0, 0, parseInt(canvas.width), parseInt(canvas.height));
+                Quagga.ImageDebug.drawPath(result.box,
+                    { x: 0, y: 1 }, ctx, { color: "blue", lineWidth: 5 });
+            });
+
+            Quagga.onDetected(result => {
+                console.log(result.codeResult.code);
+                $("#my_result").text(result.codeResult.code);
+                $("#my_barcode div").barcode(result.codeResult.code, "ean13");
+            });
+
+
+        </script>
     </div>
     <h1>クイズを選択</h1>
     <div class="container" id="container">
