@@ -22,3 +22,6 @@ secrets.json
 /staticfiles/
 media/
 
+ServerReboot.sh
+/log/
+update_repo.sh
