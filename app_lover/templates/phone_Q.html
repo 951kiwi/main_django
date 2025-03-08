@@ -578,6 +578,7 @@
     
                 targetRotationX = (beta / 180) * Math.PI;
                 targetRotationY = (gamma / 90) * Math.PI;
+                document.getElementById("info").textContent = `beta:${beta} gamma:${gamma}`;
             }
     
             function loadImage(url, callback) {
