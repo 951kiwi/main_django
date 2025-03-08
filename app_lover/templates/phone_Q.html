@@ -545,7 +545,7 @@
                             
                             let posX = adjustedX;
                             let posY = -adjustedY;
-                            let posZ = (Math.random() - 0.5) * 0.1; // 1px程度のZ方向ランダム化
+                            let posZ = (Math.random() - 0.5) * 3; // Z方向のランダム範囲を拡大（±1.5 → ±3）
                             
                             vertices.push(posX, posY, posZ);
                             colors.push(r, g, b);
