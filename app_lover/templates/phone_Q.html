@@ -522,6 +522,10 @@
                 const height = imageData.height;
                 const data = imageData.data;
                 
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const radius = Math.min(width, height) / 2;
+                
                 for (let y = 0; y < height; y += 4) {
                     for (let x = 0; x < width; x += 4) {
                         let index = (y * width + x) * 4;
@@ -530,10 +534,18 @@
                         let b = data[index + 2] / 255;
                         let a = data[index + 3] / 255;
                         
-                        if (a > 0.1) { // 透明度が低い部分のみ点を描画
-                            let posX = (x / width) * 4 - 2;
-                            let posY = -(y / height) * 4 + 2;
-                            let posZ = (Math.random() - 0.5) * 1.5; // Z方向にランダム化
+                        if (a > 0.1) {
+                            let normX = (x - centerX) / radius;
+                            let normY = (y - centerY) / radius;
+                            let distance = Math.sqrt(normX * normX + normY * normY);
+                            
+                            let angle = Math.atan2(normY, normX);
+                            let adjustedX = Math.cos(angle) * distance * 2;
+                            let adjustedY = Math.sin(angle) * distance * 2;
+                            
+                            let posX = adjustedX;
+                            let posY = -adjustedY;
+                            let posZ = (Math.random() - 0.5) * 0.1; // 1px程度のZ方向ランダム化
                             
                             vertices.push(posX, posY, posZ);
                             colors.push(r, g, b);
