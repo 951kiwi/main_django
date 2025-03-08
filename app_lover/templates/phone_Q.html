@@ -556,7 +556,7 @@
                 geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
                 geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
                 
-                const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 * 300});
+                const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 * 400});
                 pointCloud = new THREE.Points(geometry, material);
                 scene.add(pointCloud);
     
