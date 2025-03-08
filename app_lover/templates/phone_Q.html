@@ -578,7 +578,7 @@
     
                 targetRotationX = (beta / 180) * Math.PI;
                 targetRotationY = (gamma / 90) * Math.PI;
-                if( 0.0 < beta && beta < 0.5 && 0.0 < gamma && gamma < 0.5 ){
+                if( -0.1 < beta && beta < 0.1 && -0.1 < gamma && gamma < 0.1 ){
                     window.removeEventListener("deviceorientation", handleOrientation, true);
                     document.getElementById("info").textContent = `成功`;
                 }
