@@ -498,7 +498,7 @@
             <hr>
             <button id="startBtn" onclick="requestPermission()">ゲーム開始</button>
             <h1>スマホの傾き検知</h1>
-            <div id="box"></div>
+            <div id="boxQ5"></div>
             <p id="info">傾きを検知中...</p>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -508,12 +508,12 @@
             
             function init(imageData) {
                 scene = new THREE.Scene();
-                camera = new THREE.PerspectiveCamera(0.1, window.innerWidth / window.innerHeight, 1, 5000);
-                camera.position.z = 5000;
+                camera = new THREE.PerspectiveCamera(0.1, (window.innerWidth * 0.9) / (window.innerHeight * 0.5), 1, 5000);
+                camera.position.z = 3000;
     
                 renderer = new THREE.WebGLRenderer({ antialias: true });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                document.body.appendChild(renderer.domElement);
+                renderer.setSize(window.innerWidth * 0.9, window.innerHeight* 0.5);
+                document.getElementById('boxQ5').appendChild(renderer.domElement);
     
                 const geometry = new THREE.BufferGeometry();
                 const vertices = [];
