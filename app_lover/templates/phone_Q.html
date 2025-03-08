@@ -268,11 +268,9 @@
         }
         canvas { display: block; 
             z-index: 1001;}
+
         #startBtn {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            text-align: center;
             padding: 10px 20px;
             font-size: 18px;
             background-color: #008CBA;
@@ -493,13 +491,12 @@
     </div>
     <div id="Q05" class="modal">
         <div class="modal-content">
-            特定の場所へ行け
+            向きを探せ
             <span class="modal-close" onclick="closeModal('Q05')">&times;</span>
             <hr>
-            <button id="startBtn" onclick="requestPermission()">ゲーム開始</button>
             <h1>スマホの傾き検知</h1>
             <div id="boxQ5"></div>
-            <p id="info">傾きを検知中...</p>
+            <p id="info">傾きを検知中</p>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         <script>
@@ -601,9 +598,6 @@
                             .catch(error => console.error("Error:", error));
                     },1000);
                 }
-                else{
-                    document.getElementById("info").textContent = `beta:${gamma} gamma:${gamma}`;
-                }
                 
             }
     
@@ -639,6 +633,12 @@
                     loadImage("{% static 'lover/images/Q5y.jpg' %}", init);
                 }
             }
+            function showModal_Q5() {
+            var modal = document.getElementById("Q05");
+            requestPermission();
+            modal.classList.remove('hide'); // 閉じるアニメーションをリセット
+            modal.style.display = 'flex';
+        }
         </script>
     </div>
     <div id="Q06" class="modal">
@@ -677,7 +677,13 @@
                 // link-card の div を作成
                 const linkCard = document.createElement('div');
                 linkCard.classList.add('link-card');
-                linkCard.setAttribute('onclick', `showModal('Q0${i}')`);
+                if(i == 5){
+                    linkCard.setAttribute('onclick',"showModal_Q5()");
+                }
+                else{
+                    linkCard.setAttribute('onclick', `showModal('Q0${i}')`);
+                }
+                
                 linkCard.id = `Q0${i}_card`;
                 image = document.createElement('img')
                 image.src = "{% static 'lover/images/q'%}" + i.toString() + ".png";
