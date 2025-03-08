@@ -266,6 +266,20 @@
             justify-content: space-around;
             align-items: center;
         }
+        canvas { display: block; 
+            z-index: 1001;}
+        #startBtn {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -487,74 +501,87 @@
             <div id="box"></div>
             <p id="info">傾きを検知中...</p>
         </div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         <script>
-            
-            let scene, camera, renderer, cube;
-                let targetRotationX = 0, targetRotationY = 0;
-        
-                function init() {
-                    scene = new THREE.Scene();
-                    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                    camera.position.z = 5;
-        
-                    renderer = new THREE.WebGLRenderer();
-                    renderer.setSize(window.innerWidth, window.innerHeight);
-                    document.body.appendChild(renderer.domElement);
-        
-                    // キューブ作成（バラバラの角度で配置）
-                    const geometry = new THREE.BoxGeometry();
-                    const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-                    cube = new THREE.Mesh(geometry, material);
-                    cube.rotation.x = Math.random() * Math.PI;
-                    cube.rotation.y = Math.random() * Math.PI;
-                    scene.add(cube);
-        
-                    animate();
+            let scene, camera, renderer, puzzlePiece;
+            let targetRotationX = 0, targetRotationY = 0;
+            let correctRotationX = Math.PI / 4;
+            let correctRotationY = Math.PI / 6;
+    
+            function init() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 5;
+    
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+    
+                // 凹凸のあるパズル形状を作成
+                const shape = new THREE.Shape();
+                shape.moveTo(-1, -1);
+                shape.lineTo(1, -1);
+                shape.lineTo(1, 1);
+                shape.lineTo(-1, 1);
+                shape.lineTo(-1, -1);
+    
+                const extrudeSettings = { depth: 0.5, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 5 };
+                const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+                const material = new THREE.MeshStandardMaterial({ color: 0xff0000, metalness: 0.3, roughness: 0.6 });
+                
+                puzzlePiece = new THREE.Mesh(geometry, material);
+                puzzlePiece.rotation.x = Math.random() * Math.PI;
+                puzzlePiece.rotation.y = Math.random() * Math.PI;
+                scene.add(puzzlePiece);
+    
+                // ライト追加
+                const light = new THREE.DirectionalLight(0xffffff, 1);
+                light.position.set(2, 2, 5);
+                scene.add(light);
+    
+                animate();
+            }
+    
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // スマホの傾きで回転を調整
+                puzzlePiece.rotation.x += (targetRotationX - puzzlePiece.rotation.x) * 0.1;
+                puzzlePiece.rotation.y += (targetRotationY - puzzlePiece.rotation.y) * 0.1;
+    
+                renderer.render(scene, camera);
+    
+                // 角度が正解に近づいたらクリア
+                if (Math.abs(puzzlePiece.rotation.x - correctRotationX) < 0.1 && Math.abs(puzzlePiece.rotation.y - correctRotationY) < 0.1) {
+                    alert("クリア！🎉");
+                    window.removeEventListener("deviceorientation", handleOrientation);
                 }
-        
-                function animate() {
-                    requestAnimationFrame(animate);
-                    
-                    // スマホの傾きで回転を調整
-                    cube.rotation.x += (targetRotationX - cube.rotation.x) * 0.1;
-                    cube.rotation.y += (targetRotationY - cube.rotation.y) * 0.1;
-        
-                    renderer.render(scene, camera);
-        
-                    // 角度が揃ったらクリア
-                    if (Math.abs(cube.rotation.x) < 0.1 && Math.abs(cube.rotation.y) < 0.1) {
-                        alert("クリア！🎉");
-                        window.removeEventListener("deviceorientation", handleOrientation);
-                    }
+            }
+    
+            function handleOrientation(event) {
+                let beta = event.beta ?? 0;  // 前後の傾き
+                let gamma = event.gamma ?? 0; // 左右の傾き
+    
+                targetRotationX = (beta / 180) * Math.PI;  // -180~180度をラジアンに変換
+                targetRotationY = (gamma / 90) * Math.PI;  // -90~90度をラジアンに変換
+            }
+    
+            function requestPermission() {
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    DeviceMotionEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                window.addEventListener("deviceorientation", handleOrientation, true);
+                                init();
+                            } else {
+                                alert("センサーの許可が必要です");
+                            }
+                        })
+                        .catch(error => console.error("許可エラー:", error));
+                } else {
+                    window.addEventListener("deviceorientation", handleOrientation, true);
+                    init();
                 }
-        
-                function handleOrientation(event) {
-                    let beta = event.beta ?? 0;  // 前後の傾き
-                    let gamma = event.gamma ?? 0; // 左右の傾き
-        
-                    targetRotationX = (beta / 180) * Math.PI;  // -180~180度をラジアンに変換
-                    targetRotationY = (gamma / 90) * Math.PI;  // -90~90度をラジアンに変換
-                }
-        
-                function requestPermission() {
-                    if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                        DeviceMotionEvent.requestPermission()
-                            .then(permissionState => {
-                                if (permissionState === 'granted') {
-                                    window.addEventListener("deviceorientation", handleOrientation, true);
-                                    init();
-                                } else {
-                                    alert("センサーの許可が必要です");
-                                }
-                            })
-                            .catch(error => console.error("許可エラー:", error));
-                    } else {
-                        window.addEventListener("deviceorientation", handleOrientation, true);
-                        init();
-                    }
-                }
-            
+            }
         </script>
     </div>
     <div id="Q06" class="modal">
