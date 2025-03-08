@@ -508,8 +508,8 @@
             
             function init(imageData) {
                 scene = new THREE.Scene();
-                camera = new THREE.PerspectiveCamera(1, window.innerWidth / window.innerHeight, 1, 2000);
-                camera.position.z = 500;
+                camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 2000);
+                camera.position.z = 40;
     
                 renderer = new THREE.WebGLRenderer({ antialias: true });
                 renderer.setSize(window.innerWidth, window.innerHeight);
