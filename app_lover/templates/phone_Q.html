@@ -503,12 +503,10 @@
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         <script>
-            let scene, camera, renderer, puzzlePiece;
+            let scene, camera, renderer, pointCloud;
             let targetRotationX = 0, targetRotationY = 0;
-            let correctRotationX = Math.PI / 4;
-            let correctRotationY = Math.PI / 6;
-    
-            function init() {
+            
+            function init(imageData) {
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
                 camera.position.z = 5;
@@ -517,27 +515,39 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 document.body.appendChild(renderer.domElement);
     
-                // 凹凸のあるパズル形状を作成
-                const shape = new THREE.Shape();
-                shape.moveTo(-1, -1);
-                shape.lineTo(1, -1);
-                shape.lineTo(1, 1);
-                shape.lineTo(-1, 1);
-                shape.lineTo(-1, -1);
-    
-                const extrudeSettings = { depth: 0.5, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 5 };
-                const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-                const material = new THREE.MeshStandardMaterial({ color: 0xff0000, metalness: 0.3, roughness: 0.6 });
+                // 画像のピクセルを点に変換
+                const geometry = new THREE.BufferGeometry();
+                const vertices = [];
+                const colors = [];
+                const width = imageData.width;
+                const height = imageData.height;
+                const data = imageData.data;
                 
-                puzzlePiece = new THREE.Mesh(geometry, material);
-                puzzlePiece.rotation.x = Math.random() * Math.PI;
-                puzzlePiece.rotation.y = Math.random() * Math.PI;
-                scene.add(puzzlePiece);
-    
-                // ライト追加
-                const light = new THREE.DirectionalLight(0xffffff, 1);
-                light.position.set(2, 2, 5);
-                scene.add(light);
+                for (let y = 0; y < height; y += 4) {
+                    for (let x = 0; x < width; x += 4) {
+                        let index = (y * width + x) * 4;
+                        let r = data[index] / 255;
+                        let g = data[index + 1] / 255;
+                        let b = data[index + 2] / 255;
+                        let a = data[index + 3] / 255;
+                        
+                        if (a > 0.1) { // 透明度が低い部分のみ点を描画
+                            let posX = (x / width) * 4 - 2;
+                            let posY = -(y / height) * 4 + 2;
+                            let posZ = (Math.random() - 0.5) * 0.5;
+                            
+                            vertices.push(posX, posY, posZ);
+                            colors.push(r, g, b);
+                        }
+                    }
+                }
+                
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                
+                const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 });
+                pointCloud = new THREE.Points(geometry, material);
+                scene.add(pointCloud);
     
                 animate();
             }
@@ -546,16 +556,10 @@
                 requestAnimationFrame(animate);
                 
                 // スマホの傾きで回転を調整
-                puzzlePiece.rotation.x += (targetRotationX - puzzlePiece.rotation.x) * 0.1;
-                puzzlePiece.rotation.y += (targetRotationY - puzzlePiece.rotation.y) * 0.1;
+                pointCloud.rotation.x += (targetRotationX - pointCloud.rotation.x) * 0.1;
+                pointCloud.rotation.y += (targetRotationY - pointCloud.rotation.y) * 0.1;
     
                 renderer.render(scene, camera);
-    
-                // 角度が正解に近づいたらクリア
-                if (Math.abs(puzzlePiece.rotation.x - correctRotationX) < 0.1 && Math.abs(puzzlePiece.rotation.y - correctRotationY) < 0.1) {
-                    alert("クリア！🎉");
-                    window.removeEventListener("deviceorientation", handleOrientation);
-                }
             }
     
             function handleOrientation(event) {
@@ -566,13 +570,28 @@
                 targetRotationY = (gamma / 90) * Math.PI;  // -90~90度をラジアンに変換
             }
     
+            function loadImage(url, callback) {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.src = url;
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, img.width, img.height);
+                    callback(imageData);
+                };
+            }
+    
             function requestPermission() {
                 if (typeof DeviceMotionEvent.requestPermission === 'function') {
                     DeviceMotionEvent.requestPermission()
                         .then(permissionState => {
                             if (permissionState === 'granted') {
                                 window.addEventListener("deviceorientation", handleOrientation, true);
-                                init();
+                                loadImage("https://www.tadapic.com/img/newstopic/icon_d.jpg", init);
                             } else {
                                 alert("センサーの許可が必要です");
                             }
@@ -580,7 +599,7 @@
                         .catch(error => console.error("許可エラー:", error));
                 } else {
                     window.addEventListener("deviceorientation", handleOrientation, true);
-                    init();
+                    loadImage("https://www.tadapic.com/img/newstopic/icon_d.jpg", init);
                 }
             }
         </script>
