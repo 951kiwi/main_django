@@ -591,7 +591,7 @@
                         .then(permissionState => {
                             if (permissionState === 'granted') {
                                 window.addEventListener("deviceorientation", handleOrientation, true);
-                                loadImage("https://www.tadapic.com/img/newstopic/icon_d.jpg", init);
+                                loadImage("{% static 'lover/images/clear.png' %}", init);
                             } else {
                                 alert("センサーの許可が必要です");
                             }
@@ -599,7 +599,7 @@
                         .catch(error => console.error("許可エラー:", error));
                 } else {
                     window.addEventListener("deviceorientation", handleOrientation, true);
-                    loadImage("https://www.tadapic.com/img/newstopic/icon_d.jpg", init);
+                    loadImage("{% static 'lover/images/clear.png' %}", init);
                 }
             }
         </script>
