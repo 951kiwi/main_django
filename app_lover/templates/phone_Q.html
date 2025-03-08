@@ -624,7 +624,7 @@
                                 window.addEventListener("deviceorientation", handleOrientation, true);
                                 loadImage("{% static 'lover/images/Q5y.jpg' %}", init);
                             } else {
-                                alert("センサーの許可が必要です");
+                                alert("センサーの許可が必要です\nアプリを再起動して許可してください。");
                             }
                         })
                         .catch(error => console.error("許可エラー:", error));
