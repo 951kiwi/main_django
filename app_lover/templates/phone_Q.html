@@ -266,8 +266,11 @@
             justify-content: space-around;
             align-items: center;
         }
-        canvas { display: block; 
-            z-index: 1001;}
+
+        canvas {
+            display: block;
+            z-index: 1001;
+        }
 
         #startBtn {
             text-align: center;
@@ -379,10 +382,10 @@
 
             <div id="my_container">
                 <div id="my_inner">
-                    <div>= QuaggaJS =</div>
+                    <div>Barcode Reader</div>
                     <div>
                         <button id="startCamera">Start</button>
-                        <button id="changeCamera">Change Camera</button>
+                        <button id="changeCamera">向き変更</button>
 
                     </div>
                     <div id="my_quagga"></div>
@@ -482,6 +485,24 @@
                 if (result.codeResult.code == "45019517") {//ポカリ
                     stopQuagga();
                     $("#my_result").text("成功");
+                    setTimeout(function () {
+                        alert("Q04クリア！！\nバーコードを読み込んだ！！！");
+                        const formData = new FormData();
+                        formData.append("message", "Q04=True");
+
+                        fetch("{% url 'phone' %}", {  // DjangoのURL
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": "{{ csrf_token }}"
+                            },
+                            body: formData  // フォームデータとして送信
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                window.location.reload();
+                            })
+                            .catch(error => console.error("Error:", error));
+                    }, 1000);
                 }
                 $("#my_barcode div").barcode(result.codeResult.code, "ean13");
             });
@@ -502,28 +523,28 @@
         <script>
             let scene, camera, renderer, pointCloud;
             let targetRotationX = 0, targetRotationY = 0;
-            
+
             function init(imageData) {
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(0.1, (window.innerWidth * 0.9) / (window.innerHeight * 0.5), 1, 5000);
                 camera.position.z = 2000;
-    
+
                 renderer = new THREE.WebGLRenderer({ antialias: true });
-                renderer.setSize(window.innerWidth * 0.9, window.innerHeight* 0.5);
+                renderer.setSize(window.innerWidth * 0.9, window.innerHeight * 0.5);
                 document.getElementById('boxQ5').appendChild(renderer.domElement);
-                
-    
+
+
                 const geometry = new THREE.BufferGeometry();
                 const vertices = [];
                 const colors = [];
                 const width = imageData.width;
                 const height = imageData.height;
                 const data = imageData.data;
-                
+
                 const centerX = width / 2;
                 const centerY = height / 2;
                 const radius = Math.min(width, height) / 2;
-                
+
                 for (let y = 0; y < height; y += 3) {
                     for (let x = 0; x < width; x += 3) {
                         let index = (y * width + x) * 4;
@@ -531,55 +552,55 @@
                         let g = data[index + 1] / 255;
                         let b = data[index + 2] / 255;
                         let a = data[index + 3] / 255;
-                        
+
                         if (a > 0.1) {
                             let normX = (x - centerX) / radius;
                             let normY = (y - centerY) / radius;
                             let distance = Math.sqrt(normX * normX + normY * normY);
-                            
+
                             let angle = Math.atan2(normY, normX);
                             let adjustedX = Math.cos(angle) * distance * 2;
                             let adjustedY = Math.sin(angle) * distance * 2;
-                            
+
                             let posX = adjustedX;
                             let posY = -adjustedY;
                             let posZ = (Math.random() - 0.5) * 12; // Z方向のランダム範囲を拡大（±1.5 → ±3）
-                            
+
                             vertices.push(posX, posY, posZ);
                             colors.push(r, g, b);
                         }
                     }
                 }
-                
+
                 geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
                 geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-                
-                const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 * 300});
+
+                const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 * 300 });
                 pointCloud = new THREE.Points(geometry, material);
                 scene.add(pointCloud);
-    
+
                 animate();
             }
-    
+
             function animate() {
                 requestAnimationFrame(animate);
-                
+
                 pointCloud.rotation.x += (targetRotationX - pointCloud.rotation.x) * 0.1;
                 pointCloud.rotation.y += (targetRotationY - pointCloud.rotation.y) * 0.1;
-    
+
                 renderer.render(scene, camera);
             }
-    
+
             function handleOrientation(event) {
                 let beta = event.beta ?? 0;
                 let gamma = event.gamma ?? 0;
-    
+
                 targetRotationX = (beta / 180) * Math.PI;
                 targetRotationY = (gamma / 90) * Math.PI;
-                if( -0.1 < beta && beta < 0.1 && -0.1 < gamma && gamma < 0.1 ){
+                if (-0.1 < beta && beta < 0.1 && -0.1 < gamma && gamma < 0.1) {
                     window.removeEventListener("deviceorientation", handleOrientation, true);
                     document.getElementById("info").textContent = `成功`;
-                    setTimeout(function() {
+                    setTimeout(function () {
                         alert("Q05クリア！！\n向きを合わした！！！");
                         const formData = new FormData();
                         formData.append("message", "Q05=True");
@@ -596,11 +617,11 @@
                                 window.location.reload();
                             })
                             .catch(error => console.error("Error:", error));
-                    },1000);
+                    }, 1000);
                 }
-                
+
             }
-    
+
             function loadImage(url, callback) {
                 const img = new Image();
                 img.crossOrigin = "Anonymous";
@@ -615,7 +636,7 @@
                     callback(imageData);
                 };
             }
-    
+
             function requestPermission() {
                 if (typeof DeviceMotionEvent.requestPermission === 'function') {
                     DeviceMotionEvent.requestPermission()
@@ -634,21 +655,53 @@
                 }
             }
             function showModal_Q5() {
-            var modal = document.getElementById("Q05");
-            requestPermission();
-            modal.classList.remove('hide'); // 閉じるアニメーションをリセット
-            modal.style.display = 'flex';
-        }
+                var modal = document.getElementById("Q05");
+                requestPermission();
+                modal.classList.remove('hide'); // 閉じるアニメーションをリセット
+                modal.style.display = 'flex';
+            }
         </script>
     </div>
     <div id="Q06" class="modal">
-            <div class="modal-content">
-                特定の場所へ行け
-                <span class="modal-close" onclick="closeModal('Q06')">&times;</span>
-                <hr>
-                
-            </div>
-            
+        <div class="modal-content">
+            お誕生おめでとう
+            <span class="modal-close" onclick="closeModal('Q06')">&times;</span>
+            <hr>
+            <h2>何歳になりましたか？</h2>
+            <input type="number" id="oldQ6" style="width: 50px;">
+            <h1>歳</h1>
+            <button onclick="birthbtnQ6()">送信！！</button>
+        </div>
+        <script>
+            function birthbtnQ6() {
+                var data = document.getElementById("oldQ6").value;
+                if (data == null || data == "") {
+                    alert("なんか入れてくれよ泣くぞ")
+                }
+                else if (data <= 15) {
+                    alert("嘘つけガキ気取りすぎんだろ？？")
+                }
+                else if (data == 16) {
+                    alert("永遠の16歳ちゃうねんwww\n\nアイドルかなにかですかwww");
+                }
+                else if (data >= 18) {
+                    alert("残念やけどまだまだ子どもです笑");
+                }
+                else {
+                    if (confirm("この操作を実行しますか？")) {
+                        let age = prompt("あなたの年齢は何歳ですか?");
+                        if (age !== null) {
+                            console.log("あなたの年齢は " + age + " 歳です");
+                        } else {
+                            console.log("入力がキャンセルされました");
+                        }
+                    } else {
+                        alert("キャンセルが選ばれました");
+                    }
+                }
+            }
+        </script>
+
     </div>
     <h1>クイズを選択</h1>
     <div class="container" id="container">
@@ -677,13 +730,13 @@
                 // link-card の div を作成
                 const linkCard = document.createElement('div');
                 linkCard.classList.add('link-card');
-                if(i == 5){
-                    linkCard.setAttribute('onclick',"showModal_Q5()");
+                if (i == 5) {
+                    linkCard.setAttribute('onclick', "showModal_Q5()");
                 }
-                else{
+                else {
                     linkCard.setAttribute('onclick', `showModal('Q0${i}')`);
                 }
-                
+
                 linkCard.id = `Q0${i}_card`;
                 image = document.createElement('img')
                 image.src = "{% static 'lover/images/q'%}" + i.toString() + ".png";

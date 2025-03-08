@@ -13,6 +13,18 @@ def phone_view(request):
         if(data == "Q02=True"):
             selection.game02 = True
             selection.save()
+        ##if(data == "Q03=True"): 使わない
+        ##    selection.game03 = True
+        ##    selection.save()
+        if(data == "Q04=True"):
+            selection.game04 = True
+            selection.save()
+        if(data == "Q05=True"):
+            selection.game05 = True
+            selection.save()
+        if(data == "Q06=True"):
+            selection.game06 = True
+            selection.save()
         else:
             return JsonResponse({"status": "error"})  # JSONレスポンスを返す
         return JsonResponse({"status": "success"})  # JSONレスポンスを返す
