@@ -513,7 +513,6 @@
     
                 renderer = new THREE.WebGLRenderer({ antialias: true });
                 renderer.setSize(window.innerWidth * 0.9, window.innerHeight* 0.5);
-                renderer.setClearColor(0xffffff, 1);
                 document.getElementById('boxQ5').appendChild(renderer.domElement);
                 
     
@@ -583,6 +582,24 @@
                 if( -0.1 < beta && beta < 0.1 && -0.1 < gamma && gamma < 0.1 ){
                     window.removeEventListener("deviceorientation", handleOrientation, true);
                     document.getElementById("info").textContent = `成功`;
+                    setTimeout(function() {
+                        alert("Q05クリア！！\n向きを合わした！！！");
+                        const formData = new FormData();
+                        formData.append("message", "Q05=True");
+
+                        fetch("{% url 'phone' %}", {  // DjangoのURL
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": "{{ csrf_token }}"
+                            },
+                            body: formData  // フォームデータとして送信
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                window.location.reload();
+                            })
+                            .catch(error => console.error("Error:", error));
+                    },1000);
                 }
                 else{
                     document.getElementById("info").textContent = `beta:${gamma} gamma:${gamma}`;
