@@ -364,7 +364,7 @@
             ポカリスエット500mlを購入して<br>バーコードを読み込め
             <span class="modal-close" onclick="closeModal('Q04')">&times;</span>
             <hr>
-            
+
             <div id="my_container">
                 <div id="my_inner">
                     <div>= QuaggaJS =</div>
@@ -476,6 +476,60 @@
 
 
         </script>
+    </div>
+    <div id="Q05" class="modal">
+        <div class="modal-content">
+            特定の場所へ行け
+            <span class="modal-close" onclick="closeModal('Q05')">&times;</span>
+            <hr>
+            <button onclick="requestPermission()">センサー許可</button>
+            <h1>スマホの傾き検知</h1>
+            <div id="box"></div>
+            <p id="info">傾きを検知中...</p>
+        </div>
+        <script>
+            function requestPermission() {
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    DeviceMotionEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                window.addEventListener("deviceorientation", handleOrientation, true);
+                            }
+                        })
+                        .catch(console.error);
+                } else {
+                    window.addEventListener("deviceorientation", handleOrientation, true);
+                }
+
+                // 傾きを検知
+                function handleOrientation(event) {
+                    let beta = event.beta;  // 前後の傾き (-180～180)
+                    let gamma = event.gamma; // 左右の傾き (-90～90)
+
+                    // 情報を表示
+                    document.getElementById("info").innerText = `前後: ${beta.toFixed(2)}°, 左右: ${gamma.toFixed(2)}°`;
+
+                    // ボックスを傾きに応じて動かす
+                    document.getElementById("box").style.transform = `translate(${gamma * 2}px, ${beta * 2}px)`;
+                }
+            }
+        </script>
+    </div>
+    <div id="Q06" class="modal">
+        <form method="POST" action="{% url 'phone_name_birthday' %}">
+            {% csrf_token %}
+            <div class="modal-content">
+                特定の場所へ行け
+                <span class="modal-close" onclick="closeModal('Q06')">&times;</span>
+                <hr>
+                <input type="text" name="name" id="name" placeholder="名前" required>
+                <br>
+                <label for="birthdate">誕生日:</label>
+                <input type="date" name="birth_date" id="birthdate" placeholder="誕生日" required>
+                <br>
+                <button type="submit">送信</button>
+            </div>
+        </form>
     </div>
     <h1>クイズを選択</h1>
     <div class="container" id="container">
