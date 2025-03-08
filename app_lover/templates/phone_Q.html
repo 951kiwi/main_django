@@ -515,7 +515,6 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 document.body.appendChild(renderer.domElement);
     
-                // 画像のピクセルを点に変換
                 const geometry = new THREE.BufferGeometry();
                 const vertices = [];
                 const colors = [];
@@ -534,7 +533,7 @@
                         if (a > 0.1) { // 透明度が低い部分のみ点を描画
                             let posX = (x / width) * 4 - 2;
                             let posY = -(y / height) * 4 + 2;
-                            let posZ = (Math.random() - 0.5) * 0.5;
+                            let posZ = (Math.random() - 0.5) * 1.5; // Z方向にランダム化
                             
                             vertices.push(posX, posY, posZ);
                             colors.push(r, g, b);
@@ -555,7 +554,6 @@
             function animate() {
                 requestAnimationFrame(animate);
                 
-                // スマホの傾きで回転を調整
                 pointCloud.rotation.x += (targetRotationX - pointCloud.rotation.x) * 0.1;
                 pointCloud.rotation.y += (targetRotationY - pointCloud.rotation.y) * 0.1;
     
@@ -563,11 +561,11 @@
             }
     
             function handleOrientation(event) {
-                let beta = event.beta ?? 0;  // 前後の傾き
-                let gamma = event.gamma ?? 0; // 左右の傾き
+                let beta = event.beta ?? 0;
+                let gamma = event.gamma ?? 0;
     
-                targetRotationX = (beta / 180) * Math.PI;  // -180~180度をラジアンに変換
-                targetRotationY = (gamma / 90) * Math.PI;  // -90~90度をラジアンに変換
+                targetRotationX = (beta / 180) * Math.PI;
+                targetRotationY = (gamma / 90) * Math.PI;
             }
     
             function loadImage(url, callback) {
