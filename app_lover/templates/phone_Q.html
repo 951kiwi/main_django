@@ -266,8 +266,12 @@
             justify-content: space-around;
             align-items: center;
         }
-        canvas { display: block; 
-            z-index: 1001;}
+
+        canvas {
+            display: block;
+            z-index: 1001;
+        }
+
         #startBtn {
             position: absolute;
             top: 10px;
@@ -505,27 +509,31 @@
         <script>
             let scene, camera, renderer, pointCloud;
             let targetRotationX = 0, targetRotationY = 0;
-            
+
             function init(imageData) {
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
                 camera.position.z = 5;
-    
+
                 renderer = new THREE.WebGLRenderer({ antialias: true });
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 document.body.appendChild(renderer.domElement);
-    
+
                 const geometry = new THREE.BufferGeometry();
                 const vertices = [];
                 const colors = [];
                 const width = imageData.width;
                 const height = imageData.height;
                 const data = imageData.data;
-                
+
                 const centerX = width / 2;
                 const centerY = height / 2;
                 const radius = Math.min(width, height) / 2;
-                
+
+                const maxZ = 3; // 最大Zの範囲
+                const minZ = -3; // 最小Zの範囲
+                const zScale = (maxZ - minZ) / radius; // Z軸のスケール調整
+
                 for (let y = 0; y < height; y += 4) {
                     for (let x = 0; x < width; x += 4) {
                         let index = (y * width + x) * 4;
@@ -533,53 +541,57 @@
                         let g = data[index + 1] / 255;
                         let b = data[index + 2] / 255;
                         let a = data[index + 3] / 255;
-                        
+
                         if (a > 0.1) {
                             let normX = (x - centerX) / radius;
                             let normY = (y - centerY) / radius;
                             let distance = Math.sqrt(normX * normX + normY * normY);
-                            
+
                             let angle = Math.atan2(normY, normX);
                             let adjustedX = Math.cos(angle) * distance * 2;
                             let adjustedY = Math.sin(angle) * distance * 2;
-                            
+
                             let posX = adjustedX;
                             let posY = -adjustedY;
-                            let posZ = (Math.random() - 0.5) * 3; // Z方向のランダム範囲を拡大（±1.5 → ±3）
-                            
-                            vertices.push(posX, posY, posZ);
+                            let posZ = (Math.random() - 0.5) * 3; // ランダムなZ軸の値
+
+                            // Z軸方向を縮小する調整を追加
+                            let scaledZ = posZ * zScale;
+
+                            vertices.push(posX, posY, scaledZ);
                             colors.push(r, g, b);
                         }
                     }
                 }
-                
+
                 geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
                 geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-                
+
                 const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 });
                 pointCloud = new THREE.Points(geometry, material);
                 scene.add(pointCloud);
-    
+
                 animate();
             }
-    
+
+
             function animate() {
                 requestAnimationFrame(animate);
-                
+
                 pointCloud.rotation.x += (targetRotationX - pointCloud.rotation.x) * 0.1;
                 pointCloud.rotation.y += (targetRotationY - pointCloud.rotation.y) * 0.1;
-    
+
                 renderer.render(scene, camera);
             }
-    
+
             function handleOrientation(event) {
                 let beta = event.beta ?? 0;
                 let gamma = event.gamma ?? 0;
-    
+
                 targetRotationX = (beta / 180) * Math.PI;
                 targetRotationY = (gamma / 90) * Math.PI;
             }
-    
+
             function loadImage(url, callback) {
                 const img = new Image();
                 img.crossOrigin = "Anonymous";
@@ -594,7 +606,7 @@
                     callback(imageData);
                 };
             }
-    
+
             function requestPermission() {
                 if (typeof DeviceMotionEvent.requestPermission === 'function') {
                     DeviceMotionEvent.requestPermission()
@@ -615,13 +627,13 @@
         </script>
     </div>
     <div id="Q06" class="modal">
-            <div class="modal-content">
-                特定の場所へ行け
-                <span class="modal-close" onclick="closeModal('Q06')">&times;</span>
-                <hr>
-                
-            </div>
-            
+        <div class="modal-content">
+            特定の場所へ行け
+            <span class="modal-close" onclick="closeModal('Q06')">&times;</span>
+            <hr>
+
+        </div>
+
     </div>
     <h1>クイズを選択</h1>
     <div class="container" id="container">
