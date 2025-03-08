@@ -513,7 +513,9 @@
     
                 renderer = new THREE.WebGLRenderer({ antialias: true });
                 renderer.setSize(window.innerWidth * 0.9, window.innerHeight* 0.5);
+                renderer.setClearColor(0xffffff, 1);
                 document.getElementById('boxQ5').appendChild(renderer.domElement);
+                
     
                 const geometry = new THREE.BufferGeometry();
                 const vertices = [];
@@ -556,7 +558,7 @@
                 geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
                 geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
                 
-                const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 * 400});
+                const material = new THREE.PointsMaterial({ vertexColors: true, size: 0.05 * 300});
                 pointCloud = new THREE.Points(geometry, material);
                 scene.add(pointCloud);
     
