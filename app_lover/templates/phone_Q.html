@@ -487,6 +487,7 @@
             <div id="box"></div>
             <p id="info">傾きを検知中...</p>
         </div>
+        
         <script>
             function requestPermission() {
                 if (typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -516,20 +517,79 @@
         </script>
     </div>
     <div id="Q06" class="modal">
-        <form method="POST" action="{% url 'phone_name_birthday' %}">
-            {% csrf_token %}
             <div class="modal-content">
                 特定の場所へ行け
                 <span class="modal-close" onclick="closeModal('Q06')">&times;</span>
                 <hr>
-                <input type="text" name="name" id="name" placeholder="名前" required>
-                <br>
-                <label for="birthdate">誕生日:</label>
-                <input type="date" name="birth_date" id="birthdate" placeholder="誕生日" required>
-                <br>
-                <button type="submit">送信</button>
+                <button id="startBtn" onclick="requestPermission()">ゲーム開始</button>
             </div>
-        </form>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+            <script>
+                let scene, camera, renderer, cube;
+                let targetRotationX = 0, targetRotationY = 0;
+        
+                function init() {
+                    scene = new THREE.Scene();
+                    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                    camera.position.z = 5;
+        
+                    renderer = new THREE.WebGLRenderer();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    document.body.appendChild(renderer.domElement);
+        
+                    // キューブ作成（バラバラの角度で配置）
+                    const geometry = new THREE.BoxGeometry();
+                    const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+                    cube = new THREE.Mesh(geometry, material);
+                    cube.rotation.x = Math.random() * Math.PI;
+                    cube.rotation.y = Math.random() * Math.PI;
+                    scene.add(cube);
+        
+                    animate();
+                }
+        
+                function animate() {
+                    requestAnimationFrame(animate);
+                    
+                    // スマホの傾きで回転を調整
+                    cube.rotation.x += (targetRotationX - cube.rotation.x) * 0.1;
+                    cube.rotation.y += (targetRotationY - cube.rotation.y) * 0.1;
+        
+                    renderer.render(scene, camera);
+        
+                    // 角度が揃ったらクリア
+                    if (Math.abs(cube.rotation.x) < 0.1 && Math.abs(cube.rotation.y) < 0.1) {
+                        alert("クリア！🎉");
+                        window.removeEventListener("deviceorientation", handleOrientation);
+                    }
+                }
+        
+                function handleOrientation(event) {
+                    let beta = event.beta ?? 0;  // 前後の傾き
+                    let gamma = event.gamma ?? 0; // 左右の傾き
+        
+                    targetRotationX = (beta / 180) * Math.PI;  // -180~180度をラジアンに変換
+                    targetRotationY = (gamma / 90) * Math.PI;  // -90~90度をラジアンに変換
+                }
+        
+                function requestPermission() {
+                    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                        DeviceMotionEvent.requestPermission()
+                            .then(permissionState => {
+                                if (permissionState === 'granted') {
+                                    window.addEventListener("deviceorientation", handleOrientation, true);
+                                    init();
+                                } else {
+                                    alert("センサーの許可が必要です");
+                                }
+                            })
+                            .catch(error => console.error("許可エラー:", error));
+                    } else {
+                        window.addEventListener("deviceorientation", handleOrientation, true);
+                        init();
+                    }
+                }
+            </script>
     </div>
     <h1>クイズを選択</h1>
     <div class="container" id="container">
