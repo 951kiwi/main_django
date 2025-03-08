@@ -578,11 +578,14 @@
     
                 targetRotationX = (beta / 180) * Math.PI;
                 targetRotationY = (gamma / 90) * Math.PI;
-                if(parseInt(beta) == 0 && parseInt(gamma) == 0){
+                if( 0.0 < beta && beta < 0.5 && 0.0 < gamma && gamma < 0.5 ){
                     window.removeEventListener("deviceorientation", handleOrientation, true);
                     document.getElementById("info").textContent = `成功`;
                 }
-                document.getElementById("info").textContent = `beta:${parseInt(beta)} gamma:${gamma}`;
+                else{
+                    document.getElementById("info").textContent = `beta:${gamma} gamma:${gamma}`;
+                }
+                
             }
     
             function loadImage(url, callback) {
