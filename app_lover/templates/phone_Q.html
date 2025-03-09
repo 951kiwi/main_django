@@ -392,9 +392,9 @@
                     
                 </div>
                 <div style="display: flex; width: 100%; justify-content: space-around;">
-                    <img id="my_barcode_image_1" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%"  style="background-color: skyblue; border-radius: 10px;">
-                    <img id="my_barcode_image_2" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%"  style="background-color: skyblue; border-radius: 10px;">
-                    <img id="my_barcode_image_3" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%"  style="background-color: skyblue; border-radius: 10px;">
+                    <img id="my_barcode_image_1" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
+                    <img id="my_barcode_image_2" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
+                    <img id="my_barcode_image_3" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
                 </div>
             </div>
         </div>
@@ -517,6 +517,8 @@
                                     }
                                     else {
                                         document.getElementById("my_barcode_image_3").src = data.image_url;
+
+                                        return 0;
                                     }
                                     startQuagga();
                                 }
