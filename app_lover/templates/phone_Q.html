@@ -371,7 +371,7 @@
     </div>
     <div id="Q04" class="modal">
         <div class="modal-content">
-            ・ハーゲンダッツを購入して<br>バーコードを読み込め
+            ・ハーゲンダッツを3つ購入して<br>バーコードを読み込め
             <span class="modal-close" onclick="closeModal('Q04')">&times;</span>
             <hr>
 
@@ -855,6 +855,18 @@
                 document.getElementById(`Q0${id}_card`).appendChild(overlayImage);  // clear.png を linkCard に追加
                 document.getElementById(`Q0${id}_card`).removeAttribute('onclick');
             }
+            function checkOrientation() {
+                if (window.matchMedia("(orientation: landscape)").matches) {
+                    alert("画面を縦向きにしてください");
+                }
+            }
+
+            // ページ読み込み時にチェック
+            checkOrientation();
+
+            // 向きが変わったときにチェック
+            window.addEventListener("orientationchange", checkOrientation);
+
         };
 
     </script>
