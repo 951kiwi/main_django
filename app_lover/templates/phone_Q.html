@@ -388,13 +388,16 @@
                     <div id="my_barcode">
                         <div>***</div>
                     </div>
-                    
-                    
+
+
                 </div>
                 <div style="display: flex; width: 100%; justify-content: space-around;">
-                    <img id="my_barcode_image_1" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
-                    <img id="my_barcode_image_2" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
-                    <img id="my_barcode_image_3" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
+                    <img id="my_barcode_image_1" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt=""
+                        width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
+                    <img id="my_barcode_image_2" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt=""
+                        width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
+                    <img id="my_barcode_image_3" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt=""
+                        width="30%" height: auto; style="background-color: skyblue; border-radius: 10px;">
                 </div>
             </div>
         </div>
@@ -488,42 +491,59 @@
                     stopQuagga();
                     $("#my_result").text(result.codeResult.code);
                     const formData = new FormData();
-                        formData.append("message", "Q04=Jan");
-                        formData.append("jancode", result.codeResult.code);
+                    formData.append("message", "Q04=Jan");
+                    formData.append("jancode", result.codeResult.code);
 
-                        fetch("{% url 'phone' %}", {  // DjangoのURL
-                            method: "POST",
-                            headers: {
-                                "X-CSRFToken": "{{ csrf_token }}"
-                            },
-                            body: formData  // フォームデータとして送信
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                if(data.status === "success"){
-                                    document.getElementById("my_result").textContent = data.name;
-                                    if( data.image_url === document.getElementById("my_barcode_image_1").src || 
-                                        data.image_url === document.getElementById("my_barcode_image_2").src ||
-                                        data.image_url === document.getElementById("my_barcode_image_3").src){
-                                            alert("すでに読み込まれたバーコードです");
-                                            startQuagga();
-                                            return 0;
-                                    }
-                                    if(document.getElementById("my_barcode_image_1").src === default_image){
-                                        document.getElementById("my_barcode_image_1").src = data.image_url;
-                                    }
-                                    else if(document.getElementById("my_barcode_image_2").src === default_image){
-                                        document.getElementById("my_barcode_image_2").src = data.image_url;
-                                    }
-                                    else {
-                                        document.getElementById("my_barcode_image_3").src = data.image_url;
-
-                                        return 0;
-                                    }
+                    fetch("{% url 'phone' %}", {  // DjangoのURL
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: formData  // フォームデータとして送信
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                document.getElementById("my_result").textContent = data.name;
+                                if (data.image_url === document.getElementById("my_barcode_image_1").src ||
+                                    data.image_url === document.getElementById("my_barcode_image_2").src ||
+                                    data.image_url === document.getElementById("my_barcode_image_3").src) {
+                                    alert("すでに読み込まれたバーコードです");
                                     startQuagga();
+                                    return 0;
                                 }
-                            })
-                            .catch(error => console.error("Error:", error));
+                                if (document.getElementById("my_barcode_image_1").src === default_image) {
+                                    document.getElementById("my_barcode_image_1").src = data.image_url;
+                                }
+                                else if (document.getElementById("my_barcode_image_2").src === default_image) {
+                                    document.getElementById("my_barcode_image_2").src = data.image_url;
+                                }
+                                else {
+                                    document.getElementById("my_barcode_image_3").src = data.image_url;
+                                    setTimeout(function () {
+                                        alert("Q04クリア！！\nバーコードを読み込む！！！");
+                                        const formData = new FormData();
+                                        formData.append("message", "Q04=True");
+
+                                        fetch("{% url 'phone' %}", {  // DjangoのURL
+                                            method: "POST",
+                                            headers: {
+                                                "X-CSRFToken": "{{ csrf_token }}"
+                                            },
+                                            body: formData  // フォームデータとして送信
+                                        })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                window.location.reload();
+                                            })
+                                            .catch(error => console.error("Error:", error));
+                                    }, 1000);
+                                    return 0;
+                                }
+                                startQuagga();
+                            }
+                        })
+                        .catch(error => console.error("Error:", error));
                 }
                 $("#my_barcode div").barcode(result.codeResult.code, "ean13");
             });
@@ -712,12 +732,12 @@
                     if (confirm("ちゃんと答えるやんwwwww\n楽しめた？？\n")) {
                         alert("楽しめたなら良かった笑");
                         if (confirm("んじゃあ最後、プレゼント見つけるまで楽しんでください")) {
-                        
+
                         }
-                        else{
+                        else {
                             alert("なんぜやねんwwwwwwwwww");
                         }
-                    
+
                     } else {
                         alert("楽しまれへんかったんかよしばいたろかwwwwww");
                         alert("まーいいや、最後、プレゼント見つけるまでがお祝いやから頑張ってね");
