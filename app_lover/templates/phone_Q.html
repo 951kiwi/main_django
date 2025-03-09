@@ -502,16 +502,23 @@
                             .then(data => {
                                 if(data.status === "success"){
                                     document.getElementById("my_result").textContent = data.name;
-                                    if(document.getElementById("my_barcode_image_1") === default_image){
+                                    if( data.image_url === document.getElementById("my_barcode_image_1").src || 
+                                        data.image_url === document.getElementById("my_barcode_image_2").src ||
+                                        data.image_url === document.getElementById("my_barcode_image_3").src){
+                                            alert("すでに読み込まれたバーコードです");
+                                            startQuagga();
+                                            return 0;
+                                    }
+                                    if(document.getElementById("my_barcode_image_1").src === default_image){
                                         document.getElementById("my_barcode_image_1").src = data.image_url;
                                     }
-                                    else if(document.getElementById("my_barcode_image_2") === default_image){
+                                    else if(document.getElementById("my_barcode_image_2").src === default_image){
                                         document.getElementById("my_barcode_image_2").src = data.image_url;
                                     }
                                     else {
                                         document.getElementById("my_barcode_image_3").src = data.image_url;
                                     }
-                                    
+                                    startQuagga();
                                 }
                             })
                             .catch(error => console.error("Error:", error));
