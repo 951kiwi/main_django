@@ -481,7 +481,7 @@
                     stopQuagga();
                     $("#my_result").text(result.codeResult.code);
                     const formData = new FormData();
-                        formData.append("message", "Q4=Jan");
+                        formData.append("message", "Q04=Jan");
                         formData.append("jancode", result.codeResult.code);
 
                         fetch("{% url 'phone' %}", {  // DjangoのURL
