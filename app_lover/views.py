@@ -72,6 +72,7 @@ def phone_view(request):
                 if(jan_code == jancode):
                     return JsonResponse({"status": "success", "name": text_content , "image_url": img_url})
                 print(f"JANコード: {jan_code}, 商品名: {text_content}")
+                print(img_url)
         else:
             return JsonResponse({"status": "error"})  # JSONレスポンスを返す
         return JsonResponse({"status": "success"})  # JSONレスポンスを返す
