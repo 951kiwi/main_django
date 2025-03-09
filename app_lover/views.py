@@ -62,11 +62,15 @@ def phone_view(request):
                 description = result.find("p", class_="description")
                 if description:
                     text_content = description.get_text(strip=True)
+                    img_tag = description.find("img")
+                    if img_tag and img_tag.has_attr('src'):
+                        img_url = img_tag['src']
+                    else:
+                        img_url = None 
                 else:
                     text_content = "不明"
                 if(jan_code == jancode):
-                    return JsonResponse({"status": "success", "name": text_content})
-
+                    return JsonResponse({"status": "success", "name": text_content , "image_url": img_url})
                 print(f"JANコード: {jan_code}, 商品名: {text_content}")
         else:
             return JsonResponse({"status": "error"})  # JSONレスポンスを返す

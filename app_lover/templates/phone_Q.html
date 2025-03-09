@@ -388,6 +388,7 @@
                     <div id="my_barcode">
                         <div>***</div>
                     </div>
+                    <img id="my_barcode_image" src="" alt="" width="200vw" height="200vw" style="background-color: skyblue;">
                 </div>
             </div>
         </div>
@@ -495,6 +496,7 @@
                             .then(data => {
                                 if(data.status === "success"){
                                     document.getElementById("my_result").textContent = data.name;
+                                    document.getElementById("my_barcode_image").src = data.image_url;
                                 }
                             })
                             .catch(error => console.error("Error:", error));
