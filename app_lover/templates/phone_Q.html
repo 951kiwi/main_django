@@ -388,7 +388,13 @@
                     <div id="my_barcode">
                         <div>***</div>
                     </div>
-                    <img id="my_barcode_image" src="" alt="" width="200vw" height="200vw" style="background-color: skyblue;">
+                    
+                    
+                </div>
+                <div style="display: flex; width: 100%; justify-content: space-around;">
+                    <img id="my_barcode_image_1" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%"  style="background-color: skyblue; border-radius: 10px;">
+                    <img id="my_barcode_image_2" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%"  style="background-color: skyblue; border-radius: 10px;">
+                    <img id="my_barcode_image_3" src="https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif" alt="" width="30%"  style="background-color: skyblue; border-radius: 10px;">
                 </div>
             </div>
         </div>
@@ -474,7 +480,7 @@
                 Quagga.ImageDebug.drawPath(result.box,
                     { x: 0, y: 1 }, ctx, { color: "blue", lineWidth: 5 });
             });
-
+            var default_image = "https://www.brand-yurai.net/logoimg/fCSW4LK8Spkg2Eli.gif";
             Quagga.onDetected(result => {
                 console.log(result.codeResult.code);
                 $("#my_result").text(result.codeResult.code);
@@ -496,7 +502,16 @@
                             .then(data => {
                                 if(data.status === "success"){
                                     document.getElementById("my_result").textContent = data.name;
-                                    document.getElementById("my_barcode_image").src = data.image_url;
+                                    if(document.getElementById("my_barcode_image_1") === default_image){
+                                        document.getElementById("my_barcode_image_1").src = data.image_url;
+                                    }
+                                    else if(document.getElementById("my_barcode_image_2") === default_image){
+                                        document.getElementById("my_barcode_image_2").src = data.image_url;
+                                    }
+                                    else {
+                                        document.getElementById("my_barcode_image_3").src = data.image_url;
+                                    }
+                                    
                                 }
                             })
                             .catch(error => console.error("Error:", error));
