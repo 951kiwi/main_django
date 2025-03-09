@@ -383,7 +383,7 @@
                         <button id="changeCamera">向き変更</button>
 
                     </div>
-                    <div id="my_quagga"></div>
+                    <div id="my_quagga" data-value="1"></div>
                     <div id="my_result">***</div>
                     <div id="my_barcode">
                         <div>***</div>
@@ -405,7 +405,18 @@
         <script src="//unpkg.com/@ericblade/quagga2@1.7.4/dist/quagga.min.js"></script>
         <script src="//cdn.jsdelivr.net/gh/mtaketani113/jquery-barcode@master/jquery-barcode.js"></script>
         <script>
-
+            document.getElementById("my_quagga").addEventListener("click",function(){
+                var myDiv = document.getElementById("my_quagga");
+                var pushvalue = myDiv.dataset.value;
+                if(pushvalue === "5"){
+                    document.getElementById("my_inner").style.border = "5px solid green";
+                    myDiv.dataset.value = "1";
+                }
+                else{
+                    document.getElementById("my_inner").style.border = "";
+                    myDiv.dataset.value = `${parseInt(pushvalue)+1}`
+                }
+            })
             let cameras = [];
             let currentCameraIndex = 0;
 
@@ -507,10 +518,16 @@
                                 document.getElementById("my_result").textContent = data.name;
                                 if (data.image_url === document.getElementById("my_barcode_image_1").src ||
                                     data.image_url === document.getElementById("my_barcode_image_2").src ||
-                                    data.image_url === document.getElementById("my_barcode_image_3").src) {
-                                    alert("すでに読み込まれたバーコードです");
-                                    startQuagga();
-                                    return 0;
+                                    data.image_url === document.getElementById("my_barcode_image_3").src ) {
+                                        if(document.getElementById("my_inner").style.border === ""){//重複を無許可
+                                            alert("すでに読み込まれたバーコードです");
+                                            startQuagga();
+                                            return 0;
+                                        }
+                                        else{//重複を許可
+                                            document.getElementById("my_inner").style.border = "";
+                                        }
+                                    
                                 }
                                 if (document.getElementById("my_barcode_image_1").src === default_image) {
                                     document.getElementById("my_barcode_image_1").src = data.image_url;
