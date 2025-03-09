@@ -9,6 +9,7 @@ urls = ['https://www.jancode.xyz/corp/?c=29119','https://www.jancode.xyz/corp/?c
        'https://www.jancode.xyz/corp/?c=29119&p=3','https://www.jancode.xyz/corp/?c=29119&p=4'
        ,'https://www.jancode.xyz/corp/?c=29119&p=5','https://www.jancode.xyz/corp/?c=29119&p=6'
        ,'https://www.jancode.xyz/corp/?c=29119&p=7']
+base_url = "https://www.jancode.xyz" 
 # ヘッダー情報（アクセスブロックを回避するため）
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
@@ -64,7 +65,7 @@ def phone_view(request):
                     text_content = description.get_text(strip=True)
                     img_tag = description.find("img")
                     if img_tag and img_tag.has_attr('src'):
-                        img_url = img_tag['src']
+                        img_url = base_url + img_tag['src']
                     else:
                         img_url = None 
                 else:
@@ -72,7 +73,6 @@ def phone_view(request):
                 if(jan_code == jancode):
                     return JsonResponse({"status": "success", "name": text_content , "image_url": img_url})
                 print(f"JANコード: {jan_code}, 商品名: {text_content}")
-                print(img_url)
         else:
             return JsonResponse({"status": "error"})  # JSONレスポンスを返す
         return JsonResponse({"status": "success"})  # JSONレスポンスを返す
