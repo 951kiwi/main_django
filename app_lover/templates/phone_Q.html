@@ -493,7 +493,9 @@
                         })
                             .then(response => response.json())
                             .then(data => {
-                                
+                                if(data.status === "success"){
+                                    document.getElementById("my_result").textContent = data.name;
+                                }
                             })
                             .catch(error => console.error("Error:", error));
                 }
