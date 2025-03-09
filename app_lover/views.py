@@ -1,6 +1,19 @@
 from django.shortcuts import render,redirect
 from django.http import JsonResponse
 from .models import Selection
+import requests
+from bs4 import BeautifulSoup
+
+#ハーゲンダッツのjancodeリスト
+urls = ['https://www.jancode.xyz/corp/?c=29119','https://www.jancode.xyz/corp/?c=29119&p=2',
+       'https://www.jancode.xyz/corp/?c=29119&p=3','https://www.jancode.xyz/corp/?c=29119&p=4'
+       ,'https://www.jancode.xyz/corp/?c=29119&p=5','https://www.jancode.xyz/corp/?c=29119&p=6'
+       ,'https://www.jancode.xyz/corp/?c=29119&p=7']
+# ヘッダー情報（アクセスブロックを回避するため）
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+}
+
 
 def phone_view(request):
     # 最初のSelectionオブジェクトを取得
@@ -25,6 +38,10 @@ def phone_view(request):
         if(data == "Q06=True"):
             selection.game06 = True
             selection.save()
+        if(data == "Q04=Jan"):
+            jancode = request.POST.get("jancode")
+            # ページの取得
+            print(jancode)
         else:
             return JsonResponse({"status": "error"})  # JSONレスポンスを返す
         return JsonResponse({"status": "success"})  # JSONレスポンスを返す
@@ -112,6 +129,7 @@ def get_data(request):
         "id": data.id,
         "name": data.name,
         "login": data.login,
+        "gamestart":data.gamestart,
         "game01": data.game01,
         "game02": data.game02,
         "game03": data.game03,

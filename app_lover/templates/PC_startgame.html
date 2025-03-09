@@ -129,7 +129,7 @@
         /* 横方向中央 */
         align-items: flex-end;
         /* 垂直方向下部 */
-        
+
     }
 
     /* 動画のスタイル */
@@ -184,6 +184,8 @@
     </div>
 
     <!--画像用-->
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.3.2/dist/confetti.browser.min.js"></script>
     <script>
         let img = document.getElementById("myImage");
         let imgDiv = document.getElementById("box1");
@@ -210,7 +212,6 @@
 
         // ユーザーがボタンをクリックしたら音声を解除
         video.addEventListener("click", function () {
-            document.getElementById("myVideo").playbackRate = 10;
             video.play();
             video.muted = false; // 動画音声解除
         });
@@ -224,7 +225,6 @@
 
                 video.src = staticPath + (parseInt(videoFileName) + 1) + ".mp4";
             }
-            document.getElementById("myVideo").playbackRate = 10;
             video.play();
         });
         function updateTime() {
@@ -250,6 +250,20 @@
                 overlayImage.src = "{% static 'lover/images/clear.png' %}";
                 overlayImage.classList.add("clear-overlay");
                 document.getElementById(`Q0${id}_card`).appendChild(overlayImage);  // clear.png を linkCard に追加
+                confetti({
+                        particleCount: 1000,
+                        spread: 90,
+                        angle: 45,
+                        startVelocity: 100,
+                        origin: { x: 0.0, y: 1.2 }
+                    });
+                    confetti({
+                        particleCount: 1000,
+                        spread: 90,
+                        angle: 45 + 90 ,
+                        startVelocity: 100,
+                        origin: { x: 1.0, y: 1.2 }
+                    });
             }
 
         }
@@ -257,6 +271,7 @@
             fetch('/lover/get_data/')
                 .then(response => response.json())  // ここで JSON を取得
                 .then(data => {  // JSON 取得後に処理
+
                     if (data.game01 == true) {
                         // クリアした場合の処理
                         clear_card(1);
@@ -281,10 +296,11 @@
                         // クリアした場合の処理
                         clear_card(6);
                     }
+
                     var p = 6;
                     const overlayCount = document.querySelectorAll('.clear-overlay').length;
                     imagefilter(6 - overlayCount);
-
+                    
                 })
                 .catch(error => console.error('Error:', error));
         }

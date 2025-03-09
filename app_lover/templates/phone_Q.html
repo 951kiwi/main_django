@@ -362,21 +362,16 @@
         <form method="POST" action="{% url 'phone_name_birthday' %}">
             {% csrf_token %}
             <div class="modal-content">
-                特定の場所へ行け
                 <span class="modal-close" onclick="closeModal('Q03')">&times;</span>
-                <hr>
-                <input type="text" name="name" id="name" placeholder="名前" required>
-                <br>
-                <label for="birthdate">誕生日:</label>
-                <input type="date" name="birth_date" id="birthdate" placeholder="誕生日" required>
-                <br>
-                <button type="submit">送信</button>
+                Q03, 指定された場所へ行け
+                <hr color="#fffff">
+                <img src="{% static 'lover/images/q03.jpg' %}" width="100%">
             </div>
         </form>
     </div>
     <div id="Q04" class="modal">
         <div class="modal-content">
-            ポカリスエット500mlを購入して<br>バーコードを読み込め
+            ・ハーゲンダッツを購入して<br>バーコードを読み込め
             <span class="modal-close" onclick="closeModal('Q04')">&times;</span>
             <hr>
 
@@ -482,13 +477,12 @@
             Quagga.onDetected(result => {
                 console.log(result.codeResult.code);
                 $("#my_result").text(result.codeResult.code);
-                if (result.codeResult.code == "45019517") {//ポカリ
+                if (result.codeResult.code.startsWith("4976994")) {//
                     stopQuagga();
-                    $("#my_result").text("成功");
-                    setTimeout(function () {
-                        alert("Q04クリア！！\nバーコードを読み込んだ！！！");
-                        const formData = new FormData();
-                        formData.append("message", "Q04=True");
+                    $("#my_result").text(result.codeResult.code);
+                    const formData = new FormData();
+                        formData.append("message", "Q4=Jan");
+                        formData.append("jancode", result.codeResult.code);
 
                         fetch("{% url 'phone' %}", {  // DjangoのURL
                             method: "POST",
@@ -499,10 +493,9 @@
                         })
                             .then(response => response.json())
                             .then(data => {
-                                window.location.reload();
+                                
                             })
                             .catch(error => console.error("Error:", error));
-                    }, 1000);
                 }
                 $("#my_barcode div").barcode(result.codeResult.code, "ean13");
             });
