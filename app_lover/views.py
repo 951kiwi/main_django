@@ -43,36 +43,35 @@ def phone_view(request):
             jancode = request.POST.get("jancode")
             # ページの取得
             print(jancode)
-            
-        # ページの取得
-        for url in urls:
-            response = requests.get(url, headers=headers)
-            response.encoding = 'utf-8'  # 文字エンコーディングの設定
-            # BeautifulSoupでHTMLを解析
-            soup = BeautifulSoup(response.text, 'html.parser')
-            # 商品情報を取得
-            results = soup.find_all("div", class_="result-box-out m15-b")
-            for result in results:
-                # JANコードの取得
-                jan_element = result.find("h4", class_="title")
-                if jan_element:
-                    jan_code = jan_element.text.replace("JANコード:", "").strip()
-                else:
-                    jan_code = "不明"
-                # 商品名の取得
-                description = result.find("p", class_="description")
-                if description:
-                    text_content = description.get_text(strip=True)
-                    img_tag = description.find("img")
-                    if img_tag and img_tag.has_attr('src'):
-                        img_url = base_url + img_tag['src']
+            # ページの取得
+            for url in urls:
+                response = requests.get(url, headers=headers)
+                response.encoding = 'utf-8'  # 文字エンコーディングの設定
+                # BeautifulSoupでHTMLを解析
+                soup = BeautifulSoup(response.text, 'html.parser')
+                # 商品情報を取得
+                results = soup.find_all("div", class_="result-box-out m15-b")
+                for result in results:
+                    # JANコードの取得
+                    jan_element = result.find("h4", class_="title")
+                    if jan_element:
+                        jan_code = jan_element.text.replace("JANコード:", "").strip()
                     else:
-                        img_url = None 
-                else:
-                    text_content = "不明"
-                if(jan_code == jancode):
-                    return JsonResponse({"status": "success", "name": text_content , "image_url": img_url})
-                print(f"JANコード: {jan_code}, 商品名: {text_content}")
+                        jan_code = "不明"
+                    # 商品名の取得
+                    description = result.find("p", class_="description")
+                    if description:
+                        text_content = description.get_text(strip=True)
+                        img_tag = description.find("img")
+                        if img_tag and img_tag.has_attr('src'):
+                            img_url = base_url + img_tag['src']
+                        else:
+                            img_url = None 
+                    else:
+                        text_content = "不明"
+                    if(jan_code == jancode):
+                        return JsonResponse({"status": "success", "name": text_content , "image_url": img_url})
+                    print(f"JANコード: {jan_code}, 商品名: {text_content}")
         else:
             return JsonResponse({"status": "error"})  # JSONレスポンスを返す
         return JsonResponse({"status": "success"})  # JSONレスポンスを返す
