@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -12,6 +13,7 @@
             overflow: hidden;
             background: black;
         }
+
         .video-container {
             position: fixed;
             top: 0;
@@ -22,20 +24,24 @@
             align-items: center;
             justify-content: center;
         }
+
         video {
             width: 100vw;
             height: 100vh;
             object-fit: cover;
         }
+
         .video-wrapper {
             position: absolute;
             width: 100%;
             height: 100%;
             transition: transform 0.5s ease-in-out;
         }
+
         .hidden {
             transform: translateY(100%);
         }
+
         .overlay {
             position: absolute;
             bottom: 10%;
@@ -43,7 +49,9 @@
             color: white;
             font-size: 1.2em;
         }
-        .mute-button, .play-button {
+
+        .mute-button,
+        .play-button {
             position: absolute;
             bottom: 15%;
             right: 10px;
@@ -55,6 +63,7 @@
             font-size: 16px;
             cursor: pointer;
         }
+
         .play-button {
             display: none;
             bottom: 50%;
@@ -64,10 +73,11 @@
         }
     </style>
 </head>
+
 <body>
 
-<div id="video-feed">
-    {% for video in videos %}
+    <div id="video-feed">
+        {% for video in videos %}
         <div class="video-wrapper {% if not forloop.first %}hidden{% endif %}">
             <div class="video-container" onclick="toggleMute(this)">
                 <video class="video-player" src="{{ video.video.url }}" playsinline muted loop></video>
@@ -80,113 +90,117 @@
                 <button class="play-button" onclick="playVideo(this)">▶️</button>
             </div>
         </div>
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
 
-<script>
-    let currentIndex = 0;
-    let videos = document.querySelectorAll('.video-wrapper');
-    let videoElements = document.querySelectorAll('.video-player');
+    <script>
+        let currentIndex = 0;
+        let videos = document.querySelectorAll('.video-wrapper');
+        let videoElements = document.querySelectorAll('.video-player');
 
-    document.addEventListener('DOMContentLoaded', function () {
-        let firstVideo = videoElements[0];
-        if (firstVideo) {
-            firstVideo.play().catch(() => console.log("自動再生がブロックされました"));
-        }
-    });
-
-    document.addEventListener('touchstart', function () {
-        let firstVideo = videoElements[0];
-        if (firstVideo.paused) {
-            firstVideo.play();
-        }
-    }, { once: true });
-
-    document.addEventListener('touchstart', handleTouchStart, false);
-    document.addEventListener('touchend', handleTouchEnd, false);
-
-    let startY = 0;
-
-    function handleTouchStart(event) {
-        startY = event.touches[0].clientY;
-    }
-
-    function handleTouchEnd(event) {
-        let endY = event.changedTouches[0].clientY;
-        let diffY = startY - endY;
-
-        if (diffY > 50) {  // 上スワイプ
-            nextVideo();
-        }
-    }
-
-    function nextVideo() {
-        if (currentIndex < videos.length - 1) {
-            videos[currentIndex].classList.add('hidden');
-            let currentVideo = videoElements[currentIndex];
-            currentVideo.pause();  // 現在の動画を停止
-
-            currentIndex++;
-            videos[currentIndex].classList.remove('hidden');
-            
-            let nextVideo = videoElements[currentIndex];
-            
-            // ミュートの状態を次の動画にも適用
-            let isMuted = sessionStorage.getItem("muted") !== "false";
-            nextVideo.muted = isMuted;
-
-            // 動画がロードされるまでの処理
-            preloadNextVideo(currentIndex + 1);
-            nextVideo.play().catch(() => showPlayButton(nextVideo));
-        }
-    }
-
-    function preloadNextVideo(index) {
-        if (index < videoElements.length) {
-            let video = videoElements[index];
-            video.preload = "auto";  // 次の動画を事前ロード
-        }
-    }
-
-    function toggleMute(container) {
-        let video = container.querySelector("video");
-        let button = container.querySelector(".mute-button");
-
-        if (video.muted) {
-            video.muted = false;
-            button.textContent = "🔊"; // 音声ON
-            sessionStorage.setItem("muted", "false");  // 次の動画にも適用
-        } else {
-            video.muted = true;
-            button.textContent = "🔇"; // 音声OFF
-            sessionStorage.setItem("muted", "true");
-        }
-    }
-
-    function showPlayButton(video) {
-        let playButton = video.closest('.video-container').querySelector('.play-button');
-        playButton.style.display = "block";
-    }
-
-    function playVideo(button) {
-        let video = button.closest('.video-container').querySelector("video");
-        video.play().then(() => {
-            button.style.display = "none";  // 再生成功ならボタンを消す
-        }).catch(() => console.log("再生に失敗しました"));
-    }
-
-    videoElements.forEach(video => {
-        video.addEventListener("ended", function () {
-            showPlayButton(video);
+        document.addEventListener('DOMContentLoaded', function () {
+            let firstVideo = videoElements[0];
+            console.log(firstVideo)
+            if (firstVideo) {
+                firstVideo.play().catch(() => console.log("自動再生がブロックされました"));
+            }
         });
 
-        video.addEventListener("play", function () {
+        document.addEventListener('touchstart', function () {
+            let firstVideo = videoElements[0];
+            if (firstVideo.paused) {
+                firstVideo.play();
+            }
+        }, { once: true });
+
+        document.addEventListener('touchstart', handleTouchStart, false);
+        document.addEventListener('touchend', handleTouchEnd, false);
+
+        let startY = 0;
+
+        function handleTouchStart(event) {
+            startY = event.touches[0].clientY;
+        }
+
+        function handleTouchEnd(event) {
+            let endY = event.changedTouches[0].clientY;
+            let diffY = startY - endY;
+
+            if (diffY > 50) {  // 上スワイプ
+                nextVideo();
+            }
+        }
+
+        function nextVideo() {
+            if (currentIndex < videos.length - 1) {
+                let currentVideoWrapper = videos[currentIndex];
+                let currentVideo = videoElements[currentIndex];
+
+                // 現在の動画を停止＆非表示にする
+                currentVideo.pause();
+                currentVideoWrapper.style.display = "none";
+
+                // 次の動画を表示
+                currentIndex++;
+                let nextVideoWrapper = videos[currentIndex];
+                let nextVideo = videoElements[currentIndex];
+
+                nextVideoWrapper.style.display = "block"; // 表示
+                nextVideo.play().catch(() => showPlayButton(nextVideo));
+
+                // 次の動画のロードを開始
+                preloadNextVideo(currentIndex + 1);
+            }
+        }
+
+        function preloadNextVideo(index) {
+            if (index < videoElements.length) {
+                let video = videoElements[index];
+                video.preload = "auto";  // 次の動画を事前ロード
+            }
+        }
+
+
+        function toggleMute(container) {
+            let video = container.querySelector("video");
+            let button = container.querySelector(".mute-button");
+
+            if (video.muted) {
+                video.muted = false;
+                button.textContent = "🔊"; // 音声ON
+                sessionStorage.setItem("muted", "false");  // 次の動画にも適用
+            } else {
+                video.muted = true;
+                button.textContent = "🔇"; // 音声OFF
+                sessionStorage.setItem("muted", "true");
+            }
+        }
+
+        function showPlayButton(video) {
             let playButton = video.closest('.video-container').querySelector('.play-button');
-            playButton.style.display = "none";  // 再生時にボタンを消す
-        });
-    });
+            playButton.style.display = "block";
+        }
 
-</script>
+        function playVideo(button) {
+            let video = button.closest('.video-container').querySelector("video");
+            video.play().then(() => {
+                button.style.display = "none";  // 再生成功ならボタンを消す
+            }).catch(() => console.log("再生に失敗しました"));
+        }
+
+        videoElements.forEach(video => {
+            video.addEventListener("ended", function () {
+                showPlayButton(video);
+            });
+
+            video.addEventListener("play", function () {
+                let playButton = video.closest('.video-container').querySelector('.play-button');
+                playButton.style.display = "none";  // 再生時にボタンを消す
+            });
+        });
+
+    </script>
 
 </body>
+
 </html>
