@@ -108,12 +108,12 @@ def PC_view(request):
 
 
 def kiwitok(request):
-    selection = Selection.objects.first()
     if request.method == "POST":
         data = request.POST.get("message")
         if(data == "like"):
             print("like")
     videos = list(Video.objects.all())
+    print(videos)
     random.shuffle(videos)  # ランダムに並び替え
     return render(request, 'tiktok.html', {'videos': videos})
 
