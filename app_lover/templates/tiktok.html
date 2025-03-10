@@ -311,8 +311,10 @@
 
             if (diffY > 50) {  // 上スワイプ
                 nextVideo();
+                console.log(currentIndex);
             } else if (diffY < -50) {  // 下スワイプ
                 prevVideo();
+                console.log(currentIndex);
             }
         }
 
