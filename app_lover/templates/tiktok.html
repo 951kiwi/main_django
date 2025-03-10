@@ -415,6 +415,7 @@
 
             const formData = new FormData();
                 formData.append("message", "like");
+                formData.append("video", videoElements[currentIndex]);
 
                 fetch("{% url 'kiwitok' %}", {  // DjangoのURL
                     method: "POST",
