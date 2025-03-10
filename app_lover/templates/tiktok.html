@@ -169,146 +169,7 @@
             resetVideoState();
         });
 
-        // 再生バーを更新する
-        function updateProgressBar(video) {
-            let currentTime = video.currentTime;
-            let duration = video.duration;
-            let progress = (currentTime / duration) * 100;
-            progressBar.style.width = progress + '%';
-        }
-
-        // ローディングバーを更新する
-        function updateLoadingBar(video) {
-            let buffered = video.buffered;
-            if (buffered.length > 0) {
-                let end = buffered.end(buffered.length - 1);
-                let duration = video.duration;
-                let bufferProgress = (end / duration) * 100;
-                loadingBar.style.width = bufferProgress + '%';
-            }
-        }
-        let intervalId;  // setIntervalのIDを格納する変数
-
-        videoElements.forEach(video => {
-            video.addEventListener("play", function () {
-                // 再生時に進行状況の更新を開始
-                if (!intervalId) {
-                    intervalId = setInterval(() => {
-                        updateProgressBar(video);
-                        updateLoadingBar(video);
-                    }, 100);
-                }
-            });
-
-            video.addEventListener("pause", function () {
-                // 動画が一時停止されたら、進行状況の更新を停止
-                clearInterval(intervalId);
-                intervalId = null;
-            });
-
-            video.addEventListener("ended", function () {
-                // 動画が終了したら、進行状況の更新を停止
-                clearInterval(intervalId);
-                intervalId = null;
-            });
-        });
-
-        // 初期状態のリセット処理
-        function resetVideoState() {
-            videos.forEach((videoWrapper, index) => {
-                if (index === 0) {
-                    videoWrapper.classList.remove('hidden');
-                } else {
-                    videoWrapper.classList.add('hidden');
-                }
-            });
-        }
-
-        document.addEventListener('touchstart', function () {
-            let firstVideo = videoElements[0];
-            if (firstVideo.paused) {
-                firstVideo.play();
-            }
-        }, { once: true });
-
-        document.addEventListener('touchstart', handleTouchStart, false);
-        document.addEventListener('touchend', handleTouchEnd, false);
-
-        let startY = 0;
-
-        function handleTouchStart(event) {
-            startY = event.touches[0].clientY;
-        }
-
-        function handleTouchEnd(event) {
-            let endY = event.changedTouches[0].clientY;
-            let diffY = startY - endY;
-
-            if (diffY > 50) {  // 上スワイプ
-                nextVideo();
-            } else if (diffY < -50) {  // 下スワイプ
-                prevVideo();
-            }
-        }
-
-        function nextVideo() {
-            if (currentIndex < videos.length - 1) {
-                let currentVideoWrapper = videos[currentIndex];
-                let currentVideo = videoElements[currentIndex];
-
-                // 現在の動画を停止
-                currentVideo.pause();
-
-                // 現在の動画にhiddenを追加
-                currentVideoWrapper.classList.add("hidden");
-
-                // 次の動画を表示
-                currentIndex++;
-                let nextVideoWrapper = videos[currentIndex];
-                let nextVideo = videoElements[currentIndex];
-
-                // hiddenを削除して表示
-                nextVideoWrapper.classList.remove("hidden");
-                nextVideo.play().catch(() => showPlayButton(nextVideo));
-
-                // さらに次の動画を事前ロード
-                preloadNextVideo(currentIndex + 1);
-            }
-        }
-        function prevVideo() {
-            if (currentIndex > 0) {
-                // 現在の動画を隠す
-                videos[currentIndex].classList.add('hidden');
-                let currentVideo = videoElements[currentIndex];
-                currentVideo.pause();  // 現在の動画を停止
-
-                // 前の動画を表示
-                currentIndex--;
-                videos[currentIndex].classList.remove('hidden');
-
-                let prevVideo = videoElements[currentIndex];
-                prevVideo.play().catch(() => console.log("自動再生がブロックされました"));
-            }
-        }
-
-        // 次の動画を事前ロード
-        function preloadNextVideo(index) {
-            if (index < videoElements.length) {
-                let video = videoElements[index];
-                video.preload = "auto";  // 次の動画をロード
-            }
-        }
-
-        // 再生ボタンを表示する関数
-        function showPlayButton(video) {
-            let playButton = video.closest(".video-container").querySelector(".play-button");
-            playButton.style.display = "block";
-        }
-
-
-
-
-
+        // ミュート状態を切り替え
         function toggleMute(container) {
             let video = container.querySelector("video");
             let button = container.querySelector(".mute-button");
@@ -325,21 +186,29 @@
             }
         }
 
-        function showPlayButton(video) {
-            let playButton = video.closest('.video-container').querySelector('.play-button');
-            playButton.style.display = "block";
+        // 初期状態のリセット処理
+        function resetVideoState() {
+            videos.forEach((videoWrapper, index) => {
+                if (index === 0) {
+                    videoWrapper.classList.remove('hidden');
+                } else {
+                    videoWrapper.classList.add('hidden');
+                }
+            });
         }
 
-        // playボタンが押されたら再生
+        // 再生ボタンが押されたら再生
         function playVideo(button) {
             let video = button.closest(".video-container").querySelector("video");
             video.play();
             button.style.display = "none";
         }
 
+        // 動画の進行状況を更新
         videoElements.forEach(video => {
             video.addEventListener("ended", function () {
-                showPlayButton(video);
+                let playButton = video.closest('.video-container').querySelector('.play-button');
+                playButton.style.display = "block";  // 動画が終了したら再生ボタンを表示
             });
 
             video.addEventListener("play", function () {
@@ -347,7 +216,6 @@
                 playButton.style.display = "none";  // 再生時にボタンを消す
             });
         });
-
 
     </script>
 
