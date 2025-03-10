@@ -135,31 +135,35 @@
     }
 
     function nextVideo() {
-        if (currentIndex < videos.length - 1) {
-            videos[currentIndex].classList.add('hidden');
-            let currentVideo = videoElements[currentIndex];
-            currentVideo.pause();  // 現在の動画を停止
+    if (currentIndex < videos.length - 1) {
+        videos[currentIndex].classList.add('hidden');
+        let currentVideo = videoElements[currentIndex];
+        currentVideo.pause();  // 現在の動画を停止
 
-            currentIndex++;
-            videos[currentIndex].classList.remove('hidden');
-            
-            let nextVideo = videoElements[currentIndex];
-            nextVideo.play().catch(() => console.log("自動再生がブロックされました"));
-        }
+        currentIndex++;
+        videos[currentIndex].classList.remove('hidden');
+
+        let nextVideo = videoElements[currentIndex];
+        nextVideo.muted = sessionStorage.getItem("muted") === "true"; // ミュート状態を適用
+        nextVideo.play().catch(() => console.log("自動再生がブロックされました"));
     }
+}
 
     function toggleMute(container) {
-        let video = container.querySelector("video");
-        let button = container.querySelector(".mute-button");
+    let video = container.querySelector("video");
+    let button = container.querySelector(".mute-button");
 
-        if (video.muted) {
-            video.muted = false;
-            button.textContent = "🔊"; // 音声ON
-        } else {
-            video.muted = true;
-            button.textContent = "🔇"; // 音声OFF
-        }
+    if (video.muted) {
+        video.muted = false;
+        button.textContent = "🔊"; // 音声ON
+        sessionStorage.setItem("muted", "false"); // ミュート解除を保存
+    } else {
+        video.muted = true;
+        button.textContent = "🔇"; // 音声OFF
+        sessionStorage.setItem("muted", "true"); // ミュートONを保存
     }
+}
+
 
     // 動画のバッファリング状況を取得
     function updateBufferProgress(video, progressBar) {
