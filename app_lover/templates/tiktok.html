@@ -371,6 +371,7 @@
             heart.classList.add("heart");
             // ランダムな回転角度を生成（-45度から45度の範囲でランダム）
             const randomRotation = Math.random() * 90 - 45; // -45〜45のランダムな角度
+            console.log(randomRotation);
             // 生成したハートの位置を指定
             heart.style.left = `${x - 25}px`; // ハートの幅の半分を調整
             heart.style.top = `${y - 25}px`;  // ハートの高さの半分を調整
