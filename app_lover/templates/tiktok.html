@@ -43,7 +43,7 @@
             color: white;
             font-size: 1.2em;
         }
-        .mute-button {
+        .mute-button, .play-button {
             position: absolute;
             bottom: 15%;
             right: 10px;
@@ -55,21 +55,12 @@
             font-size: 16px;
             cursor: pointer;
         }
-        .progress-bar-container {
-            position: absolute;
-            bottom: 5%;
-            left: 10px;
-            width: 80%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: #00ff00;
-            transition: width 0.3s;
+        .play-button {
+            display: none;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            font-size: 24px;
         }
     </style>
 </head>
@@ -86,9 +77,7 @@
                     <p>❤️ {{ video.likes }} | 💬 {{ video.comments_count }}</p>
                 </div>
                 <button class="mute-button">🔇</button>
-                <div class="progress-bar-container">
-                    <div class="progress-bar"></div>
-                </div>
+                <button class="play-button" onclick="playVideo(this)">▶️</button>
             </div>
         </div>
     {% endfor %}
@@ -98,7 +87,6 @@
     let currentIndex = 0;
     let videos = document.querySelectorAll('.video-wrapper');
     let videoElements = document.querySelectorAll('.video-player');
-    let progressBars = document.querySelectorAll('.progress-bar');
 
     document.addEventListener('DOMContentLoaded', function () {
         let firstVideo = videoElements[0];
@@ -147,9 +135,16 @@
             let isMuted = sessionStorage.getItem("muted") !== "false";
             nextVideo.muted = isMuted;
 
-            // バッファを監視し、ロード済みの部分だけ再生
-            nextVideo.onprogress = () => playBufferedVideo(nextVideo);
-            playBufferedVideo(nextVideo);
+            // 動画がロードされるまでの処理
+            preloadNextVideo(currentIndex + 1);
+            nextVideo.play().catch(() => showPlayButton(nextVideo));
+        }
+    }
+
+    function preloadNextVideo(index) {
+        if (index < videoElements.length) {
+            let video = videoElements[index];
+            video.preload = "auto";  // 次の動画を事前ロード
         }
     }
 
@@ -168,62 +163,29 @@
         }
     }
 
-    function playBufferedVideo(video) {
-        if (!video) return;
-
-        let buffered = video.buffered;
-        let currentTime = video.currentTime;
-        let canPlay = false;
-
-        for (let i = 0; i < buffered.length; i++) {
-            let start = buffered.start(i);
-            let end = buffered.end(i);
-
-            if (currentTime >= start && currentTime <= end) {
-                canPlay = true;
-                break;
-            }
-
-            if (currentTime < start) {
-                video.currentTime = start;
-                canPlay = true;
-                break;
-            }
-        }
-
-        if (canPlay) {
-            video.play().catch(() => console.log("自動再生がブロックされました"));
-        } else {
-            console.log("まだロードされていません");
-        }
+    function showPlayButton(video) {
+        let playButton = video.closest('.video-container').querySelector('.play-button');
+        playButton.style.display = "block";
     }
 
-    // 各動画のバッファリング状況を監視
-    videoElements.forEach((video, index) => {
-        let progressBar = progressBars[index];
+    function playVideo(button) {
+        let video = button.closest('.video-container').querySelector("video");
+        video.play().then(() => {
+            button.style.display = "none";  // 再生成功ならボタンを消す
+        }).catch(() => console.log("再生に失敗しました"));
+    }
 
-        video.addEventListener('progress', function () {
-            updateBufferProgress(video, progressBar);
+    videoElements.forEach(video => {
+        video.addEventListener("ended", function () {
+            showPlayButton(video);
         });
 
-        video.addEventListener('loadedmetadata', function () {
-            updateBufferProgress(video, progressBar);
-        });
-
-        video.addEventListener('timeupdate', function () {
-            updateBufferProgress(video, progressBar);
+        video.addEventListener("play", function () {
+            let playButton = video.closest('.video-container').querySelector('.play-button');
+            playButton.style.display = "none";  // 再生時にボタンを消す
         });
     });
 
-    function updateBufferProgress(video, progressBar) {
-        let buffered = video.buffered;
-        if (buffered.length > 0) {
-            let loaded = buffered.end(buffered.length - 1);
-            let total = video.duration;
-            let percent = (loaded / total) * 100;
-            progressBar.style.width = percent + "%";
-        }
-    }
 </script>
 
 </body>
