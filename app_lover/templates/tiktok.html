@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <!-- Webアプリとして動作する設定 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="kiwitok">
-
     <title>動画フィード</title>
     <style>
         body {
@@ -81,7 +79,7 @@
     {% for video in videos %}
         <div class="video-wrapper {% if not forloop.first %}hidden{% endif %}">
             <div class="video-container" onclick="toggleMute(this)">
-                <video class="video-player" src="{{ video.video.url }}" playsinline muted loop preload="auto"></video>
+                <video class="video-player" src="{{ video.video.url }}" playsinline muted loop></video>
                 <div class="overlay">
                     <h2>{{ video.title }}</h2>
                     <p>{{ video.description }}</p>
@@ -135,46 +133,68 @@
     }
 
     function nextVideo() {
-    if (currentIndex < videos.length - 1) {
-        videos[currentIndex].classList.add('hidden');
-        let currentVideo = videoElements[currentIndex];
-        currentVideo.pause();  // 現在の動画を停止
+        if (currentIndex < videos.length - 1) {
+            videos[currentIndex].classList.add('hidden');
+            let currentVideo = videoElements[currentIndex];
+            currentVideo.pause();  // 現在の動画を停止
 
-        currentIndex++;
-        videos[currentIndex].classList.remove('hidden');
+            currentIndex++;
+            videos[currentIndex].classList.remove('hidden');
+            
+            let nextVideo = videoElements[currentIndex];
+            
+            // ミュートの状態を次の動画にも適用
+            let isMuted = sessionStorage.getItem("muted") !== "false";
+            nextVideo.muted = isMuted;
 
-        let nextVideo = videoElements[currentIndex];
-        nextVideo.muted = sessionStorage.getItem("muted") === "true"; // ミュート状態を適用
-        nextVideo.src = nextVideo.dataset.src; // ここで次の動画のソースを設定
-        nextVideo.load(); // 動画のロードを開始
-        nextVideo.play().catch(() => console.log("自動再生がブロックされました"));
+            // バッファを監視し、ロード済みの部分だけ再生
+            nextVideo.onprogress = () => playBufferedVideo(nextVideo);
+            playBufferedVideo(nextVideo);
+        }
     }
-}
 
     function toggleMute(container) {
-    let video = container.querySelector("video");
-    let button = container.querySelector(".mute-button");
+        let video = container.querySelector("video");
+        let button = container.querySelector(".mute-button");
 
-    if (video.muted) {
-        video.muted = false;
-        button.textContent = "🔊"; // 音声ON
-        sessionStorage.setItem("muted", "false"); // ミュート解除を保存
-    } else {
-        video.muted = true;
-        button.textContent = "🔇"; // 音声OFF
-        sessionStorage.setItem("muted", "true"); // ミュートONを保存
+        if (video.muted) {
+            video.muted = false;
+            button.textContent = "🔊"; // 音声ON
+            sessionStorage.setItem("muted", "false");  // 次の動画にも適用
+        } else {
+            video.muted = true;
+            button.textContent = "🔇"; // 音声OFF
+            sessionStorage.setItem("muted", "true");
+        }
     }
-}
 
+    function playBufferedVideo(video) {
+        if (!video) return;
 
-    // 動画のバッファリング状況を取得
-    function updateBufferProgress(video, progressBar) {
         let buffered = video.buffered;
-        if (buffered.length > 0) {
-            let loaded = buffered.end(buffered.length - 1); // 最後のバッファリング位置
-            let total = video.duration;
-            let percent = (loaded / total) * 100;
-            progressBar.style.width = percent + "%";
+        let currentTime = video.currentTime;
+        let canPlay = false;
+
+        for (let i = 0; i < buffered.length; i++) {
+            let start = buffered.start(i);
+            let end = buffered.end(i);
+
+            if (currentTime >= start && currentTime <= end) {
+                canPlay = true;
+                break;
+            }
+
+            if (currentTime < start) {
+                video.currentTime = start;
+                canPlay = true;
+                break;
+            }
+        }
+
+        if (canPlay) {
+            video.play().catch(() => console.log("自動再生がブロックされました"));
+        } else {
+            console.log("まだロードされていません");
         }
     }
 
@@ -195,6 +215,15 @@
         });
     });
 
+    function updateBufferProgress(video, progressBar) {
+        let buffered = video.buffered;
+        if (buffered.length > 0) {
+            let loaded = buffered.end(buffered.length - 1);
+            let total = video.duration;
+            let percent = (loaded / total) * 100;
+            progressBar.style.width = percent + "%";
+        }
+    }
 </script>
 
 </body>
