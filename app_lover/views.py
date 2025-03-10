@@ -115,6 +115,7 @@ def kiwitok(request):
             video = Video.objects.get(id=int(video)) 
             video.likes = video.likes + 1
             video.save
+            print(video.likes)
             return JsonResponse({"status": "success", "likes": video.likes})
     videos = list(Video.objects.all())
     print(videos[0].video)
