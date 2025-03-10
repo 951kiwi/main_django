@@ -202,6 +202,16 @@
             });
         });
 
+        // 初期状態のリセット処理
+        function resetVideoState() {
+            videos.forEach((videoWrapper, index) => {
+                if (index === 0) {
+                    videoWrapper.classList.remove('hidden');
+                } else {
+                    videoWrapper.classList.add('hidden');
+                }
+            });
+        }
 
         document.addEventListener('touchstart', function () {
             let firstVideo = videoElements[0];
@@ -284,25 +294,22 @@
             playButton.style.display = "block";
         }
 
-
-
-
-
         function toggleMute(container) {
-            let video = container.querySelector("video");
-            let button = container.querySelector(".mute-button");
+            // 現在表示されている動画を取得
+            let currentVideo = videoElements[currentIndex];
 
             // ミュート状態を切り替え
-            if (video.muted) {
-                video.muted = false;
-                button.textContent = "🔊"; // 音声ON
+            if (currentVideo.muted) {
+                currentVideo.muted = false;
+                container.querySelector(".mute-button").textContent = "🔊"; // 音声ON
                 sessionStorage.setItem("muted", "false");  // 状態を保存
             } else {
-                video.muted = true;
-                button.textContent = "🔇"; // 音声OFF
+                currentVideo.muted = true;
+                container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
                 sessionStorage.setItem("muted", "true");  // 状態を保存
             }
         }
+
 
         function showPlayButton(video) {
             let playButton = video.closest('.video-container').querySelector('.play-button');
