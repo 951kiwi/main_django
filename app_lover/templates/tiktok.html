@@ -97,14 +97,13 @@
         let currentIndex = 0;
         let videos = document.querySelectorAll('.video-wrapper');
         let videoElements = document.querySelectorAll('.video-player');
-
-        document.addEventListener('DOMContentLoaded', function () {
+        window.onload = function(){
             let firstVideo = videoElements[0];
             console.log(firstVideo)
             if (firstVideo) {
                 firstVideo.play().catch(() => console.log("自動再生がブロックされました"));
             }
-        });
+        };
 
         document.addEventListener('touchstart', function () {
             let firstVideo = videoElements[0];
