@@ -33,16 +33,20 @@
 
         .video-wrapper {
             transition: transform 1s ease, opacity 1s ease;
-            /* 1秒で変化させる */
+            /* transform と opacity に1秒のアニメーション */
             opacity: 1;
-            /* 初期状態で透明度1 */
+            /* 初期状態 */
+            position: relative;
+            /* transform を適用するために必要 */
         }
 
         .hidden {
             transform: translateY(100%) !important;
+            /* 下にスライドさせる */
             opacity: 0 !important;
-            /* 隠れる時に透明にする */
+            /* 透明化 */
         }
+
 
 
 
