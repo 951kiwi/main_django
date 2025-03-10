@@ -212,6 +212,18 @@
             });
         });
 
+        function reloadStyles() {
+            let styleTags = document.querySelectorAll("style");
+            styleTags.forEach(tag => {
+                let newTag = tag.cloneNode(true);  // 既存の <style> タグを複製
+                tag.parentNode.replaceChild(newTag, tag);  // 新しいタグで置き換える
+            });
+        }
+
+        // ページがロードされた際にスタイルをリロード
+        window.addEventListener("load", reloadStyles);
+
+
     </script>
 
 </body>
