@@ -37,6 +37,7 @@
             height: 100%;
             transition: transform 0.5s ease-in-out;
         }
+
         .hidden {
             transform: translateY(100%);
         }
@@ -237,7 +238,20 @@
                 let newTag = tag.cloneNode(true);  // 既存の <style> タグを複製
                 tag.parentNode.replaceChild(newTag, tag);  // 新しいタグで置き換える
             });
+
+            // 全ての .video-wrapper 要素をリセットしてから hidden を適用
+            let videoWrappers = document.querySelectorAll('.video-wrapper');
+            videoWrappers.forEach(wrapper => {
+                wrapper.style.position = 'absolute';
+                wrapper.style.top = '0';
+                wrapper.style.left = '0';
+                wrapper.classList.add('hidden');  // 最初に隠す
+            });
         }
+
+        // ページがロードされた際にスタイルをリロード
+        window.addEventListener("load", reloadStyles);
+
 
         // ページがロードされた際にスタイルをリロード
         window.addEventListener("load", reloadStyles);
