@@ -118,7 +118,6 @@ def kiwitok(request):
             print(video.likes)
             return JsonResponse({"status": "success", "likes": video.likes})
     videos = list(Video.objects.all())
-    print(videos[0].video)
     random.shuffle(videos)  # ランダムに並び替え
     return render(request, 'tiktok.html', {'videos': videos})
 
