@@ -149,8 +149,18 @@
         let progressBar = document.getElementById('progress-bar');
 
         document.addEventListener('DOMContentLoaded', function () {
+            // 初期設定でミュート状態を確認
+            let mutedState = sessionStorage.getItem("muted");
+            if (mutedState === "true") {
+                videoElements.forEach(video => {
+                    video.muted = true;  // ミュート状態を適用
+                    let muteButton = video.closest('.video-container').querySelector('.mute-button');
+                    muteButton.textContent = "🔇";  // ボタン表示を変更
+                });
+            }
+
+            // 最初の動画を再生
             let firstVideo = videoElements[0];
-            console.log(firstVideo)
             if (firstVideo) {
                 firstVideo.play().catch(() => console.log("自動再生がブロックされました"));
             }
@@ -303,14 +313,15 @@
             let video = container.querySelector("video");
             let button = container.querySelector(".mute-button");
 
+            // ミュート状態を切り替え
             if (video.muted) {
                 video.muted = false;
                 button.textContent = "🔊"; // 音声ON
-                sessionStorage.setItem("muted", "false");  // 次の動画にも適用
+                sessionStorage.setItem("muted", "false");  // 状態を保存
             } else {
                 video.muted = true;
                 button.textContent = "🔇"; // 音声OFF
-                sessionStorage.setItem("muted", "true");
+                sessionStorage.setItem("muted", "true");  // 状態を保存
             }
         }
 
