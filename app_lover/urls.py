@@ -16,12 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import phone_view,phone_name_birthday,get_data,PC_view,phone_data_save,Q3_QR,video_list
+from .views import phone_view,phone_name_birthday,get_data,PC_view,phone_data_save,Q3_QR,kiwitok
 
 urlpatterns = [
     path('phone/', phone_view, name='phone'),
     path('PC_view/',PC_view,name="PC_view"),
-    path('tiktok/', video_list, name='tiktok'),
+    path('kiwitok/', kiwitok, name='kiwitok'),
 
     #データ変更用
     path('phone_name_birthday/',phone_name_birthday, name='phone_name_birthday'),   

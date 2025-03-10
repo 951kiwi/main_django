@@ -413,7 +413,17 @@
                 heart.remove();
             });
 
-            console.log("❤️ いいね済み"); // いいね済みに変更
+            const formData = new FormData();
+                formData.append("message", "like");
+
+                fetch("{% url 'kiwitok' %}", {  // DjangoのURL
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: formData  // フォームデータとして送信
+                })
+
         }
         // 再生ボタンを表示する関数
         function showPlayButton(video) {
