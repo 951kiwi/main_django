@@ -300,12 +300,13 @@
             let currentVideo = videoElements[currentIndex];
             let container = videos[currentIndex].querySelector('.video-container');
             if(mutedState === "true"){
-                currentVideo.muted = true;
-                container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
-            }
-            else{
                 currentVideo.muted = false;
                 container.querySelector(".mute-button").textContent = "🔊"; // 音声ON
+                
+            }
+            else{
+                currentVideo.muted = true;
+                container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
             }
         }
 
