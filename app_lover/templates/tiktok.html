@@ -300,7 +300,6 @@
             playButton.style.display = "block";
         }
         function nowmuted() {
-            let mutedState = sessionStorage.getItem("muted")
             let currentVideo = videoElements[currentIndex];
             let container = videos[currentIndex].querySelector('.video-container');
             if (ismuted) {
@@ -329,6 +328,10 @@
                     video.pause();
                 })
                 currentVideo.play();
+                videos.forEach(video => {
+                    video.querySelector('.video-container').removeEventListener("toggleMute()");
+                })
+                container = videos[currentIndex].querySelector('.video-container');
             } else {
                 currentVideo.muted = true;
                 container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
