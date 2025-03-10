@@ -145,6 +145,8 @@
 
         let nextVideo = videoElements[currentIndex];
         nextVideo.muted = sessionStorage.getItem("muted") === "true"; // ミュート状態を適用
+        nextVideo.src = nextVideo.dataset.src; // ここで次の動画のソースを設定
+        nextVideo.load(); // 動画のロードを開始
         nextVideo.play().catch(() => console.log("自動再生がブロックされました"));
     }
 }
