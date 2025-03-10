@@ -329,16 +329,6 @@
 
                 // 次の動画を表示
                 currentIndex++;
-                nowmuted();
-                let nextVideoWrapper = videos[currentIndex];
-                let nextVideo = videoElements[currentIndex];
-
-                // hiddenを削除して表示
-                nextVideoWrapper.classList.remove("hidden");
-                nextVideo.play().catch(() => showPlayButton(nextVideo));
-
-                // さらに次の動画を事前ロード
-                preloadNextVideo(currentIndex + 1);
             } else {
                 // 次の動画がない場合は最初に戻る
                 currentIndex = 0;
@@ -354,6 +344,18 @@
 
             // さらに次の動画を事前ロード
             preloadNextVideo(currentIndex + 1);
+        }
+
+        nowmuted();
+        let nextVideoWrapper = videos[currentIndex];
+        let nextVideo = videoElements[currentIndex];
+
+        // hiddenを削除して表示
+        nextVideoWrapper.classList.remove("hidden");
+        nextVideo.play().catch(() => showPlayButton(nextVideo));
+
+        // さらに次の動画を事前ロード
+        preloadNextVideo(currentIndex + 1);
         }
         function prevVideo() {
             if (currentIndex > 0) {
