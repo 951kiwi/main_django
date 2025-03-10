@@ -32,7 +32,8 @@
         }
 
         .video-wrapper {
-            transition: transform 1s ease, opacity 1s ease; /* 1秒で変化させる */
+            transition: transform 1s ease, opacity 1s ease;
+            /* 1秒で変化させる */
         }
 
         .hidden {
@@ -128,6 +129,8 @@
 
             if (diffY > 50) {  // 上スワイプ
                 nextVideo();
+            } else if (diffY < -50) {  // 下スワイプ
+                prevVideo();
             }
         }
 
@@ -153,6 +156,21 @@
 
                 // さらに次の動画を事前ロード
                 preloadNextVideo(currentIndex + 1);
+            }
+        }
+        function prevVideo() {
+            if (currentIndex > 0) {
+                // 現在の動画を隠す
+                videos[currentIndex].classList.add('hidden');
+                let currentVideo = videoElements[currentIndex];
+                currentVideo.pause();  // 現在の動画を停止
+
+                // 前の動画を表示
+                currentIndex--;
+                videos[currentIndex].classList.remove('hidden');
+
+                let prevVideo = videoElements[currentIndex];
+                prevVideo.play().catch(() => console.log("自動再生がブロックされました"));
             }
         }
 
