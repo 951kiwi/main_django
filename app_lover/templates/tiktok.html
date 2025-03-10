@@ -330,6 +330,7 @@
                 currentVideo.play();
                 videos.forEach(video => {
                     video.querySelector('.video-container').onclick = null;
+                    video.querySelector('.mute-button').classList.add('hidden');
                 })
             } else {
                 currentVideo.muted = true;
