@@ -479,6 +479,8 @@
             });
 
             video.addEventListener("play", function () {
+                // 他の動画が再生されないように、再生前に他の動画を一度停止する
+                stopAllOtherVideos(currentIndex);
                 let playButton = video.closest('.video-container').querySelector('.play-button');
                 playButton.style.display = "none";  // 再生時にボタンを消す
             });
