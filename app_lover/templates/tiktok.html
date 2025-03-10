@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>動画フィード</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        video {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+        }
+        .video-wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+        .hidden {
+            transform: translateY(100%);
+        }
+        .overlay {
+            position: absolute;
+            bottom: 10%;
+            left: 10px;
+            color: white;
+            font-size: 1.2em;
+        }
+        .mute-button {
+            position: absolute;
+            bottom: 15%;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .progress-bar-container {
+            position: absolute;
+            bottom: 5%;
+            left: 10px;
+            width: 80%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #00ff00;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+<div id="video-feed">
+    {% for video in videos %}
+        <div class="video-wrapper {% if not forloop.first %}hidden{% endif %}">
+            <div class="video-container" onclick="toggleMute(this)">
+                <video class="video-player" src="{{ video.video.url }}" playsinline muted loop></video>
+                <div class="overlay">
+                    <h2>{{ video.title }}</h2>
+                    <p>{{ video.description }}</p>
+                    <p>❤️ {{ video.likes }} | 💬 {{ video.comments_count }}</p>
+                </div>
+                <button class="mute-button">🔇</button>
+                <div class="progress-bar-container">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    let currentIndex = 0;
+    let videos = document.querySelectorAll('.video-wrapper');
+    let videoElements = document.querySelectorAll('.video-player');
+    let progressBars = document.querySelectorAll('.progress-bar');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        let firstVideo = videoElements[0];
+        if (firstVideo) {
+            firstVideo.play().catch(() => console.log("自動再生がブロックされました"));
+        }
+    });
+
+    document.addEventListener('touchstart', function () {
+        let firstVideo = videoElements[0];
+        if (firstVideo.paused) {
+            firstVideo.play();
+        }
+    }, { once: true });
+
+    document.addEventListener('touchstart', handleTouchStart, false);
+    document.addEventListener('touchend', handleTouchEnd, false);
+
+    let startY = 0;
+
+    function handleTouchStart(event) {
+        startY = event.touches[0].clientY;
+    }
+
+    function handleTouchEnd(event) {
+        let endY = event.changedTouches[0].clientY;
+        let diffY = startY - endY;
+
+        if (diffY > 50) {  // 上スワイプ
+            nextVideo();
+        }
+    }
+
+    function nextVideo() {
+        if (currentIndex < videos.length - 1) {
+            videos[currentIndex].classList.add('hidden');
+            let currentVideo = videoElements[currentIndex];
+            currentVideo.pause();  // 現在の動画を停止
+
+            currentIndex++;
+            videos[currentIndex].classList.remove('hidden');
+            
+            let nextVideo = videoElements[currentIndex];
+            nextVideo.play().catch(() => console.log("自動再生がブロックされました"));
+        }
+    }
+
+    function toggleMute(container) {
+        let video = container.querySelector("video");
+        let button = container.querySelector(".mute-button");
+
+        if (video.muted) {
+            video.muted = false;
+            button.textContent = "🔊"; // 音声ON
+        } else {
+            video.muted = true;
+            button.textContent = "🔇"; // 音声OFF
+        }
+    }
+
+    // 動画のバッファリング状況を取得
+    function updateBufferProgress(video, progressBar) {
+        let buffered = video.buffered;
+        if (buffered.length > 0) {
+            let loaded = buffered.end(buffered.length - 1); // 最後のバッファリング位置
+            let total = video.duration;
+            let percent = (loaded / total) * 100;
+            progressBar.style.width = percent + "%";
+        }
+    }
+
+    // 各動画のバッファリング状況を監視
+    videoElements.forEach((video, index) => {
+        let progressBar = progressBars[index];
+
+        video.addEventListener('progress', function () {
+            updateBufferProgress(video, progressBar);
+        });
+
+        video.addEventListener('loadedmetadata', function () {
+            updateBufferProgress(video, progressBar);
+        });
+
+        video.addEventListener('timeupdate', function () {
+            updateBufferProgress(video, progressBar);
+        });
+    });
+
+</script>
+
+</body>
+</html>

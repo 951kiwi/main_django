@@ -1,9 +1,9 @@
 from django.shortcuts import render,redirect
 from django.http import JsonResponse
-from .models import Selection
+from .models import Selection,Video
 import requests
 from bs4 import BeautifulSoup
-
+import random
 #ハーゲンダッツのjancodeリスト
 urls = ['https://www.jancode.xyz/corp/?c=29119','https://www.jancode.xyz/corp/?c=29119&p=2',
        'https://www.jancode.xyz/corp/?c=29119&p=3','https://www.jancode.xyz/corp/?c=29119&p=4'
@@ -98,12 +98,19 @@ def PC_view(request):
             selection.gamestart = True
             selection.save()
         return JsonResponse({"status": "success"})  # JSONレスポンスを返す
-    
+
     if(selection.login == True):
         if(selection.gamestart == True):
             return render(request, 'PC_startgame.html',context={"data":selection})
         return render(request, 'PC_main01.html')
     return render(request, 'PC_main.html')
+
+
+
+def video_list(request):
+    videos = list(Video.objects.all())
+    random.shuffle(videos)  # ランダムに並び替え
+    return render(request, 'tiktok.html', {'videos': videos})
 
 def phone_name_birthday(request):
     if request.method == 'POST':

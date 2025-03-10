@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 # Create your models here.
 
 class Selection(models.Model):
@@ -13,3 +13,15 @@ class Selection(models.Model):
     game04 = models.BooleanField(default=False)
     game05 = models.BooleanField(default=False)
     game06 = models.BooleanField(default=False)
+
+
+class Video(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    video = models.FileField(upload_to='videos/')
+    created_at = models.DateTimeField(default=timezone.now)
+    likes = models.PositiveIntegerField(default=0)
+    comments_count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.title
