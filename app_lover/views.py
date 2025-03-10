@@ -110,8 +110,9 @@ def PC_view(request):
 def kiwitok(request):
     if request.method == "POST":
         data = request.POST.get("message")
+        video = request.POST.get("video")
         if(data == "like"):
-            print("like")
+            print(video)
     videos = list(Video.objects.all())
     print(videos)
     random.shuffle(videos)  # ランダムに並び替え
