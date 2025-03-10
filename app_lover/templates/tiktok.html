@@ -329,7 +329,7 @@
                 })
                 currentVideo.play();
                 videos.forEach(video => {
-                    video.querySelector('.video-container').removeEventListener("toggleMute()");
+                    video.querySelector('.video-container').removeEventListener("click", toggleMute);
                 })
                 container = videos[currentIndex].querySelector('.video-container');
             } else {
