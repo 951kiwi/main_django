@@ -339,7 +339,21 @@
 
                 // さらに次の動画を事前ロード
                 preloadNextVideo(currentIndex + 1);
+            } else {
+                // 次の動画がない場合は最初に戻る
+                currentIndex = 0;
             }
+
+            nowmuted();
+            let nextVideoWrapper = videos[currentIndex];
+            let nextVideo = videoElements[currentIndex];
+
+            // hiddenを削除して表示
+            nextVideoWrapper.classList.remove("hidden");
+            nextVideo.play().catch(() => showPlayButton(nextVideo));
+
+            // さらに次の動画を事前ロード
+            preloadNextVideo(currentIndex + 1);
         }
         function prevVideo() {
             if (currentIndex > 0) {
@@ -350,12 +364,16 @@
 
                 // 前の動画を表示
                 currentIndex--;
-                nowmuted();
-                videos[currentIndex].classList.remove('hidden');
-
-                let prevVideo = videoElements[currentIndex];
-                prevVideo.play().catch(() => console.log("自動再生がブロックされました"));
+            } else {
+                // 前の動画がない場合は最後に戻る
+                currentIndex = videos.length - 1;
             }
+
+            nowmuted();
+            videos[currentIndex].classList.remove('hidden');
+
+            let prevVideo = videoElements[currentIndex];
+            prevVideo.play().catch(() => console.log("自動再生がブロックされました"));
         }
 
         // 次の動画を事前ロード
