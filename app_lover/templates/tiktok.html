@@ -116,7 +116,7 @@
     <div id="video-feed">
         {% for video in videos %}
         <div class="video-wrapper {% if not forloop.first %}hidden{% endif %}">
-            <div class="video-container" onclick="toggleMute(this)">
+            <div class="video-container" onclick="toggleMute()">
                 <video class="video-player" src="{{ video.video.url }}" playsinline muted loop></video>
                 <div class="overlay">
                     <h2>{{ video.title }}</h2>
@@ -294,10 +294,10 @@
             playButton.style.display = "block";
         }
 
-        function toggleMute(container) {
+        function toggleMute() {
             // 現在表示されている動画を取得
             let currentVideo = videoElements[currentIndex];
-
+            let container = videos[currentIndex].querySelector('.video-container');
             // ミュート状態を切り替え
             if (currentVideo.muted) {
                 currentVideo.muted = false;
