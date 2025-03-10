@@ -128,38 +128,19 @@
             animation: heartAnimation 1s ease-in-out;
         }
 
-        .heart::before,
-        .heart::after {
-            content: '';
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: red;
-            border-radius: 50%;
-        }
-
-        .heart::before {
-            top: -25px;
-            left: 0;
-        }
-
-        .heart::after {
-            top: 0;
-            left: 25px;
-        }
-
-        @keyframes pulse {
+        /* ハートのアニメーション */
+        @keyframes heartAnimation {
             0% {
-                transform: scale(1) rotate(45deg);
+                transform: scale(0);
             }
 
             50% {
-                transform: scale(1.3) rotate(45deg);
-                /* ぷにんと膨らむ */
+                transform: scale(1.2);
             }
 
             100% {
-                transform: scale(1) rotate(45deg);
+                transform: scale(0);
+                opacity: 0;
             }
         }
     </style>
