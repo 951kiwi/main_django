@@ -35,7 +35,8 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            transition: transform 0.5s ease-in-out opacity 1s ease-in;
+            transition: opacity 1s ease, transform 0.5s ease;
+            /* opacityとtransformを個別に指定 */
         }
 
         .hidden {
