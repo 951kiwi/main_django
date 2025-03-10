@@ -340,6 +340,11 @@
 
             // 次の動画を表示
             nextVideoWrapper.classList.remove("hidden");
+
+            // 他の動画が再生されないように、再生前に他の動画を一度停止する
+            stopAllOtherVideos(currentIndex);
+
+            // 次の動画を再生
             nextVideo.play().catch(() => showPlayButton(nextVideo));
 
             // さらに次の動画を事前ロード
@@ -364,8 +369,22 @@
             videos[currentIndex].classList.remove('hidden');
 
             let prevVideo = videoElements[currentIndex];
+
+            // 他の動画が再生されないように、再生前に他の動画を一度停止する
+            stopAllOtherVideos(currentIndex);
+
             prevVideo.play().catch(() => console.log("自動再生がブロックされました"));
         }
+
+        // 他の動画を全て停止する関数
+        function stopAllOtherVideos(exceptIndex) {
+            videoElements.forEach((video, index) => {
+                if (index !== exceptIndex) {
+                    video.pause(); // 他の動画を停止
+                }
+            });
+        }
+
 
         // 次の動画を事前ロード
         function preloadNextVideo(index) {
