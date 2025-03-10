@@ -143,10 +143,12 @@
         let currentIndex = 0;
         let videos = document.querySelectorAll('.video-wrapper');
         let videoElements = document.querySelectorAll('.video-player');
-
+        //mute状態
+        var ismuted = true;
         // ローディングバーと再生バー
         let loadingBar = document.getElementById('loading-bar');
         let progressBar = document.getElementById('progress-bar');
+
 
         document.addEventListener('DOMContentLoaded', function () {
             // 最初の動画を再生
@@ -299,14 +301,15 @@
             let mutedState = sessionStorage.getItem("muted")
             let currentVideo = videoElements[currentIndex];
             let container = videos[currentIndex].querySelector('.video-container');
-            if(mutedState === "true"){
-                currentVideo.muted = false;
-                container.querySelector(".mute-button").textContent = "🔊"; // 音声ON
+            if(ismuted){
+                currentVideo.muted = true;
+                container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
                 
             }
             else{
-                currentVideo.muted = true;
-                container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
+                currentVideo.muted = false;
+                container.querySelector(".mute-button").textContent = "🔊"; // 音声ON
+                
             }
         }
 
@@ -318,11 +321,11 @@
             if (currentVideo.muted) {
                 currentVideo.muted = false;
                 container.querySelector(".mute-button").textContent = "🔊"; // 音声ON
-                sessionStorage.setItem("muted", "false");  // 状態を保存
+                ismuted = false  // 状態を保存
             } else {
                 currentVideo.muted = true;
                 container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
-                sessionStorage.setItem("muted", "true");  // 状態を保存
+                ismuted = true;  // 状態を保存
             }
         }
 
