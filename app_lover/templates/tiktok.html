@@ -136,29 +136,42 @@
                 let currentVideoWrapper = videos[currentIndex];
                 let currentVideo = videoElements[currentIndex];
 
-                // 現在の動画を停止＆非表示にする
+                // 現在の動画を停止
                 currentVideo.pause();
-                currentVideoWrapper.style.display = "none";
+
+                // 現在の動画にhiddenを追加
+                currentVideoWrapper.classList.add("hidden");
 
                 // 次の動画を表示
                 currentIndex++;
                 let nextVideoWrapper = videos[currentIndex];
                 let nextVideo = videoElements[currentIndex];
 
-                nextVideoWrapper.style.display = "block"; // 表示
+                // hiddenを削除して表示
+                nextVideoWrapper.classList.remove("hidden");
                 nextVideo.play().catch(() => showPlayButton(nextVideo));
 
-                // 次の動画のロードを開始
+                // さらに次の動画を事前ロード
                 preloadNextVideo(currentIndex + 1);
             }
         }
 
+        // 次の動画を事前ロード
         function preloadNextVideo(index) {
             if (index < videoElements.length) {
                 let video = videoElements[index];
-                video.preload = "auto";  // 次の動画を事前ロード
+                video.preload = "auto";  // 次の動画をロード
             }
         }
+
+        // 再生ボタンを表示する関数
+        function showPlayButton(video) {
+            let playButton = video.closest(".video-container").querySelector(".play-button");
+            playButton.style.display = "block";
+        }
+
+
+
 
 
         function toggleMute(container) {
@@ -181,11 +194,11 @@
             playButton.style.display = "block";
         }
 
+        // playボタンが押されたら再生
         function playVideo(button) {
-            let video = button.closest('.video-container').querySelector("video");
-            video.play().then(() => {
-                button.style.display = "none";  // 再生成功ならボタンを消す
-            }).catch(() => console.log("再生に失敗しました"));
+            let video = button.closest(".video-container").querySelector("video");
+            video.play();
+            button.style.display = "none";
         }
 
         videoElements.forEach(video => {
