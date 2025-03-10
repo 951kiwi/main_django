@@ -75,6 +75,39 @@
             transform: translate(-50%, 50%);
             font-size: 24px;
         }
+
+        /* ローディングバー */
+        .loading-bar-wrapper {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .loading-bar {
+            height: 100%;
+            background-color: #00ff00;
+            width: 0%;
+            /* 初期値 0% */
+        }
+
+        /* 再生位置バー */
+        .progress-bar-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #ff0000;
+            width: 0%;
+            /* 初期値 0% */
+        }
     </style>
 </head>
 
@@ -96,11 +129,24 @@
         </div>
         {% endfor %}
     </div>
+    <!-- ローディングバー -->
+    <div class="loading-bar-wrapper">
+        <div class="loading-bar" id="loading-bar"></div>
+    </div>
+
+    <!-- 再生位置バー -->
+    <div class="progress-bar-wrapper">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
 
     <script>
         let currentIndex = 0;
         let videos = document.querySelectorAll('.video-wrapper');
         let videoElements = document.querySelectorAll('.video-player');
+
+        // ローディングバーと再生バー
+        let loadingBar = document.getElementById('loading-bar');
+        let progressBar = document.getElementById('progress-bar');
 
         document.addEventListener('DOMContentLoaded', function () {
             let firstVideo = videoElements[0];
@@ -112,6 +158,41 @@
             // 最初の動画のみ表示、他は非表示
             resetVideoState();
         });
+
+        // 再生バーを更新する
+        function updateProgressBar(video) {
+            let currentTime = video.currentTime;
+            let duration = video.duration;
+            let progress = (currentTime / duration) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        // ローディングバーを更新する
+        function updateLoadingBar(video) {
+            let buffered = video.buffered;
+            if (buffered.length > 0) {
+                let end = buffered.end(buffered.length - 1);
+                let duration = video.duration;
+                let bufferProgress = (end / duration) * 100;
+                loadingBar.style.width = bufferProgress + '%';
+            }
+        }
+        // 再生時の更新
+        videoElements.forEach(video => {
+            video.addEventListener("play", function () {
+                let playButton = video.closest('.video-container').querySelector('.play-button');
+                playButton.style.display = "none";  // 再生時にボタンを消す
+                setInterval(() => {
+                    updateProgressBar(video);
+                    updateLoadingBar(video);
+                }, 1000);
+            });
+
+            video.addEventListener("ended", function () {
+                showPlayButton(video);
+            });
+        });
+
         // 初期状態のリセット処理
         function resetVideoState() {
             videos.forEach((videoWrapper, index) => {
