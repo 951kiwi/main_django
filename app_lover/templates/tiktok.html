@@ -53,11 +53,13 @@
             color: white;
             font-size: 1.0em;
         }
-        .overlay h2{
+
+        .overlay h2 {
             margin-top: 5px;
             margin-bottom: 5px;
         }
-        .overlay p{
+
+        .overlay p {
             margin-top: 10px;
             margin-bottom: 10px;
         }
@@ -152,6 +154,8 @@
         let videoElements = document.querySelectorAll('.video-player');
         //mute状態
         var ismuted = true;
+        //いいね
+        let lastTap = 0; // 最後にタップした時刻
         // ローディングバーと再生バー
         let loadingBar = document.getElementById('loading-bar');
         let progressBar = document.getElementById('progress-bar');
@@ -227,6 +231,15 @@
             if (firstVideo.paused) {
                 firstVideo.play();
             }
+            //いいね
+            const currentTime = new Date().getTime();
+            const timeDiff = currentTime - lastTap;
+            // ダブルタップの判定（500ms以内に2回タップ）
+            if (timeDiff < 500 && timeDiff > 0) {
+                toggleLike();
+            }
+            lastTap = currentTime; // 最後にタップした時刻を更新
+
         }, { once: true });
 
         document.addEventListener('touchstart', handleTouchStart, false);
@@ -298,7 +311,9 @@
                 video.preload = "auto";  // 次の動画をロード
             }
         }
-
+        function toggleLike() {
+                console.log("❤️ いいね済み"); // いいね済みに変更
+        }
         // 再生ボタンを表示する関数
         function showPlayButton(video) {
             let playButton = video.closest(".video-container").querySelector(".play-button");
@@ -310,7 +325,7 @@
             if (ismuted) {
                 currentVideo.muted = true;
                 container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
-                
+
             }
             else {
                 currentVideo.muted = false;
