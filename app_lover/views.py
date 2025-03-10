@@ -108,6 +108,10 @@ def PC_view(request):
 
 
 def kiwitok(request):
+    selection = Selection.objects.first()
+    if selection.game06 == False or selection.game05 == False or selection.game04 == False :
+        return render(request, 'kiwitok_pre.html')
+    
     if request.method == "POST":
         data = request.POST.get("message")
         video = request.POST.get("video")
