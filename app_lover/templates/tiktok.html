@@ -176,6 +176,7 @@
         {% for video in videos %}
         <div class="video-wrapper {% if not forloop.first %}hidden{% endif %}">
             <div class="video-container" onclick="toggleMute()">
+                <div class="video-id" id="{{video.id}}"></div>
                 <video class="video-player" src="{{ video.video.url }}" playsinline muted loop></video>
                 <div class="overlay">
                     <h2>{{ video.title }}</h2>
@@ -201,6 +202,7 @@
     <script>
         let currentIndex = 0;
         let videos = document.querySelectorAll('.video-wrapper');
+        let videoID = document.querySelectorAll('.video-id');
         let videoElements = document.querySelectorAll('.video-player');
         //mute状態
         var ismuted = true;
@@ -415,7 +417,7 @@
 
             const formData = new FormData();
                 formData.append("message", "like");
-                formData.append("video", videoElements[currentIndex].src);
+                formData.append("video", videoID[currentIndex]);
 
                 fetch("{% url 'kiwitok' %}", {  // DjangoのURL
                     method: "POST",
