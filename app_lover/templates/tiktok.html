@@ -117,6 +117,52 @@
             background-color: rgba(255, 0, 0, 0.7);
             width: 0%;
         }
+
+        /*いいね*/
+        .heart {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            position: absolute;
+            transform: rotate(45deg);
+            cursor: pointer;
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: -25px;
+            left: 0;
+        }
+
+        .heart::after {
+            top: 0;
+            left: 25px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1) rotate(45deg);
+            }
+
+            50% {
+                transform: scale(1.3) rotate(45deg);
+                /* ぷにんと膨らむ */
+            }
+
+            100% {
+                transform: scale(1) rotate(45deg);
+            }
+        }
     </style>
 </head>
 
@@ -226,7 +272,7 @@
             });
         }
 
-        document.addEventListener('touchstart', function () {
+        document.addEventListener('touchstart', function (e) {
             let firstVideo = videoElements[0];
             if (firstVideo.paused) {
                 firstVideo.play();
@@ -236,7 +282,10 @@
             const timeDiff = currentTime - lastTap;
             // ダブルタップの判定（500ms以内に2回タップ）
             if (timeDiff < 500 && timeDiff > 0) {
-                toggleLike();
+                // タップした位置を取得
+                const x = e.clientX;
+                const y = e.clientY;
+                toggleLike(x, y);
             }
             lastTap = currentTime; // 最後にタップした時刻を更新
 
@@ -311,8 +360,24 @@
                 video.preload = "auto";  // 次の動画をロード
             }
         }
-        function toggleLike() {
-                console.log("❤️ いいね済み"); // いいね済みに変更
+        function toggleLike(x, y) {
+            // ハートを生成
+            const heart = document.createElement("div");
+            heart.classList.add("heart");
+
+            // 生成したハートの位置を指定
+            heart.style.left = `${x - 25}px`; // ハートの幅の半分を調整
+            heart.style.top = `${y - 25}px`;  // ハートの高さの半分を調整
+
+            // bodyにハートを追加
+            document.body.appendChild(heart);
+
+            // アニメーション終了後にハートを削除
+            heart.addEventListener("animationend", function () {
+                heart.remove();
+            });
+
+            console.log("❤️ いいね済み"); // いいね済みに変更
         }
         // 再生ボタンを表示する関数
         function showPlayButton(video) {
