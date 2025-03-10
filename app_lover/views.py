@@ -114,7 +114,7 @@ def kiwitok(request):
         if(data == "like"):
             print(video)
     videos = list(Video.objects.all())
-    print(videos)
+    print(videos[0].video)
     random.shuffle(videos)  # ランダムに並び替え
     return render(request, 'tiktok.html', {'videos': videos})
 
