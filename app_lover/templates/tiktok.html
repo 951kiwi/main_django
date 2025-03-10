@@ -177,19 +177,29 @@
                 loadingBar.style.width = bufferProgress + '%';
             }
         }
-        // 再生時の更新
+        let intervalId;  // setIntervalのIDを格納する変数
+
         videoElements.forEach(video => {
             video.addEventListener("play", function () {
-                let playButton = video.closest('.video-container').querySelector('.play-button');
-                playButton.style.display = "none";  // 再生時にボタンを消す
-                setInterval(() => {
-                    updateProgressBar(video);
-                    updateLoadingBar(video);
-                }, 1000);
+                // 再生時に進行状況の更新を開始
+                if (!intervalId) {
+                    intervalId = setInterval(() => {
+                        updateProgressBar(video);
+                        updateLoadingBar(video);
+                    }, 1000);
+                }
+            });
+
+            video.addEventListener("pause", function () {
+                // 動画が一時停止されたら、進行状況の更新を停止
+                clearInterval(intervalId);
+                intervalId = null;
             });
 
             video.addEventListener("ended", function () {
-                showPlayButton(video);
+                // 動画が終了したら、進行状況の更新を停止
+                clearInterval(intervalId);
+                intervalId = null;
             });
         });
 
