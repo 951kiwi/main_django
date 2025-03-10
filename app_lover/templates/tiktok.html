@@ -241,17 +241,18 @@
 
             // 全ての .video-wrapper 要素をリセットしてから hidden を適用
             let videoWrappers = document.querySelectorAll('.video-wrapper');
+            var flag = false;
             videoWrappers.forEach(wrapper => {
                 wrapper.style.position = 'absolute';
                 wrapper.style.top = '0';
                 wrapper.style.left = '0';
-                wrapper.classList.add('hidden');  // 最初に隠す
+                if(flag){
+                    wrapper.classList.add('hidden');  // 最初に隠す
+                }
+                flag = true;
+                
             });
         }
-
-        // ページがロードされた際にスタイルをリロード
-        window.addEventListener("load", reloadStyles);
-
 
         // ページがロードされた際にスタイルをリロード
         window.addEventListener("load", reloadStyles);
