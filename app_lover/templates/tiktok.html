@@ -345,18 +345,6 @@
             // さらに次の動画を事前ロード
             preloadNextVideo(currentIndex + 1);
         }
-
-        nowmuted();
-        let nextVideoWrapper = videos[currentIndex];
-        let nextVideo = videoElements[currentIndex];
-
-        // hiddenを削除して表示
-        nextVideoWrapper.classList.remove("hidden");
-        nextVideo.play().catch(() => showPlayButton(nextVideo));
-
-        // さらに次の動画を事前ロード
-        preloadNextVideo(currentIndex + 1);
-        }
         function prevVideo() {
             if (currentIndex > 0) {
                 // 現在の動画を隠す
