@@ -299,7 +299,7 @@
             let mutedState = sessionStorage.getItem("muted")
             let currentVideo = videoElements[currentIndex];
             let container = videos[currentIndex].querySelector('.video-container');
-            if(mutedState){
+            if(mutedState === "true"){
                 currentVideo.muted = true;
                 container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
             }
