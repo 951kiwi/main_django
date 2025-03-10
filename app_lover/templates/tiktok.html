@@ -107,7 +107,20 @@
             if (firstVideo) {
                 firstVideo.play().catch(() => console.log("自動再生がブロックされました"));
             }
+
+            // 最初の動画のみ表示、他は非表示
+            resetVideoState();
         });
+        // 初期状態のリセット処理
+        function resetVideoState() {
+            videos.forEach((videoWrapper, index) => {
+                if (index === 0) {
+                    videoWrapper.classList.remove('hidden');
+                } else {
+                    videoWrapper.classList.add('hidden');
+                }
+            });
+        }
 
         document.addEventListener('touchstart', function () {
             let firstVideo = videoElements[0];
@@ -231,31 +244,6 @@
                 playButton.style.display = "none";  // 再生時にボタンを消す
             });
         });
-
-        function reloadStyles() {
-            let styleTags = document.querySelectorAll("style");
-            styleTags.forEach(tag => {
-                let newTag = tag.cloneNode(true);  // 既存の <style> タグを複製
-                tag.parentNode.replaceChild(newTag, tag);  // 新しいタグで置き換える
-            });
-
-            // 全ての .video-wrapper 要素をリセットしてから hidden を適用
-            let videoWrappers = document.querySelectorAll('.video-wrapper');
-            var flag = false;
-            videoWrappers.forEach(wrapper => {
-                wrapper.style.position = 'absolute';
-                wrapper.style.top = '0';
-                wrapper.style.left = '0';
-                if(flag){
-                    wrapper.classList.add('hidden');  // 最初に隠す
-                }
-                flag = true;
-                
-            });
-        }
-
-        // ページがロードされた際にスタイルをリロード
-        window.addEventListener("load", reloadStyles);
 
 
     </script>
