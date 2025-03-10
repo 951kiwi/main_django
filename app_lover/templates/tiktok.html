@@ -33,16 +33,44 @@
 
         .video-wrapper {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            transition: transform 0.5s ease-in-out;
+            transition: transform 1s ease, opacity 1s ease;
+            opacity: 0;
         }
-        .hidden {
+
+        .current {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .prev {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+
+        .next {
+            opacity: 0;
             transform: translateY(100%);
         }
 
+        /* hidden状態を管理 */
+        .hidden {
+            opacity: 0;
+            transform: translateY(100%);
+        }
 
+        .hidden-prev {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
+        .hidden-next {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
         .overlay {
             position: absolute;
@@ -102,7 +130,6 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             let firstVideo = videoElements[0];
-            console.log(firstVideo)
             if (firstVideo) {
                 firstVideo.play().catch(() => console.log("自動再生がブロックされました"));
             }
@@ -159,6 +186,7 @@
                 preloadNextVideo(currentIndex + 1);
             }
         }
+
         function prevVideo() {
             if (currentIndex > 0) {
                 // 現在の動画を隠す
@@ -189,10 +217,6 @@
             playButton.style.display = "block";
         }
 
-
-
-
-
         function toggleMute(container) {
             let video = container.querySelector("video");
             let button = container.querySelector(".mute-button");
@@ -206,11 +230,6 @@
                 button.textContent = "🔇"; // 音声OFF
                 sessionStorage.setItem("muted", "true");
             }
-        }
-
-        function showPlayButton(video) {
-            let playButton = video.closest('.video-container').querySelector('.play-button');
-            playButton.style.display = "block";
         }
 
         // playボタンが押されたら再生
@@ -241,7 +260,6 @@
 
         // ページがロードされた際にスタイルをリロード
         window.addEventListener("load", reloadStyles);
-
 
     </script>
 
