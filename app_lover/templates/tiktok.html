@@ -240,7 +240,7 @@
             }
             lastTap = currentTime; // 最後にタップした時刻を更新
 
-        }, { once: true });
+        });
 
         document.addEventListener('touchstart', handleTouchStart, false);
         document.addEventListener('touchend', handleTouchEnd, false);
