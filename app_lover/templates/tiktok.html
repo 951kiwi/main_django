@@ -181,7 +181,7 @@
                 <div class="overlay">
                     <h2>{{ video.title }}</h2>
                     <p>{{ video.description }}</p>
-                    <p>❤️ {{ video.likes }} | 💬 {{ video.comments_count }}</p>
+                    <p class="likes">❤️ {{ video.likes }}</p>
                 </div>
                 <button class="mute-button">🔇</button>
                 <button class="play-button" onclick="playVideo(this)">▶️</button>
@@ -203,6 +203,7 @@
         let currentIndex = 0;
         let videos = document.querySelectorAll('.video-wrapper');
         let videoID = document.querySelectorAll('.video-id');
+        let likes = document.querySelectorAll('.likes');
         let videoElements = document.querySelectorAll('.video-player');
         //mute状態
         var ismuted = true;
@@ -426,6 +427,11 @@
                     },
                     body: formData  // フォームデータとして送信
                 })
+                .then(response => response.json())
+                    .then(data => {
+                        likes[currentIndex].textContent = `❤️ ${data.likes}`
+                    })
+                    .catch(error => console.error("Error:", error));
 
         }
         // 再生ボタンを表示する関数

@@ -112,7 +112,10 @@ def kiwitok(request):
         data = request.POST.get("message")
         video = request.POST.get("video")
         if(data == "like"):
-            print(video)
+            video = Video.objects.get(id=int(video)) 
+            video.likes = video.likes + 1
+            video.save
+            return JsonResponse({"status": "success", "likes": video.likes})
     videos = list(Video.objects.all())
     print(videos[0].video)
     random.shuffle(videos)  # ランダムに並び替え
