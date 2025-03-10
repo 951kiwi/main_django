@@ -283,9 +283,9 @@
             // ダブルタップの判定（500ms以内に2回タップ）
             if (timeDiff < 500 && timeDiff > 0) {
                 // タップした位置を取得
-                const x = e.clientX;
-                const y = e.clientY;
-                console.log(x,y);
+                const x = e.touches[0].clientX;  // touchstart の場合は e.touches を使用
+                const y = e.touches[0].clientY;
+                console.log(x, y);
                 toggleLike(x, y);
             }
             lastTap = currentTime; // 最後にタップした時刻を更新
