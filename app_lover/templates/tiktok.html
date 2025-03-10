@@ -32,14 +32,18 @@
         }
 
         .video-wrapper {
-            transition: transform 1s ease;
+            transition: transform 1s ease, opacity 1s ease;
             /* 1秒で変化させる */
+            opacity: 1;
+            /* 初期状態で透明度1 */
         }
 
         .hidden {
             transform: translateY(100%) !important;
+            opacity: 0 !important;
             /* 隠れる時に透明にする */
         }
+
 
 
         .overlay {
