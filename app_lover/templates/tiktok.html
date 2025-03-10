@@ -79,10 +79,9 @@
         /* ローディングバー */
         .loading-bar-wrapper {
             position: absolute;
-            bottom: 0;
+            bottom: env(safe-area-inset-bottom);
             width: 100%;
             height: 5px;
-            padding-bottom: env(safe-area-inset-bottom);
             background-color: rgba(255, 255, 255, 0.3);
         }
 
@@ -100,7 +99,6 @@
             left: 0;
             width: 100%;
             height: 5px;
-            padding-bottom: env(safe-area-inset-bottom);
             background-color: rgba(255, 255, 255, 0.3);
         }
 
@@ -108,7 +106,6 @@
             height: 100%;
             background-color: #ff0000;
             width: 0%;
-            padding-bottom: env(safe-area-inset-bottom);
         }
     </style>
 </head>
@@ -257,6 +254,7 @@
 
                 // 次の動画を表示
                 currentIndex++;
+                nowmuted();
                 let nextVideoWrapper = videos[currentIndex];
                 let nextVideo = videoElements[currentIndex];
 
@@ -277,6 +275,7 @@
 
                 // 前の動画を表示
                 currentIndex--;
+                nowmuted();
                 videos[currentIndex].classList.remove('hidden');
 
                 let prevVideo = videoElements[currentIndex];
@@ -296,6 +295,20 @@
         function showPlayButton(video) {
             let playButton = video.closest(".video-container").querySelector(".play-button");
             playButton.style.display = "block";
+        }
+        function nowmuted() {
+            let currentVideo = videoElements[currentIndex];
+            let container = videos[currentIndex].querySelector('.video-container');
+            if (ismuted) {
+                currentVideo.muted = true;
+                container.querySelector(".mute-button").textContent = "🔇"; // 音声OFF
+                
+            }
+            else {
+                currentVideo.muted = false;
+                container.querySelector(".mute-button").textContent = "🔊"; // 音声ON
+
+            }
         }
 
         function toggleMute() {
