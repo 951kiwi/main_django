@@ -81,7 +81,7 @@
     {% for video in videos %}
         <div class="video-wrapper {% if not forloop.first %}hidden{% endif %}">
             <div class="video-container" onclick="toggleMute(this)">
-                <video class="video-player" src="{{ video.video.url }}" playsinline muted loop></video>
+                <video class="video-player" src="{{ video.video.url }}" playsinline muted loop preload="auto"></video>
                 <div class="overlay">
                     <h2>{{ video.title }}</h2>
                     <p>{{ video.description }}</p>
