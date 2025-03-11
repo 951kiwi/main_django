@@ -19,6 +19,8 @@ headers = {
 def phone_view(request):
     # 最初のSelectionオブジェクトを取得
     selection = Selection.objects.first()
+    if selection.game06:
+        return redirect("kiwitok")
     if request.method == "POST":
         data = request.POST.get("message")
         if(data == "Q01=True"):
