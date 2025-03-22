@@ -88,7 +88,7 @@
                  </script>
                 {% endif %}
                 <p>走行距離合計</p>
-                <p>{{ record.total_distance }} km  {{ record.total_distance|div:record.month_data.fuel_efficiency|mul:record.month_data.cost_per_liter|floatformat:1 }}円</p>
+                <p>{{ record.total_distance|floatformat:2 }} km  {{ record.total_distance|div:record.month_data.fuel_efficiency|mul:record.month_data.cost_per_liter|floatformat:0 }}円</p>
                 <hr>
                 <div class="daily-distance">
                     <h4>日ごとの走行距離:</h4>
