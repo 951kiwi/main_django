@@ -18,7 +18,7 @@ class MonthlyRecord(models.Model):
 class GasRecord(models.Model):
     date = models.DateField()
     distance = models.FloatField()  # 走行距離（km）
-    image = models.ImageField(upload_to='FamilyCar/gasData' ,null=True)
+    image = models.ImageField(upload_to='FamilyCar/gasData' ,null=True,blank=True)
     monthly_record = models.ForeignKey(MonthlyRecord, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
