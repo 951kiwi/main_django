@@ -18,7 +18,7 @@ def gas_record_create(request):
         gas_form = GasRecordForm()
 
     return render(request, 'gasrecord_create.html', {'gas_form': gas_form})
-
+0.
 
 def monthly_gas_summary(request):
 

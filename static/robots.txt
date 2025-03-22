@@ -8,5 +8,5 @@ Disallow: /worker/
 Disallow: /admin/
 
 # SEOに乗せたいページやディレクトリ
-Allow: /
+Allow: //
 Allow: /dareyaomae

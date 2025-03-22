@@ -47,7 +47,6 @@
         </style>
 </head>
 <body>
-    <button type="button" class="btn">Base class</button>
     
     <div class="header">
         <!-- ログイン状態のチェック -->
@@ -67,11 +66,10 @@
     </div>
     <h1>ガソリン走行距離</h1>
     
-    <div style="display: flex; flex-wrap: wrap;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: center;">
         {% for record in monthly_summary %}
             <div class="month_card" id="month_card{{record.month}}">
                 <h3>{{ record.month|date:"Y年m月" }}</h3>
-                <button type="button" class="bootstrap btn btn-lg btn-danger" data-bs-toggle="popover" data-bs-title="Popover title" data-bs-content="And here's some amazing content. It's very engaging. Right?">Click to toggle popover</button>
                 <h5>{{ record.month_data.fuel_efficiency }} km/L {{ record.month_data.cost_per_liter }}円<i id="settingicon{{record.month}}" class="bi bi-gear-wide-connected"></i></h5>
                 {% if record.month_data.is_check == True%}
                 <script>
