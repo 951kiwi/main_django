@@ -6,6 +6,7 @@ Disallow: /lover/
 Disallow: /minecraft/
 Disallow: /worker/
 Disallow: /admin/
+Disallow: /anime/
 
 # SEOに乗せたいページやディレクトリ
 Allow: //
