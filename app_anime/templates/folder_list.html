@@ -1,24 +1,80 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>プレイリスト一覧</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+        }
+        .card {
+            width: calc(33.33% - 16px); /* 3列表示 (PC) */
+            max-width: 300px;
+            height: 380px;
+            border-radius: 8px;
+            background-color: #6091d3;
+            border: solid 3px #6091d3;/*線*/
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card img {
+            width: 100%;
+            height: 340px;
+            object-fit: cover;
+            background-color: #ccc;
+        }
+        .card .name {
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            background-color: #f9f9f963;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* ✅ レスポンシブ調整 */
+        @media (max-width: 900px) {
+            .card {
+                width: calc(50% - 16px); /* タブレットで2列表示 */
+            }
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                width: 100%; /* スマホでは1列表示 */
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>プレイリスト一覧</h1>
-    <div>
+    <div class="container">
         {% for folder in folders %}
-            <div style="margin: 10px; display: inline-block;">
+            <div class="card">
                 <a href="{% url 'video_list' playlist_name=folder.name %}">
-                    <div style="text-align: center;">
-                        {% if folder.icon %}
-                            <img src="{{ folder.icon }}" alt="{{ folder.name }}" width="150px" height="150px">
-                        {% else %}
-                            <div style="width: 150px; height: 150px; background-color: #ccc;"></div>
-                        {% endif %}
-                        <div>{{ folder.name }}</div>
-                    </div>
+                {% if folder.icon %}
+                    <img src="{{ folder.icon }}" alt="{{ folder.name }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/200x150?text=No+Image" alt="No Image">
+                {% endif %}
+                <div class="name">{{ folder.name }}</div>
                 </a>
             </div>
         {% endfor %}
