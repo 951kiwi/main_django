@@ -131,6 +131,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+LOGIN_URL = '/login/'  # Custom login URL
 LOGOUT_REDIRECT_URL = 'main_page'  # ログアウト後にリダイレクトするURLを指定
 
 # Internationalization
