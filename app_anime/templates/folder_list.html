@@ -98,17 +98,6 @@
         {% else %}
         <p class="welcome">ようこそ、{{ user.username }}さん！</p>
         {% endif %}
-        <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="button" style="background-color: #333;">ログアウト</button>
-        </form>
-        {% else %}
-        <p class="welcome">ログインしていません。</p>
-        <form action="{% url 'login' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="button">ログイン</button>
-        </form>
-        {% endif %}
     </div>
     <h1>プレイリスト一覧</h1>
     <div class="container">
