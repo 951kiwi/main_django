@@ -45,7 +45,7 @@ def video_play(request, playlist_name, video_name):
     # フォルダパス
     playlist_path = os.path.join(settings.BASE_DIR, 'static/anime', playlist_name)
     video_path = os.path.join(playlist_path, video_name)
-    
+
     if not os.path.exists(video_path):
         raise Http404("動画が見つかりません。")
 
@@ -61,8 +61,10 @@ def video_play(request, playlist_name, video_name):
     context = {
         'video_path': f"/static/anime/{playlist_name}/{video_name}",
         'playlist_name': playlist_name,
+        'video_name': video_name,  # 動画名を追加
         'next_video': next_video,
-        'prev_video': prev_video
+        'prev_video': prev_video,
+        'video_list': video_files,  # 動画一覧を context に追加
     }
 
     return render(request, 'video_play.html', context)
