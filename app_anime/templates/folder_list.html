@@ -48,6 +48,32 @@
             background-color: #f9f9f963;
             border-top: 1px solid #e0e0e0;
         }
+        .header {
+            position: sticky;
+            display: flex;
+            top: 0;
+            justify-content: space-between; /* 子要素を左右に配置 */
+            background-color: #333;
+            color: white;
+            padding: 10px 40px;
+            align-items: center;
+            z-index: 1000; /* 他のコンテンツよりも上に表示 */
+        }
+
+        .header .welcome {
+            font-size: 16px; /* 文字サイズ調整 */
+        }
+        .header .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 25px;
+
+        }
 
         /* ✅ レスポンシブ調整 */
         @media (max-width: 900px) {
@@ -64,6 +90,26 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <!-- ログイン状態のチェック -->
+        {% if user.is_authenticated %}
+        {% if user.nickname %}
+        <p class="welcome">ようこそ、{{ user.nickname }}さん！</p>
+        {% else %}
+        <p class="welcome">ようこそ、{{ user.username }}さん！</p>
+        {% endif %}
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="button" style="background-color: #333;">ログアウト</button>
+        </form>
+        {% else %}
+        <p class="welcome">ログインしていません。</p>
+        <form action="{% url 'login' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="button">ログイン</button>
+        </form>
+        {% endif %}
+    </div>
     <h1>プレイリスト一覧</h1>
     <div class="container">
         {% for folder in folders %}

@@ -2,8 +2,10 @@
 import os
 from django.conf import settings
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.http import Http404
 
+@login_required  # ユーザーがログインしていない場合はログインページにリダイレクトされます
 def folder_list(request):
     static_path = os.path.join(settings.BASE_DIR, 'static/anime')
     folders = []
@@ -41,6 +43,7 @@ def video_list(request, playlist_name):
     
     return redirect('video_play', playlist_name=playlist_name, video_name=first_video)
 
+@login_required  # ユーザーがログインしていない場合はログインページにリダイレクトされます
 def video_play(request, playlist_name, video_name):
     # フォルダパス
     playlist_path = os.path.join(settings.BASE_DIR, 'static/anime', playlist_name)
