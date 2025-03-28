@@ -1,4 +1,6 @@
 from django.contrib import admin
+from .models import CustomUser
+from django.contrib.auth.admin import UserAdmin
 from .models import Link
 
 
@@ -8,4 +10,15 @@ class Linkadmin(admin.ModelAdmin):
     list_display_links = ('title',)  # タイトルはリンクとして保持
     ordering = ('rank',)  # ここで rank 順にソート
 
+
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
+    fieldsets = UserAdmin.fieldsets + (
+        (None, {'fields': ('profile_image', 'nickname')}),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        (None, {'fields': ('profile_image', 'nickname')}),
+    )
+
 admin.site.register(Link,Linkadmin)
+admin.site.register(CustomUser, CustomUserAdmin)

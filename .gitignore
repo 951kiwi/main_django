@@ -20,8 +20,10 @@ secrets.json
 
 # Django関連
 /staticfiles/
+static/anime/
 media/
 
 ServerReboot.sh
 /log/
 update_repo.sh
+

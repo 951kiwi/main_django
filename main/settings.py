@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'app_anime',
     'app_minecraft',
     'app_dareyaomae',
     'app_main',
@@ -163,5 +164,8 @@ else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+
+# カスタムユーザーモデルを指定
+AUTH_USER_MODEL = 'app_main.CustomUser'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

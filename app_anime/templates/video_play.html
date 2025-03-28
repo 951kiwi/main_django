@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ playlist_name }} - 動画再生</title>
+</head>
+<body>
+    <h1>{{ playlist_name }} - 動画再生</h1>
+    
+    <video width="640" height="360" controls>
+        <source src="{{ video_path }}" type="video/mp4">
+        お使いのブラウザでは動画を再生できません。
+    </video>
+
+    <div>
+        {% if prev_video %}
+            <a href="{% url 'video_play' playlist_name=playlist_name video_name=prev_video %}">
+                <button>前の動画</button>
+            </a>
+        {% else %}
+            <button disabled>前の動画</button>
+        {% endif %}
+        
+        {% if next_video %}
+            <a href="{% url 'video_play' playlist_name=playlist_name video_name=next_video %}">
+                <button>次の動画</button>
+            </a>
+        {% else %}
+            <button disabled>次の動画</button>
+        {% endif %}
+    </div>
+</body>
+</html>

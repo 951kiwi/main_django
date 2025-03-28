@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プレイリスト一覧</title>
+</head>
+<body>
+    <h1>プレイリスト一覧</h1>
+    <div>
+        {% for folder in folders %}
+            <div style="margin: 10px; display: inline-block;">
+                <a href="{% url 'video_list' playlist_name=folder.name %}">
+                    <div style="text-align: center;">
+                        {% if folder.icon %}
+                            <img src="{{ folder.icon }}" alt="{{ folder.name }}" width="150px" height="150px">
+                        {% else %}
+                            <div style="width: 150px; height: 150px; background-color: #ccc;"></div>
+                        {% endif %}
+                        <div>{{ folder.name }}</div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
