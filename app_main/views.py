@@ -2,7 +2,9 @@ from django.contrib.auth import login
 import random
 import os
 from django.conf import settings
+from django.urls import reverse
 from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from .form import CustomAuthenticationForm
@@ -50,11 +52,16 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('main_page')  # ログイン後のリダイレクト先
+                
+                # Get the 'next' parameter from the URL (if available)
+                next_url = request.GET.get('next', reverse('main_page'))  # Default to 'main_page' if 'next' is not provided
+                
+                return HttpResponseRedirect(next_url)  # Redirect to the next URL after successful login
             else:
                 form.add_error(None, "無効なユーザー名またはパスワードです。")
     else:
         form = CustomAuthenticationForm()  # GETリクエスト時は新しいフォームを表示
+    
     # 静的ファイルのディレクトリパスを取得
     image_folder = os.path.join(settings.BASE_DIR, 'static', 'main', 'backgraundImages')
     # ディレクトリ内の全てのファイルを取得
@@ -65,5 +72,5 @@ def login_view(request):
         image_path = os.path.join('main', 'backgraundImages', selected_image)  # テンプレートに渡すパス
     else:
         image_path = None  # 画像が無い場合の処理
-        
-    return render(request, 'accounts/login.html', {'form': form ,'image_path': image_path})
+
+    return render(request, 'accounts/login.html', {'form': form, 'image_path': image_path})
