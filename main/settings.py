@@ -66,7 +66,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'main.urls'
-
+AUTH_PASSWORD_VALIDATORS = []
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

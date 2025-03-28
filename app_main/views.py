@@ -16,17 +16,18 @@ def main_page(request):
         user_links = Link.objects.filter(users=request.user)
     else:
         # ログインしていない場合、関連なしのリンクだけを表示
-        user_links = Link.objects.filter(users=None)
+        user_links = Link.objects.none()  # 空のクエリセットにする
 
     # ログインしていないユーザーにも表示されるリンク（usersフィールドに何も設定されていないリンク）
-    public_links = Link.objects.filter(users=None)
+    public_links = Link.objects.filter(users__isnull=True)
 
     # 全てのリンク（ユーザーに関連するもの、関連しないもの）
     links = user_links | public_links
 
-    links = links.order_by("rank")  # Djangoの order_by() を使用
+    links = links.order_by("rank").distinct()  # 重複を排除して並べ替え
 
     return render(request, 'main.html', {'links': links})
+
 
 def register(request):
     if request.method == "POST":
