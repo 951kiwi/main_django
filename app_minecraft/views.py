@@ -22,7 +22,7 @@ def show_log(request):
     except FileNotFoundError:
         log_content = 'ログファイルが見つかりません。'  # ファイルが見つからなかった場合のエラーメッセージ
 
-    return render(request, 'show_log.html', {'log_content': log_data})
+    return render(request, 'minecraft/show_log.html', {'log_content': log_data})
 
 
 
@@ -70,7 +70,7 @@ def players_list(request):
         'player_statuses': player_statuses,
     }
 
-    return render(request, 'players_list.html', context)
+    return render(request, 'minecraft/players_list.html', context)
 
 
 def set_status():

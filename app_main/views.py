@@ -28,7 +28,7 @@ def main_page(request):
 
     links = links.order_by("rank").distinct()  # 重複を排除して並べ替え
 
-    return render(request, 'main.html', {'links': links})
+    return render(request, 'main/main.html', {'links': links})
 
 
 def register(request):
@@ -41,7 +41,7 @@ def register(request):
     else:
         form = UserCreationForm()
     
-    return render(request, 'accounts/register.html', {'form': form})
+    return render(request, 'main/accounts/register.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
@@ -73,4 +73,4 @@ def login_view(request):
     else:
         image_path = None  # 画像が無い場合の処理
 
-    return render(request, 'accounts/login.html', {'form': form, 'image_path': image_path})
+    return render(request, 'main/accounts/login.html', {'form': form, 'image_path': image_path})
