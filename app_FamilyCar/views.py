@@ -17,7 +17,7 @@ def gas_record_create(request):
     else:
         gas_form = GasRecordForm()
 
-    return render(request, 'gasrecord_create.html', {'gas_form': gas_form})
+    return render(request, 'FamilyCar/gasrecord_create.html', {'gas_form': gas_form})
 0.
 
 def monthly_gas_summary(request):
@@ -37,6 +37,6 @@ def monthly_gas_summary(request):
             'gas_datas': gas_datas,
         })
     monthly_summary.sort(key=lambda x: x['month'],reverse=True)
-    return render(request, 'monthly_gas_summary.html', {
+    return render(request, 'FamilyCar/monthly_gas_summary.html', {
         'monthly_summary': monthly_summary,
     })

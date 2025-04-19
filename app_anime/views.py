@@ -23,7 +23,7 @@ def folder_list(request):
                     break
             folders.append({'name': folder, 'icon': icon_path})
     
-    return render(request, 'folder_list.html', {'folders': folders})
+    return render(request, 'anime/folder_list.html', {'folders': folders})
 
 def video_list(request, playlist_name):
     # フォルダパス
@@ -70,4 +70,4 @@ def video_play(request, playlist_name, video_name):
         'video_list': video_files,  # 動画一覧を context に追加
     }
 
-    return render(request, 'video_play.html', context)
+    return render(request, 'anime/video_play.html', context)
