@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-
+{% extends "dareyaomae/base.html" %}
 {% load static %}
 
 {% block script %}
@@ -12,9 +11,13 @@
 <form method="post" action="{% url 'create_room' %}">{% csrf_token %}
   <div class="card-overlay">
     <div class="create_card">
-      <div class="box1">
-        <img src="{% static 'dareyaomae//images/button.png' %}" width="100%" height="100%">
-        <p>ルーム作成</p>
+      <div style="
+        height: 20%; 
+        background-color: blue; 
+        font-size: larger;
+        text-align: center;">
+        <img src="{% static 'dareyaomae/images/winner.jpg'}" alt="winner">
+        <p class="namefont2" style="font-size: 3rem;">あいうえおおおおっっｐ</p>
       </div>
       <div class="box2" style="height: 80%;">
         <p>~ ルーム名 ~</p>

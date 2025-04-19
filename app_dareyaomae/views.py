@@ -22,7 +22,7 @@ def create_room(request):
                 #部屋を探す
                 existing_room = Room.objects.filter(name=room_name,password=password).first()
                 if existing_room:#部屋が見つかったら
-                    return render(request, 'create_room.html', {'existing_room': existing_room})
+                    return render(request, 'dareyaomae/create_room.html', {'existing_room': existing_room})
                 else: #見つからなかったら
                     room = Room.objects.create(name=room_name,password=password)
                     return redirect('host_room', room_id=room.id)
@@ -35,7 +35,7 @@ def create_room(request):
                 print(existing_room)
                 return redirect('join_room', room_id=existing_room.id)
 
-    return render(request, 'create_room.html')
+    return render(request, 'dareyaomae/create_room.html')
 
 def joinSerch_room(request):
     if request.method == 'POST':
@@ -47,10 +47,10 @@ def joinSerch_room(request):
                 #部屋を探す
                 existing_room = Room.objects.filter(name=room_name,password=password).first()
                 if existing_room:#部屋が見つかったら
-                    return render(request, 'joinSerch_room.html', {'existing_room': existing_room})
+                    return render(request, 'dareyaomae/joinSerch_room.html', {'existing_room': existing_room})
                 else: #見つからなかったら
                     room = Room.objects.create(name=room_name,password=password)
-                    return render(request, 'joinSerch_room.html', {'notfound': "true"})
+                    return render(request, 'dareyaomae/joinSerch_room.html', {'notfound': "true"})
                     
         
         # ボタンが join の場合
@@ -60,7 +60,7 @@ def joinSerch_room(request):
                 print(existing_room)
                 return redirect('join_room', room_id=existing_room.id)
 
-    return render(request, 'joinSerch_room.html')
+    return render(request, 'dareyaomae/joinSerch_room.html')
 
 
 
@@ -91,17 +91,17 @@ def host_room(request, room_id):
             player_name = request.POST.get('player_name')
             if player_name:
                 Player.objects.create(name=player_name,room=room)
-                return render(request, 'host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
+                return render(request, 'dareyaomae/host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
             else:
                 Player.objects.create(name="",room=room)
-                return render(request, 'host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
+                return render(request, 'dareyaomae/host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
         elif 'delete_player' in request.POST:
             delete_player = request.POST.get("delete_player")
             if delete_player:
                 try:
                     player = Player.objects.get(id=delete_player, room=room)
                     player.delete()
-                    return render(request, 'host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
+                    return render(request, 'dareyaomae/host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
                 except:
                     print("エラー")
         elif 'delete_player_all' in request.POST:
@@ -109,7 +109,7 @@ def host_room(request, room_id):
                 player = Player.objects.filter(room=room)
                 print(player)
                 player.delete()
-                return render(request, 'host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
+                return render(request, 'dareyaomae/host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
             except:
                 print("エラー")
         elif 'save' in request.POST:
@@ -121,7 +121,7 @@ def host_room(request, room_id):
                 room.s_set_image = s_set_image
                 room.s_dupe = s_dupe
                 room.save()
-                return render(request, 'host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
+                return render(request, 'dareyaomae/host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
             except :
                 print("エラー")
         elif 'game_start' in request.POST:
@@ -151,7 +151,7 @@ def host_room(request, room_id):
 
 
     players = Player.objects.filter(room=room)
-    return render(request, 'host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
+    return render(request, 'dareyaomae/host_room.html', {'room': room, 'players': players , 'card_in_room':card_in_room})
 
 def join_room(request , room_id):
     your = 0
@@ -173,7 +173,7 @@ def join_room(request , room_id):
                 default_storage.delete(deleteimage.image.path)
                 # 画像カードの削除
                 deleteimage.delete()
-            return render(request, 'join_room.html',{'room':room , 'your' :your , 'images_':images})
+            return render(request, 'dareyaomae/join_room.html',{'room':room , 'your' :your , 'images_':images})
 
         if 'select' in request.POST:
             your = request.POST.get('select')
@@ -181,7 +181,7 @@ def join_room(request , room_id):
             your = Player.objects.get(room=room,id=your)
             images = Image_Card.objects.filter(room=room,player=your)
             print(images)
-            return render(request, 'join_room.html',{'room':room , 'your' :your , 'images_':images})
+            return render(request, 'dareyaomae/join_room.html',{'room':room , 'your' :your , 'images_':images})
         if 'save' in request.POST:
             your = request.POST.get('your_id')
             your = Player.objects.filter(id=your).first()
@@ -203,13 +203,13 @@ def join_room(request , room_id):
                             db.save()
                     except:     #なかった場合の処理
                         Image_Card.objects.create(room=room,player=your,image=P_image)
-            return render(request, 'join_room.html',{'room':room , 'your' :your , 'images_':images})
+            return render(request, 'dareyaomae/join_room.html',{'room':room , 'your' :your , 'images_':images})
     your = request.GET.get('your', 0)
     if your != 0:
         your = Player.objects.get(room=room,id=your)
         images = Image_Card.objects.filter(room=room,player=your)
-        return render(request, 'join_room.html',{'room':room , 'your':your, 'images_' :images })
-    return render(request, 'join_room.html',{'room':room , 'players':players, 'your' :your })
+        return render(request, 'dareyaomae/join_room.html',{'room':room , 'your':your, 'images_' :images })
+    return render(request, 'dareyaomae/join_room.html',{'room':room , 'players':players, 'your' :your })
 
 def finish_room(request , room_id):
     your = 0
@@ -231,13 +231,13 @@ def finish_room(request , room_id):
     if your != 0:
         your = Player.objects.get(room=room,id=your)
         images = Image_Card.objects.filter(room=room,player=your)
-    return render(request, 'finish.html',{'room':room , 'players':players})
+    return render(request, 'dareyaomae/finish.html',{'room':room , 'players':players})
 
 def useto_card_room(request, room_id):
     room = get_object_or_404(Room, pk=room_id )
     select_card = Select_Card.objects.filter(room=room,image_card__use_to = True)
     print(select_card)
-    return render(request, 'use_card.html',{'room':room , "select_card":select_card })
+    return render(request, 'dareyaomae/use_card.html',{'room':room , "select_card":select_card })
 
 def play_game(request,room_id):
     print("受信")
@@ -247,10 +247,10 @@ def game_room(request,room_id):
     select_cards = Select_Card.objects.filter(room=room,is_drawn=False)
     drawn_cards = Select_Card.objects.filter(room=room,is_drawn=True) #すでに出たカード
     players = Player.objects.filter(room=room)
-    return render(request, 'game_room.html',{'room':room ,'select_cards':select_cards,'players':players,"drawn_cards":drawn_cards})
+    return render(request, 'dareyaomae/game_room.html',{'room':room ,'select_cards':select_cards,'players':players,"drawn_cards":drawn_cards})
 
 def startmenu(request):
-    return render(request, 'startmenu.html')
+    return render(request, 'dareyaomae/startmenu.html')
 
 def uploadImage(request,room_id):
     room = get_object_or_404(Room, pk=room_id )
