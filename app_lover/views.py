@@ -81,15 +81,15 @@ def phone_view(request):
 
     if(selection.login == True):
         if(selection.gamestart == True):
-            return render(request, 'phone_Q.html',context={"data":selection})
-        return render(request, 'phone_sucsess.html',context={"data":selection})
-    return render(request, 'phone.html')
+            return render(request, 'lover/phone_Q.html',context={"data":selection})
+        return render(request, 'lover/phone_sucsess.html',context={"data":selection})
+    return render(request, 'lover/phone.html')
 
 def Q3_QR(request):
     selection = Selection.objects.first()
     selection.game03 = True
     selection.save()
-    return render(request, 'Q3_QRload.html',context={"data":selection})
+    return render(request, 'lover/Q3_QRload.html',context={"data":selection})
 
 def PC_view(request):
     selection = Selection.objects.first()
@@ -103,16 +103,16 @@ def PC_view(request):
 
     if(selection.login == True):
         if(selection.gamestart == True):
-            return render(request, 'PC_startgame.html',context={"data":selection})
-        return render(request, 'PC_main01.html')
-    return render(request, 'PC_main.html')
+            return render(request, 'lover/PC_startgame.html',context={"data":selection})
+        return render(request, 'lover/PC_main01.html')
+    return render(request, 'lover/PC_main.html')
 
 
 
 def kiwitok(request):
     selection = Selection.objects.first()
     if selection.game06 == False or selection.game05 == False or selection.game04 == False :
-        return render(request, 'kiwitok_pre.html')
+        return render(request, 'lover/kiwitok_pre.html')
     
     if request.method == "POST":
         data = request.POST.get("message")
@@ -124,7 +124,7 @@ def kiwitok(request):
             return JsonResponse({"status": "success", "likes": video.likes})
     videos = list(Video.objects.all())
     random.shuffle(videos)  # ランダムに並び替え
-    return render(request, 'tiktok.html', {'videos': videos})
+    return render(request, 'lover/tiktok.html', {'videos': videos})
 
 def phone_name_birthday(request):
     if request.method == 'POST':
