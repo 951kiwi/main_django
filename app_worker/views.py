@@ -12,7 +12,7 @@ def selection_list(request):
     print(selections)
     for i in sorted_selections:
         print(i.id,i.interview_status)
-    return render(request, "selection_list.html", {"selections": sorted_selections})
+    return render(request, "worker/selection_list.html", {"selections": sorted_selections})
 
 
 def update_status(request, pk):
@@ -49,7 +49,7 @@ def selection_create(request):
             return redirect('selection_list')
     else:
         form = SelectionForm()
-    return render(request, 'selection_form.html', {'form': form})
+    return render(request, 'worker/selection_form.html', {'form': form})
 
 def selection_edit(request, pk):
     """ 編集ページ """
@@ -61,7 +61,7 @@ def selection_edit(request, pk):
             return redirect('selection_list')
     else:
         form = SelectionForm(instance=selection)
-    return render(request, 'selection_form.html', {'form': form, 'editing': True})
+    return render(request, 'worker/selection_form.html', {'form': form, 'editing': True})
 
 def selection_delete(request, pk):
     """ 削除 """
@@ -72,4 +72,4 @@ def selection_delete(request, pk):
         selection.delete()
         return redirect('selection_list')  # 削除後、リストページにリダイレクト
 
-    return render(request, 'selection_confirm_delete.html', {'selection': selection})
+    return render(request, 'worker/selection_confirm_delete.html', {'selection': selection})
