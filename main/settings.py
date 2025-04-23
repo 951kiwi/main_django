@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'app_lover',
     'app_worker',
     'mathfilters',
+    'app_fileuploader',
     'channels',
     'sslserver',
 ]
