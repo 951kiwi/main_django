@@ -53,7 +53,7 @@ def video_play(request, playlist_name, video_name):
         raise Http404("動画が見つかりません。")
 
     # フォルダ内の動画ファイルをリストアップ
-    video_files = [f for f in os.listdir(playlist_path) if f.endswith(('.mp4', '.avi', '.mov'))]
+    video_files = [f for f in os.listdir(playlist_path) if f.endswith(('.mp4', '.avi', '.mov','.mkv'))]
     video_files.sort()
     
     # 次の動画と前の動画のインデックスを取得
