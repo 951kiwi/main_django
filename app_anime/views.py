@@ -33,7 +33,7 @@ def video_list(request, playlist_name):
         raise Http404("プレイリストが見つかりません。")
     
     # フォルダ内の動画ファイルをリストアップ (動画ファイル拡張子でフィルタリング)
-    video_files = [f for f in os.listdir(playlist_path) if f.endswith(('.mp4', '.avi', '.mov'))]
+    video_files = [f for f in os.listdir(playlist_path) if f.endswith(('.mp4', '.avi', '.mov','.mkv'))]
     if not video_files:
         raise Http404("動画がありません。")
     
@@ -48,11 +48,11 @@ def video_play(request, playlist_name, video_name):
     # フォルダパス
     playlist_path = os.path.join(settings.BASE_DIR, 'static/anime', playlist_name)
     video_path = os.path.join(playlist_path, video_name)
-
     if not os.path.exists(video_path):
         raise Http404("動画が見つかりません。")
 
     # フォルダ内の動画ファイルをリストアップ
+    print(os.listdir(playlist_path))
     video_files = [f for f in os.listdir(playlist_path) if f.endswith(('.mp4', '.avi', '.mov','.mkv'))]
     video_files.sort()
     
