@@ -16,7 +16,7 @@ def folder_list(request):
         if os.path.isdir(folder_path):
             icon_path = None
             # listicon画像をチェック
-            for ext in ['jpg', 'jpeg', 'png']:
+            for ext in ['jpg', 'jpeg', 'png','webp']:
                 icon_file = f"listIcon.{ext}"
                 if os.path.exists(os.path.join(folder_path, icon_file)):
                     icon_path = f"/static/anime/{folder}/{icon_file}"
