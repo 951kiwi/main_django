@@ -1,0 +1,40 @@
+.header {
+    height: 50px;
+    position: sticky;
+    display: flex;
+    top: 0;
+    justify-content: space-between;
+    /* 子要素を左右に配置 */
+    background-color: #333;
+    color: white;
+    padding: 5px 40px;
+    align-items: center;
+    z-index: 1000;
+    /* 他のコンテンツよりも上に表示 */
+}
+
+
+.header .welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+    /* 文字サイズ調整 */
+}
+.header img{
+    width: 50px;
+    height: 50px;
+    padding: 0px 10px 0px 0px;
+}
+
+.header .button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 25px;
+
+}

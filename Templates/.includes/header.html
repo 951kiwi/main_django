@@ -1,0 +1,22 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/header.css' %}">
+<div class="header">
+    <!-- ログイン状態のチェック -->
+    {% if user.is_authenticated %}
+        <div class="welcome">
+            <img src="{% static 'images/default_user.jpg' %}">
+            <p>ようこそ、{{ user.username }}さん！</p>
+        </div>
+        
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="button" style="background-color: #333;">ログアウト</button>
+    </form>
+    {% else %}
+    <p class="welcome">ログインしていません。</p>
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="button">ログイン</button>
+    </form>
+    {% endif %}
+</div>

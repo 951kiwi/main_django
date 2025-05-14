@@ -119,18 +119,22 @@ DATABASES = {
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    #ユーザー名・メールアドレスなどに似すぎているパスワードを拒否。
+    #{
+    #    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    #},
+    #パスワードの最低文字数を設定。
+    #{
+    #    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    #},
+    #「123456」や「password」など、一般的に使われすぎている危険なパスワードを拒否。
+    #{
+    #    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    #},
+    #数字だけのパスワードを拒否。
+    #{
+    #    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    #},
 ]
 
 LOGIN_URL = '/login/'  # Custom login URL

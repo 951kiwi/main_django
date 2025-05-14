@@ -1,0 +1,124 @@
+{% load static %}
+{% load mathfilters %}
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="{% static 'FamilyCar/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modal01.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>月ごとのガソリン合計</title>
+    <style>
+        /* ヘッダーのスタイル */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    {% include ".includes/header.html" %}
+    <h1 style="margin-bottom: 0;">ガソリン走行距離</h1>
+    <h3 style="margin: 0;">(管理画面)<h3>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+        {% for record in monthly_summary %}
+        <div class="month_card" id="month_card{{ record.month }}">
+            <h3>{{ record.month|date:"Y年m月" }}</h3>
+            <h5>{{ record.month_data.fuel_efficiency }} km/L {{ record.month_data.cost_per_liter }}円
+                <i id="settingicon{{ record.month }}" class="bi bi-gear-wide-connected" onclick='openModal("{{ record.month }}")'></i>
+            </h5>
+            {% if record.month_data.is_check %}
+            <script>
+                var icon = document.getElementById("settingicon{{ record.month }}");
+                icon.className = "bi bi-coin";
+                icon.classList.add("checked");
+            </script>
+            {% endif %}
+            {% if record.month_data.is_payed %}
+            <script>
+                var card = document.getElementById("month_card{{ record.month }}");
+                card.id = "ispayed";
+                var icon = document.getElementById("settingicon{{ record.month }}");
+                icon.className = "bi bi-check-circle-fill";
+            </script>
+            {% endif %}
+
+            {% for data in record.datas %}
+            <div class="user_card">
+                <p><strong>{{ data.name }}</strong></p>
+                <p>走行距離合計: {{ data.total_distance|floatformat:2 }} km</p>
+                <p>金額: {{ data.total_distance|div:record.month_data.fuel_efficiency|mul:record.month_data.cost_per_liter|floatformat:0 }}円</p>
+                <div class="daily-distance">
+                    <h4>日ごとの走行距離:</h4>
+                    {% if data.gas_datas %}
+                        {% for daily in data.gas_datas %}
+                            <p>{{ daily.date|date:"m月d日" }}: {{ daily.distance }} km <i class="bi bi-receipt"></i></p>
+                        {% endfor %}
+                    {% else %}
+                        <p>走行なし</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- モーダル本体 -->
+    <div id="popupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="h2_text">詳細設定</h2>
+
+            <div id="month_data_id">
+            <p>これはモーダルの内容です。</p>
+
+                <!-- 入力フォーム -->
+                <form id="fuelForm" onsubmit="handleSubmit(event)">
+                    <label for="kmPerLiter">リッターキロ (km/L):</label><br>
+                    <input type="number" id="kmPerLiter" name="kmPerLiter" step="0.1" required><br><br>
+
+                    <label for="yenPerLiter">リットルあたりの値段 (円):</label><br>
+                    <input type="number" id="yenPerLiter" name="yenPerLiter" step="1" required><br><br>
+
+                    <button type="submit">変更</button>
+                </form>
+
+                <!-- 結果表示用 -->
+                <p id="result"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(data) {
+            document.getElementById("popupModal").style.display = "block";
+            '{% for record in monthly_summary %}'
+                if ('{{record.month}}' == data){
+                    document.getElementById("h2_text").textContent = "詳細設定 {{ record.month|date:'Y年m月' }}";
+                    document.getElementById("month_data_id").dataset.value = "{{ record.month_data.id }}";
+                    document.getElementById("kmPerLiter").value = '{{record.month_data.fuel_efficiency}}'
+                    document.getElementById("yenPerLiter").value = '{{record.month_data.cost_per_liter}}'
+                }
+            '{% endfor %}'
+        }
+        function closeModal() {
+          document.getElementById("popupModal").style.display = "none";
+        }
+    </script>
+
+</body>
+
+</html>

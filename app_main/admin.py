@@ -13,6 +13,7 @@ class Linkadmin(admin.ModelAdmin):
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
+    list_display = ("id","username","is_staff","last_login")
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('profile_image', 'nickname')}),
     )

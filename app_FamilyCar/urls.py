@@ -23,4 +23,5 @@ from . import views
 urlpatterns = [
     path('monthly_summary/', views.monthly_gas_summary, name='monthly_summary'),
     path('gas_record_create/', views.gas_record_create, name='gas_record_create'),  
+    path('parent_monthly_summmary',views.parent_monthly_summmary,name='parent_monthly_summmary')
 ]

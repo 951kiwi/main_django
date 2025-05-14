@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import timedelta, date
+from django.conf import settings
 from django.db.models.signals import pre_delete , pre_save
 import os
 from django.dispatch import receiver
@@ -16,6 +17,7 @@ class MonthlyRecord(models.Model):
     
 
 class GasRecord(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     date = models.DateField()
     distance = models.FloatField()  # 走行距離（km）
     image = models.ImageField(upload_to='FamilyCar/gasData' ,null=True,blank=True)
