@@ -84,11 +84,6 @@
         <div id="chat-container"></div>
         <div id="loading">読み込み中...</div>
         <script>
-            document.addEventListener('touchmove', function (e) {
-                e.preventDefault();
-            }, { passive: false });
-        </script>
-        <script>
             const calendarPicker = document.getElementById('calendar');
             const picker = flatpickr(calendarPicker, {
                 dateFormat: "Y-m-d",
