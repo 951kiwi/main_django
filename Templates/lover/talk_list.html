@@ -232,7 +232,7 @@
             if (loading) return;
             if (chatContainer.children.length == 0) return;
             // 一番上に到達 → 古いメッセージを読み込む
-            if (chatContainer.scrollTop <= 0) {
+            if (chatContainer.scrollTop === 0) {
                 let pastPage = chatContainer.firstElementChild.dataset.page;
                 if(pastPage === "894"){
                     return;
