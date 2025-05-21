@@ -75,190 +75,193 @@
     <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 5px;">
         LINEトーク一覧
         <button id="calendar-button">📅</button>
-    </h1>
-    <!-- HTML -->
-    <input id="calendar" type="text" placeholder="日付を選択" value="2025/05/09" style="display: none;">
-    <div id="chat-container"></div>
-    <div id="loading">読み込み中...</div>
+        </h1>
+        <!-- HTML -->
+        <input id="calendar" type="text" placeholder="日付を選択" value="2025/05/09" style="display: none;">
+        <div id="chat-container"></div>
+        <div id="loading">読み込み中...</div>
 
-    <script>
-        const calendarPicker = document.getElementById('calendar');
-        const picker = flatpickr(calendarPicker, {
-            dateFormat: "Y-m-d",
-            defaultDate: "2025-05-09",
-            minDate: "2024-03-11",
-            maxDate: "2025-05-09",
-            disable: ["2025-05-03"],
-            locale: "ja"
-        });
-        const calendarBtn = document.getElementById('calendar-button');
+        <script>
+            const calendarPicker = document.getElementById('calendar');
+            const picker = flatpickr(calendarPicker, {
+                dateFormat: "Y-m-d",
+                defaultDate: "2025-05-09",
+                minDate: "2024-03-11",
+                maxDate: "2025-05-09",
+                disable: ["2025-05-03"],
+                locale: "ja"
+            });
+            const calendarBtn = document.getElementById('calendar-button');
 
-        calendarBtn.addEventListener('click', () => {
-            picker.open(); // ← これで確実に開く
-        });
+            calendarBtn.addEventListener('click', () => {
+                picker.open(); // ← これで確実に開く
+            });
 
-        calendarPicker.addEventListener('change', async () => {
-            const selected = calendarPicker.value; // yyyy-mm-dd
-            if (!selected) return;
+            calendarPicker.addEventListener('change', async () => {
+                const selected = calendarPicker.value; // yyyy-mm-dd
+                if (!selected) return;
 
-            // 西暦日付から和暦R7などに変換する関数（仮に定義しておく）
-            const dateObj = new Date(selected);
-            const year = dateObj.getFullYear();
-            const month = dateObj.getMonth() + 1;
-            const day = dateObj.getDate();
+                // 西暦日付から和暦R7などに変換する関数（仮に定義しておく）
+                const dateObj = new Date(selected);
+                const year = dateObj.getFullYear();
+                const month = dateObj.getMonth() + 1;
+                const day = dateObj.getDate();
 
-            // ここで適切に和暦に変換（例: R7/05/01）※必要に応じて変換ロジック追加
-            let Ryear = "";
-            if(year === 2025) Ryear = "R7";
-            else Ryear = "R6";
-            const target = `${Ryear}/${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
+                // ここで適切に和暦に変換（例: R7/05/01）※必要に応じて変換ロジック追加
+                let Ryear = "";
+                if (year === 2025) Ryear = "R7";
+                else Ryear = "R6";
+                const target = `${Ryear}/${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
 
-            // API からページ番号取得してそのページに移動
-            const res = await fetch(`/lover/api/get_page_data/?date=${target}`);
-            const data = await res.json();
-            const page = data.page;
+                // API からページ番号取得してそのページに移動
+                const res = await fetch(`/lover/api/get_page_data/?date=${target}`);
+                const data = await res.json();
+                const page = data.page;
 
-            if (page) {
-                chatContainer.innerHTML = ''; // 表示リセット
-                // ← 日付を渡すようにする
-                const { targetElement } = await loadMessages(page, 'past', target);
-                // 対象のメッセージまでスクロール
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } else {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                }
-            } else {
-                alert('指定の日付のメッセージは見つかりませんでした。');
-            }
-        });
-    </script>
-    <script>
-        let loading = false;
-        const MAX_MESSAGES = 300;
-        const chatContainer = document.getElementById('chat-container');
-
-        function createMessageElement(msg, pagenum) {
-            const div = document.createElement('div');
-            div.dataset.page = pagenum
-            div.className = 'msg';
-
-            const name = document.createElement('div');
-            name.className = 'name';
-            name.textContent = msg.name;
-
-            const time = document.createElement('div');
-            time.className = 'time';
-            time.textContent = msg.time;
-
-            const content = document.createElement('div');
-            content.className = 'content';
-            content.textContent = msg.content;
-
-            div.appendChild(name);
-            div.appendChild(time);
-            div.appendChild(content);
-            return div;
-        }
-
-        async function loadMessages(pageNum, direction, targetDate = null) {
-            const res = await fetch(`/lover/api/talks/?page=${pageNum}&direction=${direction}`);
-            const data = await res.json();
-            const messages = (direction === 'past') ? data.messages.reverse() : data.messages;
-
-            const fragment = document.createDocumentFragment();
-            let targetElement = null; // ← 該当メッセージの要素
-            if (direction === 'past') {
-                messages.forEach(msg => {
-                    const el = createMessageElement(msg, pageNum);
-                    fragment.appendChild(el);
-                    // targetDateが有効の場合、該当日付のメッセージを探す
-                    if (targetDate && msg.time.includes(targetDate) && !targetElement) {
-                        targetElement = el;
-                    }
-                });
-            }
-            else {
-                // ↓これで一番下（最後）から上に向かって追加されます
-                for (let i = messages.length - 1; i >= 0; i--) {
-                    const msg = messages[i];
-                    const el = createMessageElement(msg, pageNum);
-                    fragment.appendChild(el);
-                    // targetDateが有効の場合、該当日付のメッセージを探す
-                    if (targetDate && msg.time.includes(targetDate) && !targetElement) {
-                        targetElement = el;
-                    }
-                }
-            }
-
-            const prevHeight = chatContainer.scrollHeight;
-
-            if (direction === 'past') {
-                chatContainer.insertBefore(fragment, chatContainer.firstChild);
-            } else {
-                chatContainer.appendChild(fragment);
-            }
-
-            if (pageNum === 1 && direction === 'past') {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            } else if (direction === 'past') {
-                const newHeight = chatContainer.scrollHeight;
-                chatContainer.scrollTop = newHeight - prevHeight;
-            }
-
-            return { has_next: data.has_next, targetElement };
-        }
-
-        function removeOldMessagesIfNeeded(past) {
-            const messages = chatContainer.querySelectorAll('.msg');
-            if (messages.length > MAX_MESSAGES) {
-                const numToRemove = messages.length - MAX_MESSAGES;
-                for (let i = 0; i < numToRemove; i++) {
-                    if (past === "buttom") {
-                        // 上にスクロール → 上を残す → 下を削除
-                        chatContainer.removeChild(messages[i]); // 下から削除
+                if (page) {
+                    chatContainer.innerHTML = ''; // 表示リセット
+                    // ← 日付を渡すようにする
+                    const { targetElement } = await loadMessages(page, 'past', target);
+                    // 対象のメッセージまでスクロール
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     } else {
-                        // 下にスクロール → 下を残す → 上を削除
-                        chatContainer.removeChild(messages[messages.length - 1 - i]); // 上から削除
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }
+                } else {
+                    alert('指定の日付のメッセージは見つかりませんでした。');
+                }
+            });
+        </script>
+        <script>
+            let loading = false;
+            const MAX_MESSAGES = 300;
+            const chatContainer = document.getElementById('chat-container');
+
+            function createMessageElement(msg, pagenum) {
+                const div = document.createElement('div');
+                div.dataset.page = pagenum
+                div.className = 'msg';
+
+                const name = document.createElement('div');
+                name.className = 'name';
+                name.textContent = msg.name;
+
+                const time = document.createElement('div');
+                time.className = 'time';
+                time.textContent = msg.time;
+
+                const content = document.createElement('div');
+                content.className = 'content';
+                content.textContent = msg.content;
+
+                div.appendChild(name);
+                div.appendChild(time);
+                div.appendChild(content);
+                return div;
+            }
+
+            async function loadMessages(pageNum, direction, targetDate = null) {
+                const res = await fetch(`/lover/api/talks/?page=${pageNum}&direction=${direction}`);
+                const data = await res.json();
+                const messages = (direction === 'past') ? data.messages.reverse() : data.messages;
+
+                const fragment = document.createDocumentFragment();
+                let targetElement = null; // ← 該当メッセージの要素
+                if (direction === 'past') {
+                    messages.forEach(msg => {
+                        const el = createMessageElement(msg, pageNum);
+                        fragment.appendChild(el);
+                        // targetDateが有効の場合、該当日付のメッセージを探す
+                        if (targetDate && msg.time.includes(targetDate) && !targetElement) {
+                            targetElement = el;
+                        }
+                    });
+                }
+                else {
+                    // ↓これで一番下（最後）から上に向かって追加されます
+                    for (let i = messages.length - 1; i >= 0; i--) {
+                        const msg = messages[i];
+                        const el = createMessageElement(msg, pageNum);
+                        fragment.appendChild(el);
+                        // targetDateが有効の場合、該当日付のメッセージを探す
+                        if (targetDate && msg.time.includes(targetDate) && !targetElement) {
+                            targetElement = el;
+                        }
+                    }
+                }
+
+                const prevHeight = chatContainer.scrollHeight;
+
+                if (direction === 'past') {
+                    chatContainer.insertBefore(fragment, chatContainer.firstChild);
+                } else {
+                    chatContainer.appendChild(fragment);
+                }
+
+                if (pageNum === 1 && direction === 'past') {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                } else if (direction === 'past') {
+                    const newHeight = chatContainer.scrollHeight;
+                    chatContainer.scrollTop = newHeight - prevHeight;
+                }
+
+                return { has_next: data.has_next, targetElement };
+            }
+
+            function removeOldMessagesIfNeeded(past) {
+                const messages = chatContainer.querySelectorAll('.msg');
+                if (messages.length > MAX_MESSAGES) {
+                    const numToRemove = messages.length - MAX_MESSAGES;
+                    for (let i = 0; i < numToRemove; i++) {
+                        if (past === "buttom") {
+                            // 上にスクロール → 上を残す → 下を削除
+                            chatContainer.removeChild(messages[i]); // 下から削除
+                        } else {
+                            // 下にスクロール → 下を残す → 上を削除
+                            chatContainer.removeChild(messages[messages.length - 1 - i]); // 上から削除
+                        }
                     }
                 }
             }
-        }
 
-        // 初回読み込み（過去メッセージ）
-        loadMessages(1, 'past');
+            // 初回読み込み（過去メッセージ）
+            loadMessages(1, 'past');
 
-        chatContainer.addEventListener('scroll', async () => {
-            if (loading) return;
-            if (chatContainer.children.length == 0) return;
-            // 一番上に到達 → 古いメッセージを読み込む
-            if (chatContainer.scrollTop === 0) {
-                let pastPage = chatContainer.firstElementChild.dataset.page;
-                if(pastPage === "894"){
-                    return;
+            chatContainer.addEventListener('scroll', async () => {
+                if (loading) return;
+                if (chatContainer.children.length == 0) return;
+                // 一番上に到達 → 古いメッセージを読み込む
+                if (chatContainer.scrollTop === 0) {
+                    let pastPage = chatContainer.firstElementChild.dataset.page;
+                    if (pastPage === "894") {
+                        return;
+                    }
+                    loading = true;
+                    const hasNext = await loadMessages(parseInt(pastPage) + 1, 'past');
+                    removeOldMessagesIfNeeded("top");
+                    loading = false;
                 }
-                loading = true;
-                const hasNext = await loadMessages(parseInt(pastPage) + 1, 'past');
-                removeOldMessagesIfNeeded("top");
-                loading = false;
-            }
 
-            // 一番下に到達 → 新しいメッセージを読み込む（復元）
-            if (chatContainer.scrollTop + chatContainer.clientHeight === chatContainer.scrollHeight) {
-                let futurePage = chatContainer.lastElementChild.dataset.page;
-                if (futurePage === "1") {
-                    return;
-                }
-                loading = true;
-                const hasNext = await loadMessages(parseInt(futurePage) - 1, 'future');
-                removeOldMessagesIfNeeded("buttom");
-                loading = false;
-            }
-        });
+                // 一番下に到達 → 新しいメッセージを読み込む（復元）
+                setTimeout(() => {
+                    const isBottom = Math.abs(chatContainer.scrollTop + chatContainer.clientHeight - chatContainer.scrollHeight) < 5;
+                    if (isBottom) {
+                        let futurePage = chatContainer.lastElementChild.dataset.page;
+                        if (futurePage === "1") {
+                            return;
+                        }
+                        loading = true;
+                        const hasNext = loadMessages(parseInt(futurePage) - 1, 'future');
+                        removeOldMessagesIfNeeded("buttom");
+                        loading = false;
+                    }
+                }, 50);
+            });
 
 
 
-    </script>
+        </script>
 </body>
 
 </html>
