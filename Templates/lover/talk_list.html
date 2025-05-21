@@ -244,7 +244,7 @@
             }
 
             // 一番下に到達 → 新しいメッセージを読み込む（復元）
-            if (chatContainer.scrollTop + chatContainer.clientHeight >= chatContainer.scrollHeight) {
+            if (chatContainer.scrollTop + chatContainer.clientHeight === chatContainer.scrollHeight) {
                 let futurePage = chatContainer.lastElementChild.dataset.page;
                 if (futurePage === "1") {
                     return;
