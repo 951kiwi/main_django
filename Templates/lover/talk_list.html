@@ -82,6 +82,10 @@
         const calendarPicker = document.getElementById('calendar');
         const picker = flatpickr(calendarPicker, {
             dateFormat: "Y-m-d",
+            defaultDate: "2025-05-09",
+            minDate: "2024-03-11",
+            maxDate: "2025-05-09",
+            disable: ["2025-05-03"],
             locale: "ja"
         });
         const calendarBtn = document.getElementById('calendar-button');
