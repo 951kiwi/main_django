@@ -61,6 +61,11 @@
             color: gray;
         }
     </style>
+    <!-- flatpickr本体 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- 日本語ロケール -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
 </head>
 
 <body>
@@ -68,13 +73,20 @@
         LINEトーク一覧
         <button id="calendar-button">📅</button>
     </h1>
-    <input type="date" id="calendar-picker" style="display:none;" min="2024-03-11" max="2025-05-09">
+    <!-- HTML -->
+    <input id="calendar" type="text" placeholder="日付を選択">
     <div id="chat-container"></div>
     <div id="loading">読み込み中...</div>
 
     <script>
+        flatpickr("#calendar", {
+            dateFormat: "Y-m-d",  // 例: 2025-05-21
+            minDate: "2024-03-11",
+            maxDate: "2025-05-09",
+            locale: "ja" // 日本語化（必要なら）
+        });
         const calendarBtn = document.getElementById('calendar-button');
-        const calendarPicker = document.getElementById('calendar-picker');
+        const calendarPicker = document.getElementById('calendar');
 
         calendarBtn.addEventListener('click', () => {
             if (calendarPicker.style.display === "none") {
