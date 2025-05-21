@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 import os
 from bs4 import BeautifulSoup
+from django.contrib.auth.decorators import login_required
 import random
 #ハーゲンダッツのjancodeリスト
 urls = ['https://www.jancode.xyz/corp/?c=29119','https://www.jancode.xyz/corp/?c=29119&p=2',
@@ -54,6 +55,7 @@ def parse_line_talk(file_path):
     return messages
 
 # 初期表示用
+@login_required
 def talk_list_view(request):
     return render(request, 'lover/talk_list.html')
 

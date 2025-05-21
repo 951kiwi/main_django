@@ -29,6 +29,13 @@
             margin: 0;
         }
 
+        h2 {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            /* 必要に応じて省略記号を追加 */
+        }
+
         #chat-container {
             flex: 1;
             /* 残り全部使う */
@@ -50,6 +57,7 @@
             display: flex;
             flex-direction: column;
             border: 5px solid #333333;
+            max-height: 80hv;
         }
 
         .msg {
@@ -123,14 +131,18 @@
 </head>
 
 <body>
-    <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 5px;">
-        LINEトーク一覧
-        <button id="calendar-button">📅</button>
-        <div id="search-area">
+    <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 5px; gap: 10px;">
+        <span style="flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            LINEトーク一覧
+        </span>
+
+        <div id="search-area" style="display: flex; gap: 5px; flex-shrink: 0;">
+            <button id="calendar-button">📅</button>
             <input type="text" id="search-input" placeholder="キーワード検索" />
             <button id="search-button">🔍</button>
         </div>
     </h2>
+
     <!-- HTML -->
     <input id="calendar" type="text" placeholder="日付を選択" value="2025/05/09" style="display: none;">
     <div id="search-container" style="display: none;"></div>
@@ -172,7 +184,7 @@
                         const page = btn.dataset.page;
                         const targetId = btn.dataset.id;
 
-                        chatContainer.innerHTML = '';
+                        chatContainer.innerHTML = 'flex';
 
                         // ロードして戻ってくるmessage群の中から、該当idの要素を取得
                         const { targetElement } = await loadMessages(page, 'past');
