@@ -24,6 +24,7 @@ def parse_line_talk(file_path):
     messages = []
     current_date = ""
     current_message = None
+    message_id = 0
 
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
@@ -37,10 +38,12 @@ def parse_line_talk(file_path):
                 if len(parts) >= 3:
                     time, name, content = parts[0], parts[1], '\t'.join(parts[2:])
                     current_message = {
+                        'id': message_id,  # ← ここでIDを付ける
                         'name': name,
                         'time': f"{current_date} {time}",
                         'content': content
                     }
+                    message_id += 1
             else:
                 if current_message:
                     current_message['content'] += '\n' + line
@@ -87,6 +90,30 @@ def talk_api(request):
     page_obj = paginator.get_page(page)
     data = list(page_obj.object_list)
     return JsonResponse({'messages': data, 'has_next': page_obj.has_next()})
+
+def search_message(request):
+    keyword = request.GET.get('keyword')
+    if not keyword:
+        return JsonResponse({"results": []})
+
+    file_path = os.path.join(settings.BASE_DIR, 'static', 'lover', 'Line', '[LINE]トーク.txt')
+    all_messages = parse_line_talk(file_path)
+    all_messages.reverse()  # 最新が後ろ
+
+    results = []
+    for i, msg in enumerate(all_messages):
+        text = msg.get("content", "")
+        if keyword in text:
+            page = i // 100 + 1
+            results.append({
+                'id': msg.get("id",""),  # ← ここでIDを付ける
+                "time": msg.get("time", ""),
+                "name": msg.get("name", ""),
+                "text": text,
+                "page": page
+            })
+
+    return JsonResponse({"results": results})
 
 def phone_view(request):
     # 最初のSelectionオブジェクトを取得

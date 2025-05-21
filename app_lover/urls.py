@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import phone_view,phone_name_birthday,get_data,PC_view,phone_data_save,Q3_QR,kiwitok,talk_api,talk_list_view,get_page_date
+from .views import phone_view,phone_name_birthday,get_data,PC_view,phone_data_save,Q3_QR,kiwitok,talk_api,talk_list_view,get_page_date,search_message
 
 urlpatterns = [
     path('phone/', phone_view, name='phone'),
@@ -30,4 +30,5 @@ urlpatterns = [
     path('Q3_QRload',Q3_QR,name="Q3_QRload"),
     path('api/talks/', talk_api),
     path('api/get_page_data/',get_page_date),
+    path('api/search_message/', search_message),
 ]

@@ -40,6 +40,18 @@
             flex-direction: column;
         }
 
+        #search-container {
+            /* 残り全部使う */
+            height: auto;
+            overflow-y: scroll;
+            background: #e0e0e0;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            border: 5px solid #333333;
+        }
+
         .msg {
             background: white;
             margin-bottom: 10px;
@@ -83,6 +95,25 @@
             font-weight: bold;
             color: #333;
         }
+
+        #search-area {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 6px;
+            font-size: 16px;
+        }
+
+        .search-result-item {
+            background: white;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
     </style>
     <!-- flatpickr本体 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -95,14 +126,75 @@
     <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 5px;">
         LINEトーク一覧
         <button id="calendar-button">📅</button>
+        <div id="search-area">
+            <input type="text" id="search-input" placeholder="キーワード検索" />
+            <button id="search-button">🔍</button>
+        </div>
     </h2>
     <!-- HTML -->
     <input id="calendar" type="text" placeholder="日付を選択" value="2025/05/09" style="display: none;">
+    <div id="search-container" style="display: none;"></div>
     <div id="chat-container"></div>
     <!-- ローディングオーバーレイ -->
     <div id="loading-overlay">
         <div class="loading-text">読み込み中...</div>
     </div>
+    <script>
+        document.getElementById('search-button').addEventListener('click', async () => {
+            const keyword = document.getElementById('search-input').value.trim();
+            if (!keyword) return;
+
+            showLoading();
+
+            const res = await fetch(`/lover/api/search_message/?keyword=${encodeURIComponent(keyword)}`);
+            const data = await res.json();
+
+            hideLoading();
+
+            const resultsContainer = document.getElementById('search-container');
+            resultsContainer.style.display = ""
+            resultsContainer.innerHTML = ''; // 一度リセット
+
+            if (data.results && data.results.length > 0) {
+                data.results.forEach(item => {
+                    const div = document.createElement('div');
+                    div.classList.add('search-result-item');
+                    div.innerHTML = `
+                <strong>${item.time}</strong> - <em>${item.name}</em>: ${item.text}
+                <button data-page="${item.page}" data-id="${item.id}">ジャンプ</button>
+            `;
+                    resultsContainer.appendChild(div);
+                });
+
+                // ボタンにイベントリスナーを追加（ページにジャンプ）
+                resultsContainer.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const page = btn.dataset.page;
+                        const targetId = btn.dataset.id;
+
+                        chatContainer.innerHTML = '';
+
+                        // ロードして戻ってくるmessage群の中から、該当idの要素を取得
+                        const { targetElement } = await loadMessages(page, 'past');
+
+                        // DOM上にある要素の中から、id属性で該当するものを探す
+                        const targetMessage = chatContainer.querySelector(`[data-id="${targetId}"]`);
+                        if (targetMessage) {
+                            targetMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            targetMessage.style.background = '#ffff99'; // ハイライト（任意）
+                            setTimeout(() => targetMessage.style.background = '', 2000); // 元に戻す
+                        }
+
+                        resultsContainer.innerHTML = '';
+                        resultsContainer.style.display = "none"
+                    });
+                });
+
+            } else {
+                resultsContainer.innerHTML = '<p>該当メッセージが見つかりませんでした</p>';
+            }
+        });
+    </script>
     <script>
         const calendarPicker = document.getElementById('calendar');
         const picker = flatpickr(calendarPicker, {
@@ -169,7 +261,8 @@
 
         function createMessageElement(msg, pagenum) {
             const div = document.createElement('div');
-            div.dataset.page = pagenum
+            div.dataset.page = pagenum;
+            div.dataset.id = msg.id;
             div.className = 'msg';
 
             const name = document.createElement('div');
@@ -275,21 +368,19 @@
             }
 
             // 一番下に到達 → 新しいメッセージを読み込む（復元）
-            setTimeout(() => {
-                const isBottom = Math.abs(chatContainer.scrollTop + chatContainer.clientHeight - chatContainer.scrollHeight) < 5;
-                if (isBottom) {
-                    let futurePage = chatContainer.lastElementChild.dataset.page;
-                    if (futurePage === "1") {
-                        return;
-                    }
-                    loading = true;
-                    showLoading();
-                    const hasNext = loadMessages(parseInt(futurePage) - 1, 'future');
-                    removeOldMessagesIfNeeded("buttom");
-                    loading = false;
-                    hideLoading();
+            const isBottom = Math.abs(chatContainer.scrollTop + chatContainer.clientHeight - chatContainer.scrollHeight) < 5;
+            if (isBottom) {
+                let futurePage = chatContainer.lastElementChild.dataset.page;
+                if (futurePage === "1") {
+                    return;
                 }
-            }, 50);
+                loading = true;
+                showLoading();
+                const hasNext = await loadMessages(parseInt(futurePage) - 1, 'future');
+                removeOldMessagesIfNeeded("buttom");
+                loading = false;
+                hideLoading();
+            }
         });
 
 
