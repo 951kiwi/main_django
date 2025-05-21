@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     <title>LINEトーク一覧</title>
     <style>
@@ -12,10 +13,19 @@
         }
 
         body {
+            max-width: 430px;
+            /* iPhone 14 Pro Max の横幅 */
             display: flex;
             flex-direction: column;
             font-family: sans-serif;
             background: #f0f0f0;
+        }
+
+        button,
+        input {
+            width: 100%;
+            padding: 0.75em;
+            font-size: 1em;
         }
 
         h1 {
