@@ -127,26 +127,9 @@
 </head>
 
 <body>
-    <div class="header">
-        <!-- ログイン状態のチェック -->
-        {% if user.is_authenticated %}
-        {% if user.nickname %}
-        <p class="welcome">ようこそ、{{ user.nickname }}さん！</p>
-        {% else %}
-        <p class="welcome">ようこそ、{{ user.username }}さん！</p>
-        {% endif %}
-        <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="button" style="background-color: #333;">ログアウト</button>
-        </form>
-        {% else %}
-        <p class="welcome">ログインしていません。</p>
-        <form action="{% url 'login' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="button">ログイン</button>
-        </form>
-        {% endif %}
-    </div>
+    <header>
+    {% include ".includes/header.html" %}
+    </header>
     <h1>リンク集</h1>
 
     <div class="container">

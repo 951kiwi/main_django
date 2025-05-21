@@ -7,7 +7,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0px;
             background-color: #f8f9fa;
         }
         h1 {
@@ -22,7 +22,7 @@
         .card {
             width: calc(33.33% - 16px); /* 3列表示 (PC) */
             max-width: 300px;
-            aspect-ratio: 16 / 14;
+            aspect-ratio: 16 / 12;
             border-radius: 8px;
             background-color: #6091d3;
             border: solid 3px #6091d3;/*線*/
@@ -46,7 +46,6 @@
             align-items: center;
             font-size: 16px;
             background-color: #f9f9f963;
-            border-top: 1px solid #e0e0e0;
         }
         .header {
             position: sticky;
@@ -83,28 +82,34 @@
             }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 670px) {
             .card {
-                width: calc(50% - 32px); /* スマホでは2列表示 */
-                aspect-ratio: 16 / 14;
+                width: calc(40% - 16px); /* スマホでは2列表示 */
                 height: auto;
-                border: solid 2px #6091d3;/*線*/
+                aspect-ratio: 16/12;
                 
+            }
+            .card .name {
+                height: 20px;
+            }
+        }
+        @media (max-width: 400px) {
+            .card {
+                width: calc(80% - 16px); /* スマホでは2列表示 */
+                height: auto;
+                aspect-ratio: 16 / 12;
+                
+            }.card .name {
+                height: 40px;
             }
         }
     </style>
 </head>
+
 <body>
-    <div class="header">
-        <!-- ログイン状態のチェック -->
-        {% if user.is_authenticated %}
-        {% if user.nickname %}
-        <p class="welcome">ようこそ、{{ user.nickname }}さん！</p>
-        {% else %}
-        <p class="welcome">ようこそ、{{ user.username }}さん！</p>
-        {% endif %}
-        {% endif %}
-    </div>
+    <header>
+    {% include ".includes/header.html" %}
+    </header>
     <h1>プレイリスト一覧</h1>
     <div class="container">
         {% for folder in folders %}

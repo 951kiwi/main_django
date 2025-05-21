@@ -1,7 +1,12 @@
 from django.shortcuts import render,redirect
 from django.http import JsonResponse
 from .models import Selection,Video
+from django.conf import settings
 import requests
+import re
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+import os
 from bs4 import BeautifulSoup
 import random
 #ハーゲンダッツのjancodeリスト
@@ -15,6 +20,73 @@ headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
 }
 
+def parse_line_talk(file_path):
+    messages = []
+    current_date = ""
+    current_message = None
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if re.match(r'^R\d+/\d{2}/\d{2}', line):
+                current_date = line
+            elif re.match(r'^\d{2}:\d{2}\t', line):
+                if current_message:
+                    messages.append(current_message)
+                parts = line.split('\t')
+                if len(parts) >= 3:
+                    time, name, content = parts[0], parts[1], '\t'.join(parts[2:])
+                    current_message = {
+                        'name': name,
+                        'time': f"{current_date} {time}",
+                        'content': content
+                    }
+            else:
+                if current_message:
+                    current_message['content'] += '\n' + line
+
+    if current_message:
+        messages.append(current_message)
+
+    return messages
+
+# 初期表示用
+def talk_list_view(request):
+    return render(request, 'lover/talk_list.html')
+
+def get_page_date(request):
+    file_path = os.path.join(settings.BASE_DIR, 'static', 'lover', 'Line', '[LINE]トーク.txt')
+    all_messages = parse_line_talk(file_path)
+
+    # 時系列順に並べ替える（すでに並んでいるなら不要）
+    all_messages.reverse()
+
+    # R7/05/01 を含む「最後の」メッセージを探す
+    target_date = request.GET.get('date')
+    index = next((len(all_messages) - 1 - i for i, msg in enumerate(reversed(all_messages)) if target_date in msg["time"]), None)
+
+
+    if index is None:
+        return JsonResponse({'error': 'R7/05/01 の投稿が見つかりませんでした'}, status=404)
+
+    # 100件ごとのページ番号
+    page = index // 100 + 1
+    return JsonResponse({'page': page})
+
+# Ajaxでページごと取得
+def talk_api(request):
+    page = int(request.GET.get('page', 1))
+    direction = request.GET.get('direction', 'past')  # 'past' または 'future'
+
+    file_path = os.path.join(settings.BASE_DIR, 'static', 'lover', 'Line', '[LINE]トーク.txt')
+    all_messages = parse_line_talk(file_path)
+    all_messages.reverse()  # 最新が後ろ
+    # future のときはそのまま（新しい順）
+
+    paginator = Paginator(all_messages, 100)
+    page_obj = paginator.get_page(page)
+    data = list(page_obj.object_list)
+    return JsonResponse({'messages': data, 'has_next': page_obj.has_next()})
 
 def phone_view(request):
     # 最初のSelectionオブジェクトを取得
