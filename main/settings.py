@@ -64,7 +64,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'app_main.middleware.UserActivityMiddleware',
+    'app_main.middleware.UpdateLastActivityMiddleware',
 ]
+
+# For writing log to another DB
+
+DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
+DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
 
 ROOT_URLCONF = 'main.urls'
 AUTH_PASSWORD_VALIDATORS = []
