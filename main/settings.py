@@ -68,11 +68,6 @@ MIDDLEWARE = [
     'app_main.middleware.UpdateLastActivityMiddleware',
 ]
 
-# For writing log to another DB
-
-DATABASE_ROUTERS = ['activity_log.router.DatabaseAppsRouter']
-DATABASE_APPS_MAPPING = {'activity_log': 'logs'}
-
 ROOT_URLCONF = 'main.urls'
 AUTH_PASSWORD_VALIDATORS = []
 TEMPLATES = [
