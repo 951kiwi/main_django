@@ -14,7 +14,15 @@ class UpdateLastActivityMiddleware(MiddlewareMixin):
                 request.user.last_activity = now()
                 request.user.save(update_fields=['last_activity'])
         return None
-    
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 class UserActivityMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -26,7 +34,7 @@ class UserActivityMiddleware:
             return response  # 管理画面や静的ファイルはスキップ
 
         user = request.user if request.user.is_authenticated else None
-        ip = request.META.get('REMOTE_ADDR')
+        ip = get_client_ip(request)
         ua = request.META.get('HTTP_USER_AGENT', '')
 
         # DBに保存
