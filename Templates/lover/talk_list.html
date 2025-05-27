@@ -61,7 +61,8 @@
             display: flex;
             flex-direction: column;
             border: 5px solid #333333;
-            max-height: 80hv;
+            min-height: 80vh;
+            max-height: 80vh;
         }
 
         .message-wrapper {
@@ -194,6 +195,7 @@
         #search-area {
             display: flex;
             gap: 5px;
+
         }
 
         #search-input {
@@ -292,6 +294,9 @@
 
             } else {
                 resultsContainer.innerHTML = '<p>該当メッセージが見つかりませんでした</p>';
+                setTimeout(() => {
+                    resultsContainer.style.display = "none"
+                }, 1000);
             }
         });
     </script>
