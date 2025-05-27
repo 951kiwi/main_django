@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.http import JsonResponse
-from .models import Selection,Video
+from .models import Selection,Video,Line
 from django.conf import settings
 import requests
 import re
@@ -57,7 +57,8 @@ def parse_line_talk(file_path):
 # 初期表示用
 @login_required
 def talk_list_view(request):
-    return render(request, 'lover/talk_list.html')
+    lineData = Line.objects.first()
+    return render(request, 'lover/talk_list.html' , {'data': lineData})
 
 def get_page_date(request):
     file_path = os.path.join(settings.BASE_DIR, 'static', 'lover', 'Line', '[LINE]トーク.txt')
@@ -87,7 +88,6 @@ def talk_api(request):
     all_messages = parse_line_talk(file_path)
     all_messages.reverse()  # 最新が後ろ
     # future のときはそのまま（新しい順）
-
     paginator = Paginator(all_messages, 100)
     page_obj = paginator.get_page(page)
     data = list(page_obj.object_list)
@@ -101,7 +101,7 @@ def search_message(request):
     file_path = os.path.join(settings.BASE_DIR, 'static', 'lover', 'Line', '[LINE]トーク.txt')
     all_messages = parse_line_talk(file_path)
     all_messages.reverse()  # 最新が後ろ
-
+    
     results = []
     for i, msg in enumerate(all_messages):
         text = msg.get("content", "")

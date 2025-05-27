@@ -29,22 +29,26 @@
             margin: 0;
         }
 
+        /*style="display: flex; justify-content: space-between; align-items: center; margin: 5px; gap: 10px;"*/
+
         h2 {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            /* 必要に応じて省略記号を追加 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px;
+            gap: 10px;
+            min-height: 40px;
+            /* ⬅️ 高さを確保 */
         }
 
         #chat-container {
-            flex: 1;
-            /* 残り全部使う */
-            overflow-y: scroll;
-            background: #e0e0e0;
-            padding: 10px;
-            border-radius: 10px;
             display: flex;
+            overflow-y: scroll;
             flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            max-width: 500px;
+            margin: 0 auto;
         }
 
         #search-container {
@@ -60,25 +64,107 @@
             max-height: 80hv;
         }
 
+        .message-wrapper {
+            display: flex;
+            margin: 8px 0;
+        }
+
+        .message-wrapper.self {
+            flex-direction: row-reverse;
+        }
+
         .msg {
-            background: white;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+            position: relative;
+            border-radius: 15px;
+            font-family: sans-serif;
+            line-height: 1.4;
+            word-break: break-word;
         }
 
-        .name {
-            font-weight: bold;
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin: 0 8px;
+            margin-top: 0.7rem;
+            object-fit: cover;
+            border: 1px solid #ccc;
         }
 
-        .time {
-            color: gray;
-            font-size: 0.9em;
+
+        .msg .name {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.7rem;
+            margin-bottom: 2px;
+            color: #888;
         }
 
-        .content {
-            margin-top: 5px;
+        .msg .time {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.6rem;
+            color: #999;
+            align-self: flex-end;
+            margin-top: 4px;
+        }
+
+        .msg .content {
+            width: fit-content;
+            max-width: 100%;
+            /* これで長文対応 */
+            border: solid 0.1px #c7c6c6;
+            padding: 10px 14px;
+            border-radius: 20px;
+            word-wrap: break-word;
             white-space: pre-wrap;
+            line-height: 1.4;
+            position: relative;
+            background: #e5e5ea;
+            color: black;
+        }
+
+        /* 自分のメッセージ（右） */
+        .msg.self {
+            align-items: end;
+        }
+
+        .msg.self .content {
+            background: #9fe7a4;
+            color: black;
+            border-top-right-radius: 4px;
+            border-bottom-left-radius: 20px;
+        }
+
+        .message-wrapper.self .content {
+            background: #9fe7a4;
+            border-top-right-radius: 4px;
+            border-bottom-left-radius: 20px;
+        }
+
+        /* 相手のメッセージ（左） */
+        .msg.other {
+            align-self: flex-start;
+        }
+
+        .msg.other .content {
+            background: #ffffff;
+            border-top-left-radius: 4px;
+            border-bottom-right-radius: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .message-wrapper.other .content {
+            background: #ffffff;
+            border-top-left-radius: 4px;
+            border-bottom-right-radius: 20px;
         }
 
         #loading-overlay {
@@ -107,13 +193,14 @@
         #search-area {
             display: flex;
             gap: 5px;
-            margin-bottom: 10px;
         }
 
         #search-input {
-            flex: 1;
+            flex: 0 1 150px;
+            min-width: 100px;
+            max-width: 200px;
             padding: 6px;
-            font-size: 16px;
+            font-size: 12px;
         }
 
         .search-result-item {
@@ -131,7 +218,7 @@
 </head>
 
 <body>
-    <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 5px; gap: 10px;">
+    <h2>
         <span style="flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             LINEトーク一覧
         </span>
@@ -272,14 +359,40 @@
         const chatContainer = document.getElementById('chat-container');
 
         function createMessageElement(msg, pagenum) {
+            const wrapper = document.createElement('div');
+            var stamp = false
+            msg.content === "[スタンプ]" ? stamp = true : stamp = false
+            var picture = false
+            msg.content === "[写真]" ? picture = true : picture = false
+            wrapper.className = 'message-wrapper ' + (msg.name === "コハルポンギン❕" ? 'self' : 'other');
+            if (stamp || picture) wrapper.style.margin = "0";
+            const avatar = document.createElement('img');
+            if (msg.name === "コハルポンギン❕") {
+                avatar.src = "{{data.she_image.url}}"
+            }
+            else {
+                avatar.src = "{{data.he_image.url}}"
+            }
+            if (stamp || picture) {avatar.style.opacity = '0';}
+            if (stamp || picture) {avatar.style.marginTop = '0';}
+            //avatar.src = '/default.jpg'; // msg.avatar に画像URLを含める
+            avatar.className = 'avatar';
+
             const div = document.createElement('div');
             div.dataset.page = pagenum;
             div.dataset.id = msg.id;
-            div.className = 'msg';
+            // 名前が「コハルポンギン❕️」なら「self」、それ以外は「other」
+            const isSelf = msg.name === "コハルポンギン❕";
+            div.className = 'msg ' + (isSelf ? 'self' : 'other');
 
             const name = document.createElement('div');
             name.className = 'name';
-            name.textContent = msg.name;
+            if (msg.name === "コハルポンギン❕") {
+                name.textContent = "{{data.she_name}}"
+            }
+            else {
+                name.textContent = "{{data.he_name}}"
+            }
 
             const time = document.createElement('div');
             time.className = 'time';
@@ -288,11 +401,16 @@
             const content = document.createElement('div');
             content.className = 'content';
             content.textContent = msg.content;
-
-            div.appendChild(name);
-            div.appendChild(time);
+            if(stamp)content.style.backgroundColor = "#9fe7e1"
+            if(picture)content.style.backgroundColor = "#e79f9f"
+            if (!stamp && !picture) { div.appendChild(name); }
             div.appendChild(content);
-            return div;
+            if (!stamp && !picture) { div.appendChild(time); }
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(div);
+
+            return wrapper;
         }
 
         async function loadMessages(pageNum, direction, targetDate = null) {
@@ -344,7 +462,7 @@
         }
 
         function removeOldMessagesIfNeeded(past) {
-            const messages = chatContainer.querySelectorAll('.msg');
+            const messages = chatContainer.querySelectorAll('.message-wrapper');
             if (messages.length > MAX_MESSAGES) {
                 const numToRemove = messages.length - MAX_MESSAGES;
                 for (let i = 0; i < numToRemove; i++) {
@@ -367,7 +485,7 @@
             if (chatContainer.children.length == 0) return;
             // 一番上に到達 → 古いメッセージを読み込む
             if (chatContainer.scrollTop === 0) {
-                let pastPage = chatContainer.firstElementChild.dataset.page;
+                let pastPage = chatContainer.firstElementChild.querySelector('.msg').dataset.page;
                 if (pastPage === "894") {
                     return;
                 }
@@ -382,7 +500,7 @@
             // 一番下に到達 → 新しいメッセージを読み込む（復元）
             const isBottom = Math.abs(chatContainer.scrollTop + chatContainer.clientHeight - chatContainer.scrollHeight) < 5;
             if (isBottom) {
-                let futurePage = chatContainer.lastElementChild.dataset.page;
+                let futurePage = chatContainer.lastElementChild.querySelector('.msg').dataset.page;
                 if (futurePage === "1") {
                     return;
                 }
