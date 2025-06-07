@@ -37,6 +37,7 @@
         <div class="month_card" id="month_card{{ record.month }}">
             <h3>{{ record.month|date:"Y年m月" }}</h3>
             <h5>{{ record.month_data.fuel_efficiency }} km/L {{ record.month_data.cost_per_liter }}円
+                <i class="bi bi-check-circle check"></i>
                 <i id="settingicon{{ record.month }}" class="bi bi-gear-wide-connected" onclick='openModal("{{ record.month }}")'></i>
             </h5>
             {% if record.month_data.is_check %}

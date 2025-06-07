@@ -33,6 +33,14 @@
     font-size: 24px;
 
 }
+.month_card h5 i.check{
+    position: absolute;
+    top: 50%; /* 親要素の縦中央に配置 */
+    right: 30px; /* 左端に配置 */
+    transform: translate(0, -50%); /* 縦中央を正確に補正 */
+    font-size: 24px;
+
+}
 .user_card{
     width: 95%;
     padding: 0px 0px 10px 0px;

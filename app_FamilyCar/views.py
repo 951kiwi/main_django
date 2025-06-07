@@ -6,21 +6,36 @@ from .forms import GasRecordForm
 from django.contrib.auth import get_user_model
 import calendar
 from .models import GasRecord, MonthlyRecord
+from django.contrib.auth.decorators import login_required
 
+
+def user_permission(request):
+    user = request.user
+    if not user.is_authenticated:
+        permission =  'anonymous'  # 未ログインの場合
+    if user.username == "951kiwi":
+        permission = 'admin'
+    if user.username == 'miu':
+        permission == 'general'
+    if user.username == 'daiki':
+        permission = 'parent'
+
+    return permission
 
 def gas_record_create(request):
-    if request.method == 'POST':
+    if request.method == 'POST': #保存なら
         gas_form = GasRecordForm(request.POST)
         if gas_form.is_valid():
             # ガソリンデータの保存
             gas_form.save()
             return redirect('monthly_summary')  # 保存後にリダイレクト
     else:
-        gas_form = GasRecordForm()
+        # 初期値にログイン中のユーザーを設定
+        form = GasRecordForm(initial={'user': request.user, 'date': now().date()})
 
-    return render(request, 'FamilyCar/gasrecord_create.html', {'gas_form': gas_form})
+    return render(request, 'FamilyCar/gasrecord_create.html', {'gas_form': form,'permission':user_permission(request)})
 
-def parent_monthly_summmary(request):
+def parent_monthly_summary(request):
     monthly_data = MonthlyRecord.objects.all()
     User = get_user_model()
     # 月ごとのガソリン合計（走行距離）と日ごとの走行距離を取得
@@ -55,14 +70,18 @@ def parent_monthly_summmary(request):
     })
 
 
+
+@login_required
 def monthly_gas_summary(request):
 
     monthly_data = MonthlyRecord.objects.all()
+    user = request.user  # ログイン中のユーザー
+    
 
     # 月ごとのガソリン合計（走行距離）と日ごとの走行距離を取得
     monthly_summary = []
     for record in monthly_data:
-        gas_datas = GasRecord.objects.filter(monthly_record=record).order_by('date')
+        gas_datas = GasRecord.objects.filter(monthly_record=record , user=user).order_by('date')
         total_distance = gas_datas.aggregate(total_distance=Sum('distance'))['total_distance'] or 0
 
         monthly_summary.append({

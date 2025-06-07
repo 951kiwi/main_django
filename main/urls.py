@@ -32,7 +32,7 @@ urlpatterns = [
     path('fileuploader/',include('app_fileuploader.urls')),
     # robots.txt
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type='text/plain'), name="robots.txt"),
-
+    
 ]
 
 # DEBUG モードのときだけメディアファイルを提供
