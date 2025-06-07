@@ -73,6 +73,39 @@
         .create-button:hover {
             background-color: #45a049;
         }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        /* モーダル本体 */
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 300px;
+            text-align: center;
+        }
+
+        /* 閉じるボタン */
+        .close-btn {
+            margin-top: 15px;
+            padding: 5px 15px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -129,12 +162,33 @@
             <div class="daily-distance">
                 <h4>日ごとの走行距離:</h4>
                 {% for daily in record.gas_datas %}
-                <p>{{ daily.date|date:"m月d日" }}: {{ daily.distance }} km <i class="bi bi-receipt"></i></p>
+                <p>{{ daily.date|date:"m月d日" }}: {{ daily.distance }} km <i class="bi bi-receipt" onclick='openModal(`{{ daily.date|date:"m月d日" }}` , `{{daily.distance}}` , `{{daily.image}}`,`{{daily.id}}`)'></i></p>
                 {% endfor %}
             </div>
         </div>
         {% endfor %}
     </div>
+    <!-- モーダル -->
+    <div id="detailModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-date">日付</h3>
+            <p id="modal-distance">距離</p>
+            <img id="model-image" style="width: 80%; max-height: 60%; text-align: center;" src="data:image/jpeg;base64,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">
+            <br>
+            <button class="close-btn" onclick="closeModal()">閉じる</button>
+        </div>
+    </div>
+    <script>
+        function openModal(date, distance, imageUrl = 0, id) {
+            document.getElementById('modal-date').textContent = `日付: ${date}`;
+            document.getElementById('modal-distance').textContent = `距離: ${distance} km`;
+            if(imageUrl !== ""){ document.getElementById('model-image').src = imageUrl}
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+    </script>
 </body>
 
 </html>
