@@ -79,7 +79,7 @@ def monthly_gas_summary(request):
     user = request.user  # ログイン中のユーザー
     
     User = get_user_model()
-    if User == "parent":
+    if user.id == 7:
         return redirect('parent_monthly_summary')  # 保存後にリダイレクト
     
 
