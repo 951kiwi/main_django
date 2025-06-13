@@ -41,6 +41,9 @@ def parent_monthly_summary(request):
     # 月ごとのガソリン合計（走行距離）と日ごとの走行距離を取得
     childUsersId=[1,5] # 1=あいむ 5=みう
     monthly_summary = []
+    if User= "parent":
+        return redirect('parent_monthly_summary')  # 保存後にリダイレクト
+    
     for record in monthly_data:
         datas = []
         for userId in childUsersId:
