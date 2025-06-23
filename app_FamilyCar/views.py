@@ -11,7 +11,6 @@ from django.contrib.auth.decorators import login_required
 
 def user_permission(request):
     user = request.user
-    permission = 'general' # 初期値として 'general' を設定（例）
     if not user.is_authenticated:
         permission =  'anonymous'  # 未ログインの場合
     elif user.username == "951kiwi":
