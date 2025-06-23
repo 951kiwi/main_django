@@ -1,0 +1,23 @@
+<h3>第何ゲームかを指定して一括入力</h3>
+<form method="post">
+  {% csrf_token %}
+  <label>第</label>
+  <input type="number" name="game_number" required style="width: 60px;"> <label>ゲーム</label><br><br>
+
+  <table>
+    <tr>
+      <th>プレイヤー</th>
+      <th>得点</th>
+    </tr>
+    {% for user in game_users %}
+    <tr>
+      <td>{{ user.name }}</td>
+      <td>
+        <input type="number" name="point_{{ user.id }}" style="width: 100px;">
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <br>
+  <button type="submit">まとめて追加</button>
+</form>

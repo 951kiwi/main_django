@@ -1,0 +1,27 @@
+<!-- templates/poker/room_list.html -->
+<h2>ルーム一覧</h2>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+  {% for room in rooms %}
+    <div style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 300px;">
+      <p><strong>ルーム名：</strong>{{ room.name }}</p>
+      <p><strong>作成者：</strong>{{ room.created_by.username }}</p>
+      <p><strong>作成日：</strong>{{ room.created_at|date:"Y/m/d H:i" }}</p>
+
+      <form method="get" action="{% url 'room_detail' room.id %}" style="display:inline;">
+        <button type="submit">選択</button>
+      </form>
+
+      {% if request.user == room.created_by %}
+        <form method="get" action="{% url 'room_edit' room.id %}" style="display:inline;">
+          <button type="submit">編集</button>
+        </form>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>表示可能なルームがありません。</p>
+  {% endfor %}
+</div>
+
+<br>
+<a href="{% url 'create_room' %}">ルームを作成する</a>

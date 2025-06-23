@@ -1,0 +1,12 @@
+<h2>スコア一覧</h2>
+<table>
+  <tr><th>日付</th><th>ルーム</th><th>プレイヤー</th><th>スコア</th></tr>
+  {% for score in scores %}
+    <tr>
+      <td>{{ score.game.date_played }}</td>
+      <td>{{ score.game.room.name }}</td>
+      <td>{{ score.player.name }}</td>
+      <td>{{ score.score }}</td>
+    </tr>
+  {% endfor %}
+</table>

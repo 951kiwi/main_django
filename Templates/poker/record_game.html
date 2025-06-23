@@ -1,0 +1,7 @@
+<h2>ゲームの結果を記録</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ game_form.as_p }}
+  {{ score_form.as_p }}
+  <button type="submit">記録</button>
+</form>

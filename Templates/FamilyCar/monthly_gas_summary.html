@@ -162,7 +162,11 @@
             <div class="daily-distance">
                 <h4>日ごとの走行距離:</h4>
                 {% for daily in record.gas_datas %}
-                <p>{{ daily.date|date:"m月d日" }}: {{ daily.distance }} km <i class="bi bi-receipt" onclick='openModal(`{{ daily.date|date:"m月d日" }}` , `{{daily.distance}}` , `{{daily.image}}`,`{{daily.id}}`)'></i></p>
+                {% if daily.image %}
+                <p>{{ daily.date|date:"m月d日" }}: {{ daily.distance }} km <i class="bi bi-receipt" onclick='openModal(`{{ daily.date|date:"m月d日" }}` , `{{daily.distance}}` , `{{daily.image.url}}`,`{{daily.id}}`)'></i></p>
+                {% else %}
+                <p>{{ daily.date|date:"m月d日" }}: {{ daily.distance }} km <i class="bi bi-receipt" onclick='openModal(`{{ daily.date|date:"m月d日" }}` , `{{daily.distance}}` , ``,`{{daily.id}}`)'></i></p>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
