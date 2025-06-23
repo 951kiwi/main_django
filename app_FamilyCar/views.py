@@ -13,11 +13,11 @@ def user_permission(request):
     user = request.user
     if not user.is_authenticated:
         permission =  'anonymous'  # 未ログインの場合
-    if user.username == "951kiwi":
+    elif user.username == "951kiwi":
         permission = 'admin'
-    if user.username == 'miu':
-        permission == 'general'
-    if user.username == 'daiki':
+    elif user.username == 'miu':
+        permission = 'general'
+    elif user.username == 'daiki':
         permission = 'parent'
 
     return permission
@@ -76,10 +76,10 @@ def parent_monthly_summary(request):
 def monthly_gas_summary(request):
 
     monthly_data = MonthlyRecord.objects.all()
-    user = request.user  # ログイン中のユーザー
-    
-    User = get_user_model()
-    if user.id == 7:
+    user = request.user
+    permission = user_permission(request)
+    print(permission)
+    if permission == "parent":
         return redirect('parent_monthly_summary')  # 保存後にリダイレクト
     
 
