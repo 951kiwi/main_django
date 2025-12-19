@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>{{ player.name }} のサプライズ</title>
+
+<style>
+/* ===== 全体 ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+}
+
+body {
+  background: linear-gradient(180deg, #0b1d3a, #12325c);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== 雪用キャンバス ===== */
+#snow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ===== カード ===== */
+.card {
+  position: relative;
+  z-index: 2;
+  background: rgba(255,255,255,0.95);
+  color: #2c3e50;
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  animation: pop 0.8s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== タイトル ===== */
+.title {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.sub {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+/* ===== 写真 ===== */
+.photo-frame {
+  background: #fff;
+  border-radius: 18px;
+  padding: 10px;
+  margin: 20px auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.photo-frame img {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+/* ===== メッセージ ===== */
+.message {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #c0392b;
+}
+
+/* ===== 装飾 ===== */
+.tree {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="snow"></canvas>
+
+<div class="card">
+  <div class="tree">🎄</div>
+  <div class="title">{{ player.name }} さんへ</div>
+  <div class="sub">Merry Christmas 🎅✨</div>
+
+  {% if player.photo %}
+    <div class="photo-frame">
+      <img src="{{ player.photo.url }}" alt="photo">
+    </div>
+  {% else %}
+    <p>写真がありません</p>
+  {% endif %}
+
+  <div class="message">
+    素敵なクリスマスを！
+  </div>
+</div>
+
+<script>
+/* ===== 雪エフェクト ===== */
+const canvas = document.getElementById("snow");
+const ctx = canvas.getContext("2d");
+
+let w, h;
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+const snowflakes = [];
+for (let i = 0; i < 120; i++) {
+  snowflakes.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 3 + 1,
+    d: Math.random() + 1
+  });
+}
+
+let angle = 0;
+
+function drawSnow() {
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.beginPath();
+  snowflakes.forEach(f => {
+    ctx.moveTo(f.x, f.y);
+    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+  });
+  ctx.fill();
+  moveSnow();
+}
+
+function moveSnow() {
+  angle += 0.01;
+  snowflakes.forEach(f => {
+    f.y += Math.pow(f.d, 2) + 0.5;
+    f.x += Math.sin(angle) * 0.5;
+
+    if (f.y > h) {
+      f.y = -5;
+      f.x = Math.random() * w;
+    }
+  });
+}
+
+setInterval(drawSnow, 30);
+</script>
+
+</body>
+</html>

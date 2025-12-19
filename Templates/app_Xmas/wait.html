@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>待機中</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #111;
+    color: #fff;
+    font-family: "Segoe UI", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .box {
+    text-align: center;
+    padding: 30px 40px;
+    border: 3px solid #4caf50;
+    border-radius: 12px;
+    animation: pulse 1.8s infinite;
+  }
+
+  h1 {
+    margin: 0 0 10px;
+    font-size: 26px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.8;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0px #4caf50; }
+    50% { box-shadow: 0 0 20px #4caf50; }
+    100% { box-shadow: 0 0 0px #4caf50; }
+  }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h1>⏳ 待機中</h1>
+  <p>出題が始まるまでお待ちください</p>
+</div>
+
+<script>
+  // 3秒ごとに状態確認（管理者が開始したら quiz に戻す）
+  setInterval(() => {
+    fetch("{% url 'Xmas:quiz' %}", { method: "HEAD" })
+      .then(res => {
+        if (res.status === 200) {
+          location.href = "{% url 'Xmas:quiz' %}";
+        }
+      });
+  }, 1000);
+</script>
+
+</body>
+</html>

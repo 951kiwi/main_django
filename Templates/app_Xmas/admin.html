@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(120deg, #e0eafc, #cfdef3);
+  margin: 0;
+  padding: 40px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* 共通カード */
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  margin: 0 auto 30px auto;
+  max-width: 900px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* ===== クイズ操作 ===== */
+.control-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.control-area form {
+  display: flex;
+  gap: 10px;
+}
+
+select {
+  padding: 10px;
+  font-size: 16px;
+}
+
+.control-area button {
+  padding: 10px 18px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #34495e;
+  color: white;
+}
+
+/* ===== カウンター ===== */
+.add-area {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.add-area input {
+  padding: 10px;
+  font-size: 18px;
+  width: 200px;
+}
+
+.add-area button {
+  padding: 10px 18px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  background: #2ecc71;
+  color: white;
+  cursor: pointer;
+}
+
+.counter-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.counter {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 16px;
+  width: 220px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.counter-name {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.count {
+  font-size: 46px;
+  margin: 15px 0;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.buttons button {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.plus {
+  background: #3498db;
+  color: white;
+}
+
+.minus {
+  background: #e74c3c;
+  color: white;
+}
+
+.delete {
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #7f8c8d;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>クイズ管理パネル</h1>
+
+<!-- クイズ操作 -->
+<div class="card">
+  <div class="control-area">
+
+    <form method="post">
+      {% csrf_token %}
+      <select name="question_id">
+        {% for q in questions %}
+          <option value="{{ q.id }}">{{ q.text|truncatechars:20 }}</option>
+        {% endfor %}
+      </select>
+      <button name="set_and_start">問題セット＆開始</button>
+    </form>
+
+    <form method="post">
+      {% csrf_token %}
+      <button name="show_answer">正解を表示</button>
+    </form>
+
+    <form method="post">
+      {% csrf_token %}
+      <button name="set_waiting">待機中にする</button>
+    </form>
+
+  </div>
+</div>
+
+<!-- カウンター -->
+<div class="card">
+  <h1>管理用カウンター</h1>
+
+  <div class="add-area">
+    <input id="newName" placeholder="カウンター名">
+    <button onclick="addCounter()">追加</button>
+  </div>
+
+  <div class="counter-area" id="counterArea"></div>
+</div>
+
+<script>
+const STORAGE_KEY = "admin_counters";
+let counters = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+render();
+
+function addCounter() {
+  const input = document.getElementById("newName");
+  const name = input.value.trim();
+  if (!name) return;
+
+  counters.push({ id: Date.now(), name, value: 0 });
+  input.value = "";
+  save();
+  render();
+}
+
+function change(id, diff) {
+  const c = counters.find(c => c.id === id);
+  if (!c) return;
+  c.value += diff;
+  save();
+  render();
+}
+
+function removeCounter(id) {
+  counters = counters.filter(c => c.id !== id);
+  save();
+  render();
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(counters));
+}
+
+function render() {
+  const area = document.getElementById("counterArea");
+  area.innerHTML = "";
+
+  counters.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "counter";
+    div.innerHTML = `
+      <div class="counter-name">${c.name}</div>
+      <div class="count">${c.value}</div>
+      <div class="buttons">
+        <button class="minus" onclick="change(${c.id}, -1)">−</button>
+        <button class="plus" onclick="change(${c.id}, 1)">＋</button>
+      </div>
+      <button class="delete" onclick="removeCounter(${c.id})">削除</button>
+    `;
+    area.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>

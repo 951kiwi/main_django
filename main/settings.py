@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'app_worker',
     'mathfilters',
     'app_fileuploader',
+    'app_Xmas',
     'channels',
     'sslserver',
 ]

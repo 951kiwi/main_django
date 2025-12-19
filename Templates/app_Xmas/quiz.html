@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Quiz</title>
+
+<style>
+/* ===== 全体 ===== */
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== 点滅 ===== */
+body.flash {
+  animation: flash-bg 0.4s alternate infinite;
+}
+@keyframes flash-bg {
+  from { background: #e74c3c; }
+  to   { background: #34495e; }
+}
+
+/* ===== カード ===== */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+/* ===== 待機 ===== */
+#wait-screen {
+  text-align: center;
+}
+#wait-screen h1 {
+  font-size: 26px;
+}
+#wait-screen p {
+  color: #666;
+}
+
+/* ===== 問題 ===== */
+#question {
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+/* ===== 選択肢 ===== */
+.choices {
+  display: grid;
+  gap: 14px;
+}
+
+.choice-btn {
+  padding: 18px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: 3px solid #bbb;
+  background: #f8f8f8;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.choice-btn:hover {
+  background: #eee;
+}
+
+.choice-btn.selected {
+  background: #3498db;
+  color: #fff;
+  border-color: #3498db;
+}
+
+.choice-btn.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ===== タイマー ===== */
+.timer {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.timer.danger {
+  color: #e74c3c;
+  font-weight: bold;
+  animation: pulse 0.6s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <!-- 待機 -->
+  <div id="wait-screen" style="display:none;">
+    <h1>⏳ 待機中</h1>
+    <p>次の問題を待っています</p>
+  </div>
+
+  <!-- クイズ -->
+  <div id="quiz-screen" style="display:none;">
+    <h1 id="question">---</h1>
+
+    <div class="choices">
+      <button class="choice-btn" data-choice="A" id="btn-A"></button>
+      <button class="choice-btn" data-choice="B" id="btn-B"></button>
+      <button class="choice-btn" data-choice="C" id="btn-C"></button>
+      <button class="choice-btn" data-choice="D" id="btn-D"></button>
+    </div>
+
+    <div class="timer" id="timer">
+      残り <span id="time">--</span> 秒
+    </div>
+  </div>
+
+</div>
+
+<form id="answer-form" method="post" style="display:none;">
+  {% csrf_token %}
+  <input type="hidden" name="choice" id="choice-input">
+</form>
+
+<script>
+let answered = false;
+let selectedChoice = null;
+let currentQuestionId = null;
+let flashed = false;
+
+const waitScreen = document.getElementById("wait-screen");
+const quizScreen = document.getElementById("quiz-screen");
+const buttons = document.querySelectorAll(".choice-btn");
+const choiceInput = document.getElementById("choice-input");
+const form = document.getElementById("answer-form");
+const timer = document.getElementById("timer");
+const timeText = document.getElementById("time");
+
+/* ===== 選択 ===== */
+buttons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    if (answered) return;
+
+    answered = true;
+    selectedChoice = btn.dataset.choice;
+    choiceInput.value = selectedChoice;
+
+    btn.classList.add("selected");
+    buttons.forEach(b => b.classList.add("disabled"));
+
+    fetch(form.action, {
+      method: "POST",
+      body: new FormData(form),
+      headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    });
+  });
+});
+
+/* ===== 状態取得 ===== */
+async function fetchState() {
+  const res = await fetch("/Xmas/api/state/");
+  const data = await res.json();
+  if (data.status !== "ok") return;
+
+  if (!data.accepting || !data.question) {
+    quizScreen.style.display = "none";
+    waitScreen.style.display = "block";
+    document.body.classList.remove("flash");
+    return;
+  }
+
+  quizScreen.style.display = "block";
+  waitScreen.style.display = "none";
+
+  /* 問題切替 */
+  if (currentQuestionId !== data.question.id) {
+    currentQuestionId = data.question.id;
+    answered = false;
+    selectedChoice = null;
+    flashed = false;
+
+    buttons.forEach(b => {
+      b.classList.remove("selected", "disabled");
+    });
+    document.body.classList.remove("flash");
+  }
+
+  document.getElementById("question").textContent = data.question.text;
+  document.getElementById("btn-A").textContent = "A. " + data.question.choices.A;
+  document.getElementById("btn-B").textContent = "B. " + data.question.choices.B;
+  document.getElementById("btn-C").textContent = "C. " + data.question.choices.C;
+  document.getElementById("btn-D").textContent = "D. " + data.question.choices.D;
+
+  timeText.textContent = data.remaining;
+
+  /* 🔥 残り3秒 */
+  if (data.remaining <= 3) {
+    timer.classList.add("danger");
+
+    if (!flashed) {
+      flashed = true;
+      document.body.classList.add("flash");
+      if (navigator.vibrate) {
+        navigator.vibrate([200,100,200,100,200]);
+      }
+    }
+  } else {
+    timer.classList.remove("danger");
+    document.body.classList.remove("flash");
+  }
+
+  /* 回答済みUI維持 */
+  if (answered && selectedChoice) {
+    buttons.forEach(b => {
+      if (b.dataset.choice === selectedChoice) {
+        b.classList.add("selected");
+      }
+      b.classList.add("disabled");
+    });
+  }
+}
+
+setInterval(fetchState, 1000);
+fetchState();
+</script>
+
+</body>
+</html>
