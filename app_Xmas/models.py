@@ -65,3 +65,14 @@ class QuizState(models.Model):
     is_accepting = models.BooleanField(default=False)  # 回答受付中か
     started_at = models.DateTimeField(null=True, blank=True)  # ← これ
     show_answer = models.BooleanField(default=False)  # ← 正解表示中か
+
+# Create your models here.
+class Link(models.Model):
+    title = models.CharField(max_length=100)
+    url = models.URLField()
+    image = models.ImageField(upload_to='xmas/links/', blank=True, null=True ,default='links/dafault.jpg')
+    rank = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.title
+    

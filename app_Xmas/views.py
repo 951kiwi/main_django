@@ -1,4 +1,4 @@
-from .models import Player,Answer,Question,QuizState
+from .models import Player,Answer,Question,QuizState,Link
 from django.shortcuts import render,redirect,get_object_or_404
 from django.http import JsonResponse
 from django.http import HttpResponse
@@ -167,6 +167,11 @@ def adminpage(request):
         "questions": questions
     })
 
+def main_page(request):
+    links = Link.objects.all()
+    links = links.order_by("rank").distinct()  # 重複を排除して並べ替え
+
+    return render(request, 'app_Xmas/main.html', {'links': links})
 
 def surprisebox_view(request, name):
     player = get_object_or_404(Player, name=name)

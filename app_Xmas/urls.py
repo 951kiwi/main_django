@@ -18,11 +18,12 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include,path
-from app_Xmas.views import pc_view,quiz_view,join_view,player_logout_view,adminpage,pc_state_api,surprisebox_view
+from app_Xmas.views import pc_view,quiz_view,join_view,player_logout_view,adminpage,pc_state_api,surprisebox_view,main_page
 
 app_name = "Xmas"   # ← ★これが必要
 
 urlpatterns = [
+    path('main/', main_page, name='main'),
     path('join/', join_view, name='join'),
     path('Xmaslogout/', player_logout_view, name='Xmaslogout'),  # ←追加
     path("pc/", pc_view, name="pc"),

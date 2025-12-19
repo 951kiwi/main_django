@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Question, Player, Answer, QuizState
+from .models import Question, Player, Answer, QuizState,Link
 
 
 @admin.register(Question)
@@ -43,3 +43,10 @@ class QuizStateAdmin(admin.ModelAdmin):
             state.started_at = timezone.now()
             state.save()
     reset_timer.short_description = "⏱ タイマーをリセット"
+
+class Linkadmin(admin.ModelAdmin):
+    list_display = ("title","rank")  # 一覧表示
+    list_editable = ('rank',)  # 直接編集可能
+    list_display_links = ('title',)  # タイトルはリンクとして保持
+    ordering = ('rank',)  # ここで rank 順にソート
+admin.site.register(Link,Linkadmin)
