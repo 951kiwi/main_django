@@ -124,6 +124,27 @@ h1 {
   color: red;
   font-weight: bold;
 }
+.confetti {
+  position: fixed;
+  width: 8px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.9;
+  animation: confetti-fall 2.8s cubic-bezier(.25,.6,.25,1) forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) rotate(1080deg);
+    opacity: 0;
+  }
+}
+
 </style>
 </head>
 
@@ -154,8 +175,13 @@ h1 {
 <div class="player-area" id="players"></div>
 
 <script>
+let serverOffset = 0;
+let endsAt = null;
 let totalTime = 1;
+let currentQuestionId = null;
+let confettiFired = false;
 
+/* ===== 状態取得 ===== */
 async function fetchState() {
   const res = await fetch("/Xmas/api/state/");
   const data = await res.json();
@@ -168,18 +194,40 @@ async function fetchState() {
   playersEl.innerHTML = "";
 
   /* ===== 問題待機中 ===== */
-  if (data.status !== "ok" || !data.question) {
+  if (data.status !== "ok" || !data.question ) {
     questionEl.textContent = "問題待機中";
     choicesEl.style.display = "none";
     timerEl.style.display = "none";
-    return;
   }
+  if(!data.accepting){
+    endsAt = null;
+  }
+  else{
+    /* ===== サーバー時間同期 ===== */
+    const serverNow = new Date(data.server_now).getTime();
+    serverOffset = serverNow - Date.now();
+    endsAt = new Date(data.ends_at).getTime();
 
-  /* ===== 出題中 ===== */
-  choicesEl.style.display = "grid";
-  timerEl.style.display = "block";
-
+    /* ===== 問題切替 ===== */
+    if (currentQuestionId !== data.question.id) {
+      currentQuestionId = data.question.id;
+      totalTime = Math.max(
+        1,
+        Math.ceil((endsAt - serverNow) / 1000)
+      );
+    }
+    
+    /* ===== 表示 ===== */
+    choicesEl.style.display = "grid";
+    timerEl.style.display = "block";
+  }
+    if (!data.show_answer) {
+      confettiFired = false;
+    }
+  
   questionEl.textContent = data.question.text;
+
+  
 
   ["A","B","C","D"].forEach(k => {
     const el = document.getElementById(k);
@@ -187,39 +235,92 @@ async function fetchState() {
     el.classList.remove("correct");
   });
 
-  /* タイマー */
-  totalTime = data.question.time_limit;
-  document.getElementById("time-left").textContent = data.remaining;
-  document.getElementById("progress-bar").style.width =
-    (data.remaining / totalTime) * 100 + "%";
-
-  document.getElementById("finish-text").style.display =
-    data.remaining === 0 ? "inline" : "none";
-
-  /* 正解表示 */
+  /* ===== 正解表示 ===== */
   if (data.show_answer) {
-    document.getElementById(data.question.correct)
-      .classList.add("correct");
+    document.getElementById(data.question.correct).classList.add("correct");
   }
 
-  /* プレイヤー */
-  data.players.forEach(p => {
-    const div = document.createElement("div");
-    div.textContent = p.name;
+  /* ===== プレイヤー ===== */
+  if (data.players) {
+    data.players.forEach(p => {
+      const div = document.createElement("div");
+      div.textContent = p.name;
 
+      if (data.show_answer) {
+        div.className = "player " + (p.is_correct ? "correct-player" : "wrong-player");
+        // 🎉 正解者からクラッカー
+        if (p.is_correct && !confettiFired) {
+          setTimeout(() => fireConfettiFrom(div), 100);
+        }
+
+      } else if(p.answered){
+        div.className = "player answered";
+      }
+      else {
+        div.className = "player waiting";
+      }
+      playersEl.appendChild(div);
+    });
+    // 全員処理後にフラグON
     if (data.show_answer) {
-      div.className = "player " + (p.is_correct ? "correct-player" : "wrong-player");
-    } else {
-      div.className = "player answered";
+      confettiFired = true;
     }
-
-    playersEl.appendChild(div);
-  });
+  }
+  
 }
 
-setInterval(fetchState, 1000);
+/* ===== タイマー描画 ===== */
+function updateTimer() {
+  if (!endsAt) return;
+
+  const now = Date.now() + serverOffset;
+  const remaining = Math.max(0, Math.ceil((endsAt - now) / 1000));
+
+  document.getElementById("time-left").textContent = remaining;
+
+  const percent = Math.max(0, (remaining / totalTime) * 100);
+  document.getElementById("progress-bar").style.width = percent + "%";
+
+  document.getElementById("finish-text").style.display =
+    remaining === 0 ? "inline" : "none";
+}
+
+/*  ==== クラッカー ====*/
+function fireConfettiFrom(element) {
+  const rect = element.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+
+  const colors = ["#f1c40f", "#e67e22", "#e74c3c", "#3498db", "#2ecc71"];
+
+  for (let i = 0; i < 120; i++) {
+    const confetti = document.createElement("div");
+    confetti.className = "confetti";
+
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.background = color;
+
+    const dx = (Math.random() - 0.5) * 400 + "px";
+    const dy = -(Math.random() * (-200 - 200) + 200) + "px";
+
+    confetti.style.left = x + "px";
+    confetti.style.top = y + "px";
+    confetti.style.setProperty("--dx", dx);
+    confetti.style.setProperty("--dy", dy);
+
+    document.body.appendChild(confetti);
+
+    setTimeout(() => confetti.remove(), 4500);
+  }
+}
+
+/* ===== 実行 ===== */
+setInterval(fetchState, 1000);   // 状態同期
+setInterval(updateTimer, 100);   // 表示更新
+
 fetchState();
 </script>
+
 
 </body>
 </html>

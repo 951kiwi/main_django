@@ -51,7 +51,7 @@ def pc_view(request):
     })
 
 
-def pc_state_api(request):
+'''def pc_state_api(request):
     state = QuizState.objects.first()
     if not state or not state.current_question:
         return JsonResponse({"status": "no_question"})
@@ -96,6 +96,59 @@ def pc_state_api(request):
             },
             "correct": q.correct,
             "time_limit": q.time_limit
+        },
+        "players": players
+    })'''
+
+def pc_state_api(request):
+    state = QuizState.objects.first()
+    if not state or not state.current_question:
+        return JsonResponse({"status": "no_question"})
+
+    q = state.current_question
+    now = timezone.now()
+
+    # 終了時刻を計算
+    if state.started_at:
+        ends_at = state.started_at + timezone.timedelta(seconds=q.time_limit)
+    else:
+        ends_at = None
+
+    # ⏱ 時間切れで自動停止
+    if ends_at and now >= ends_at and state.is_accepting:
+        state.is_accepting = False
+        state.save()
+    
+    players = []
+    for p in Player.objects.all():
+        if(p.name == "admin") : continue
+        ans = Answer.objects.filter(player=p, question=q).first()
+        players.append({
+            "name": p.name,
+            "answered": bool(ans),
+            "choice": ans.choice if ans else None,
+            "is_correct": ans.choice == q.correct if ans else False
+        })
+
+    return JsonResponse({
+        "status": "ok",
+        "accepting": state.is_accepting,
+        "show_answer": state.show_answer,
+
+        # ⭐ 時刻同期用
+        "server_now": now.isoformat(),
+        "ends_at": ends_at.isoformat() if ends_at else None,
+
+        "question": {
+            "id": q.id,
+            "text": q.text,
+            "choices": {
+                "A": q.choice_a,
+                "B": q.choice_b,
+                "C": q.choice_c,
+                "D": q.choice_d,
+            },
+            "correct": q.correct
         },
         "players": players
     })

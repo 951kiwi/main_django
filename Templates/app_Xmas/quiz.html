@@ -144,6 +144,9 @@ let selectedChoice = null;
 let currentQuestionId = null;
 let flashed = false;
 
+let serverOffset = 0;
+let endsAt = null;
+
 const waitScreen = document.getElementById("wait-screen");
 const quizScreen = document.getElementById("quiz-screen");
 const buttons = document.querySelectorAll(".choice-btn");
@@ -152,7 +155,7 @@ const form = document.getElementById("answer-form");
 const timer = document.getElementById("timer");
 const timeText = document.getElementById("time");
 
-/* ===== 選択 ===== */
+/* ===== 回答 ===== */
 buttons.forEach(btn => {
   btn.addEventListener("click", () => {
     if (answered) return;
@@ -172,12 +175,13 @@ buttons.forEach(btn => {
   });
 });
 
-/* ===== 状態取得 ===== */
+/* ===== サーバー状態取得 ===== */
 async function fetchState() {
   const res = await fetch("/Xmas/api/state/");
   const data = await res.json();
   if (data.status !== "ok") return;
 
+  // 待機
   if (!data.accepting || !data.question) {
     quizScreen.style.display = "none";
     waitScreen.style.display = "block";
@@ -188,16 +192,19 @@ async function fetchState() {
   quizScreen.style.display = "block";
   waitScreen.style.display = "none";
 
-  /* 問題切替 */
+  // ⭐ サーバー時刻との差分
+  const serverNow = new Date(data.server_now).getTime();
+  serverOffset = serverNow - Date.now();
+  endsAt = new Date(data.ends_at).getTime();
+
+  // 問題切替
   if (currentQuestionId !== data.question.id) {
     currentQuestionId = data.question.id;
     answered = false;
     selectedChoice = null;
     flashed = false;
 
-    buttons.forEach(b => {
-      b.classList.remove("selected", "disabled");
-    });
+    buttons.forEach(b => b.classList.remove("selected", "disabled"));
     document.body.classList.remove("flash");
   }
 
@@ -206,13 +213,18 @@ async function fetchState() {
   document.getElementById("btn-B").textContent = "B. " + data.question.choices.B;
   document.getElementById("btn-C").textContent = "C. " + data.question.choices.C;
   document.getElementById("btn-D").textContent = "D. " + data.question.choices.D;
+}
 
-  timeText.textContent = data.remaining;
+/* ===== タイマー描画（完全リアルタイム） ===== */
+function updateTimer() {
+  if (!endsAt) return;
 
-  /* 🔥 残り3秒 */
-  if (data.remaining <= 3) {
+  const now = Date.now() + serverOffset;
+  const remaining = Math.max(0, Math.ceil((endsAt - now) / 1000));
+  timeText.textContent = remaining;
+
+  if (remaining <= 3) {
     timer.classList.add("danger");
-
     if (!flashed) {
       flashed = true;
       document.body.classList.add("flash");
@@ -224,21 +236,15 @@ async function fetchState() {
     timer.classList.remove("danger");
     document.body.classList.remove("flash");
   }
-
-  /* 回答済みUI維持 */
-  if (answered && selectedChoice) {
-    buttons.forEach(b => {
-      if (b.dataset.choice === selectedChoice) {
-        b.classList.add("selected");
-      }
-      b.classList.add("disabled");
-    });
-  }
 }
 
-setInterval(fetchState, 1000);
+/* ===== 実行 ===== */
+setInterval(fetchState, 1000);   // 状態同期
+setInterval(updateTimer, 200);   // 表示更新
+
 fetchState();
 </script>
+
 
 </body>
 </html>
