@@ -186,10 +186,9 @@ buttons.forEach(btn => {
 async function fetchState() {
   const res = await fetch("/Xmas/api/state/");
   const data = await res.json();
-  if (data.status !== "ok") return;
 
   // 待機
-  if (!data.accepting || !data.question) {
+  if (data.status !== "ok" || !data.accepting || !data.question) {
     quizScreen.style.display = "none";
     waitScreen.style.display = "block";
     document.body.classList.remove("flash");
