@@ -21,7 +21,7 @@ class Player(models.Model):
             except Player.DoesNotExist:
                 pass
 
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         if self.photo and os.path.isfile(self.photo.path):

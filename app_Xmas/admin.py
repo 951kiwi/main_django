@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
+from django.utils.html import format_html
 from .models import Question, Player, Answer, QuizState,Link
 
 
@@ -12,8 +13,18 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ("id", "name")
-    search_fields = ("name",)
+    list_display = ("id", "name", "photo_preview")
+    readonly_fields = ("photo_preview",)
+
+    def photo_preview(self, obj):
+        if obj.photo:
+            return format_html(
+                '<img src="{}" style="height:100px; border-radius:8px;" />',
+                obj.photo.url
+            )
+        return "画像なし"
+
+    photo_preview.short_description = "プレビュー"
 
 
 @admin.register(Answer)
