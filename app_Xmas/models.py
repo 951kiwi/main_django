@@ -31,6 +31,9 @@ class Player(models.Model):
     def __str__(self):
         return self.name
 
+class Data(models.Model):
+    surprise = models.BooleanField()
+
 class Question(models.Model):
     text = models.TextField()
     choice_a = models.CharField(max_length=100)

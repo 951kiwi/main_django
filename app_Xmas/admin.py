@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.utils.html import format_html
-from .models import Question, Player, Answer, QuizState,Link
+from .models import Question, Player, Answer, QuizState,Link,Data
 
 
 @admin.register(Question)
@@ -10,6 +10,10 @@ class QuestionAdmin(admin.ModelAdmin):
     list_editable = ("time_limit",)
     search_fields = ("text",)
 
+
+@admin.register(Data)
+class DataAdmin(admin.ModelAdmin):
+    list_display = ("id", "surprise")
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):

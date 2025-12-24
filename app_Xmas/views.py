@@ -1,8 +1,9 @@
-from .models import Player,Answer,Question,QuizState,Link
+from .models import Player,Answer,Question,QuizState,Link,Data
 from django.shortcuts import render,redirect,get_object_or_404
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.utils import timezone
+from django.http import Http404
 
 # Create your views here.
 def join_view(request):
@@ -227,8 +228,13 @@ def main_page(request):
     return render(request, 'app_Xmas/main.html', {'links': links})
 
 def surprisebox_view(request, name):
-    player = get_object_or_404(Player, name=name)
-
-    return render(request, "app_Xmas/surprisebox.html", {
-        "player": player
-    })
+    data = Data.objects.first()
+    try:
+        player = Player.objects.get(name=name)
+    except Player.DoesNotExist:
+        raise Http404("指定されたプレイヤーが存在しません")
+    if(data.surprise):
+        return render(request, "app_Xmas/surprisebox.html", {"player": player})
+    else:
+        return render(request, "app_Xmas/surprisebox_false.html", {"player": player})
+    
