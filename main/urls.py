@@ -31,6 +31,7 @@ urlpatterns = [
     path('anime/',include('app_anime.urls')),
     path('fileuploader/',include('app_fileuploader.urls')),
     path('Xmas/',include('app_Xmas.urls')),
+    path('smarthome/',include('app_smarthome.urls')),
     # robots.txt
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type='text/plain'), name="robots.txt"),
     

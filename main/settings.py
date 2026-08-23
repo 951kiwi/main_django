@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["160.251.196.11","951kiwi.com","127.0.0.1"]
+ALLOWED_HOSTS = ["192.168.0.163","951kiwi.com","127.0.0.1"]
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
 
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'mathfilters',
     'app_fileuploader',
     'app_Xmas',
+    'app_smarthome',
     'channels',
     'sslserver',
 ]

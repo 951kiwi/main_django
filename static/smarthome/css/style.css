@@ -1,0 +1,2403 @@
+/* =========================================================
+   基本
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+
+    font-family:
+        "Segoe UI",
+        "Noto Sans JP",
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at 70% 20%,
+            rgba(20, 73, 140, 0.22),
+            transparent 40%
+        ),
+        #020914;
+
+    color: #eaf3ff;
+}
+
+body {
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   全体
+========================================================= */
+
+.app {
+    display: flex;
+
+    width: 100vw;
+    height: 100vh;
+
+    min-height: 700px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(3, 14, 29, 0.96),
+            rgba(1, 7, 18, 0.98)
+        );
+}
+
+
+/* =========================================================
+   サイドバー
+========================================================= */
+
+.sidebar {
+    width: 265px;
+    height: 100%;
+
+    flex-shrink: 0;
+
+    padding: 32px 18px;
+
+    border-right:
+        1px solid rgba(80, 130, 190, 0.18);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(4, 20, 39, 0.94),
+            rgba(2, 12, 25, 0.98)
+        );
+
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 0 12px 32px;
+}
+
+.logo-icon {
+    width: 72px;
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 58px;
+
+    color: #62b7ff;
+
+    filter:
+        drop-shadow(0 0 10px #008cff);
+}
+
+.logo-title {
+    font-size: 30px;
+    font-weight: 500;
+
+    letter-spacing: 0.5px;
+}
+
+.logo-subtitle {
+    margin-top: 3px;
+
+    font-size: 18px;
+
+    color: #aebed3;
+}
+
+
+/* =========================================================
+   メニュー
+========================================================= */
+
+.menu {
+    display: flex;
+    flex-direction: column;
+
+    gap: 9px;
+}
+
+.menu-item {
+    height: 80px;
+
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 20px;
+
+    border-radius: 17px;
+
+    color: #c7d3e3;
+
+    text-decoration: none;
+
+    font-size: 19px;
+
+    transition:
+        background 0.2s,
+        color 0.2s,
+        transform 0.2s;
+}
+
+.menu-item:hover {
+    background: rgba(20, 72, 130, 0.3);
+    color: white;
+}
+
+.menu-item.active {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 117, 255, 0.72),
+            rgba(22, 69, 128, 0.35)
+        );
+
+    box-shadow:
+        inset 0 0 0 1px rgba(51, 159, 255, 0.55),
+        0 0 25px rgba(0, 110, 255, 0.18);
+
+    color: white;
+}
+
+.menu-icon {
+    width: 30px;
+
+    font-size: 28px;
+
+    text-align: center;
+
+    color: #c5d5e9;
+}
+
+.menu-item.active .menu-icon {
+    color: #68bcff;
+
+    filter:
+        drop-shadow(0 0 8px #008cff);
+}
+
+
+/* =========================================================
+   外出モード
+========================================================= */
+
+.away-box {
+    margin-top: auto;
+
+    padding: 18px;
+
+    border-radius: 17px;
+
+    border:
+        1px solid rgba(42, 111, 190, 0.45);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 31, 59, 0.8),
+            rgba(2, 14, 29, 0.9)
+        );
+
+    box-shadow:
+        inset 0 0 30px rgba(0, 100, 255, 0.06);
+}
+
+.away-header {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.away-icon {
+    color: #1687ff;
+
+    font-size: 21px;
+}
+
+.away-title {
+    font-size: 17px;
+
+    flex: 1;
+}
+
+.mini-switch {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 4px 7px;
+
+    border-radius: 20px;
+
+    background: #172b42;
+
+    font-size: 13px;
+}
+
+.mini-knob {
+    width: 17px;
+    height: 17px;
+
+    border-radius: 50%;
+
+    background: #dce6f0;
+}
+
+.away-description {
+    margin-top: 15px;
+
+    line-height: 1.7;
+
+    color: #a8b8cb;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   メイン
+========================================================= */
+
+.main {
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================================
+   ヘッダー
+========================================================= */
+
+.header {
+    height: 92px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+
+    gap: 38px;
+}
+
+.clock {
+    font-size: 42px;
+
+    line-height: 1;
+
+    letter-spacing: 1px;
+}
+
+.date {
+    margin-top: 8px;
+
+    font-size: 16px;
+
+    color: #b6c5d9;
+}
+
+.weather {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    padding-left: 25px;
+
+    border-left:
+        1px solid rgba(140, 180, 220, 0.25);
+}
+
+.weather-icon {
+    font-size: 49px;
+
+    color: #a9b9cb;
+
+    filter:
+        drop-shadow(
+            0 0 5px
+            rgba(180, 210, 255, 0.25)
+        );
+}
+
+.weather-temperature {
+    font-size: 24px;
+}
+
+.weather-location {
+    margin-top: 6px;
+
+    color: #b6c5d9;
+}
+
+
+/* =========================================================
+   ダッシュボード
+========================================================= */
+
+.dashboard {
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    width: 100%;
+}
+
+.dashboard-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(16, minmax(0, 1fr));
+
+    grid-template-rows:
+        repeat(12, minmax(0, 1fr));
+
+    gap: 16px;
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    background-image:
+        linear-gradient(
+            to right,
+            #383a40 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            to bottom,
+            #383a40 1px,
+            transparent 1px
+        );
+
+    background-size:
+        calc(100% / 16)
+        calc(100% / 12);
+
+    border: 1px solid #383a40;
+}
+
+
+/* =========================================================
+   カード共通
+========================================================= */
+
+.device-card {
+    position: relative;
+
+    container-type: size;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    border-radius: 22px;
+
+    border: 1px solid rgba(93, 137, 194, 0.58);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(15, 29, 50, 0.93),
+            rgba(5, 17, 33, 0.97)
+        );
+
+    box-shadow:
+        inset 0 0 40px rgba(0, 80, 160, 0.06),
+        0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.device-card::before {
+    content: "";
+
+    position: absolute;
+
+    width: 60cqw;
+    height: 60cqh;
+
+    top: -35cqh;
+    right: -30cqw;
+
+    border-radius: 50%;
+
+    background: rgba(0, 132, 255, 0.08);
+
+    filter: blur(4cqw);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   カードヘッダー
+========================================================= */
+
+.card-header {
+    height: 25%;
+    flex-shrink: 0;
+
+    padding: 5cqh 6cqw 0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    min-width: 0;
+}
+
+.device-title {
+    min-width: 0;
+    max-width: calc(100% - 120px);
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+.device-icon {
+    width: 40px;
+
+    flex-shrink: 0;
+
+    font-size: 32px;
+
+    line-height: 1;
+
+    text-align: center;
+}
+
+.tv-icon {
+    color: #c8d5e9;
+}
+
+.snow {
+    color: #72dcff;
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(0, 183, 255, 0.55)
+        );
+}
+
+
+/* =========================================================
+   タイトル
+========================================================= */
+
+.title {
+    min-width: 0;
+
+    font-size: 24px;
+
+    font-weight: 400;
+
+    line-height: 1.1;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.subtitle {
+    margin-top: 5px;
+
+    color: #a8b6ca;
+
+    font-size: clamp(
+        11px,
+        2cqh,
+        17px
+    );
+
+    line-height: 1.2;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   ON / OFF 独立スタイル設計
+========================================================= */
+
+/* 共通ベーススタイル */
+.power-switch {
+    flex-shrink: 0;
+    width: 105px;
+    height: 42px;
+    border-radius: 999px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.power-label {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 0.2s ease;
+}
+
+.switch-knob {
+    position: absolute;
+    top: 3.5px;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #f0f5fa;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------------------------------------------------------
+   ON 状態のスタイル (青背景 / 左文字 / 右白丸)
+--------------------------------------------------------- */
+.power-switch.on {
+    background: linear-gradient(90deg, #075dc6, #168eff);
+    box-shadow: 0 0 14px rgba(0, 119, 255, 0.35);
+}
+
+.power-switch.on .power-label {
+    left: 18px;
+    color: #ffffff;
+}
+
+.power-switch.on .switch-knob {
+    left: calc(100% - 39px); /* 右端へ配置 (105px - 35px - 4px) */
+}
+
+/* ---------------------------------------------------------
+   OFF 状態のスタイル (グレー背景 / 右文字 / 左白丸)
+--------------------------------------------------------- */
+.power-switch.off {
+    background: linear-gradient(90deg, #283448, #37455b);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.power-switch.off .power-label {
+    right: 18px;
+    color: #8a99ad;
+}
+
+.power-switch.off .switch-knob {
+    left: 4px; /* 左端へ配置 */
+}
+
+/* =========================================================
+   テレビカード（フル機能IRリモコン）
+========================================================= */
+
+.tv-content {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    padding: 4cqw 1cqh 2cqw 1cqw;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    align-items: center;
+    gap: 3cqw;
+}
+
+/* 左側：十字キーエリア */
+.tv-nav-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5cqh;
+    width: 100%;
+}
+
+.dpad {
+    position: relative;
+    width: 100%;
+    max-width: 150px;
+    aspect-ratio: 1 / 1;
+    background: radial-gradient(circle, #101c2b, #091321);
+    border: 1px solid #2a3c52;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dpad-btn {
+    position: absolute;
+    background: transparent;
+    border: none;
+    color: #67d9ff;
+    font-size: clamp(10px, 4cqw, 30px);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, transform 0.1s;
+}
+
+.dpad-btn:active {
+    color: #ffffff;
+    transform: scale(0.9);
+}
+
+.dpad-btn.up    { top: 4px; left: 50%; transform: translateX(-50%); }
+.dpad-btn.down  { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.dpad-btn.left  { left: 6px; top: 50%; transform: translateY(-50%); }
+.dpad-btn.right { right: 6px; top: 50%; transform: translateY(-50%); }
+
+.dpad-btn.ok {
+    width: 44%;
+    height: 44%;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #1a283b, #0e1826);
+    border: 1px solid #364d69;
+    color: #ffffff;
+    font-size: clamp(10px, 2.2cqw, 12px);
+    font-weight: bold;
+}
+
+.dpad-btn.ok:active {
+    transform: scale(0.92);
+    border-color: #008cff;
+}
+
+.nav-sub-btns {
+    display: flex;
+    gap: 2cqw;
+    width: 80%;
+}
+
+/* 右側：コントロールエリア */
+.tv-controls-section {
+    height: 100%;
+    padding-left: 3cqw;
+    border-left: 1px solid rgba(145, 170, 200, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1cqh;
+}
+
+.rocker-group {
+    display: flex;
+    gap: 2cqw;
+    width: 100%;
+}
+
+.rocker {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.rocker-label {
+    font-size: clamp(9px, 5cqw, 14px);
+    color: #a9b7ca;
+}
+
+.step-btn {
+    width: 100%;
+    height: 10cqw;
+    padding: 4px 0;
+}
+
+.primary-btn {
+    width: 100%;
+    padding: 6px 0;
+    background: rgba(0, 140, 255, 0.15);
+    border: 1px solid rgba(0, 140, 255, 0.4);
+    color: #67d9ff;
+    font-weight: bold;
+}
+
+.primary-btn:active {
+    background: rgba(0, 140, 255, 0.3);
+}
+
+.rec-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5cqw;
+    width: 100%;
+}
+
+/* 共通ボタンスタイル */
+.tv-btn {
+    background: linear-gradient(145deg, #18263b, #091321);
+    border: 1px solid #30445e;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: clamp(10px, 4cqw, 12px);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s, transform 0.05s;
+    text-align: center;
+}
+
+.tv-btn.small {
+    flex: 1;
+    padding: 3px 0;
+}
+
+.tv-btn.sub {
+    padding: 4px 0;
+    font-size: clamp(9px, 1.8cqw, 11px);
+}
+
+.tv-btn:active {
+    transform: scale(0.95);
+    border-color: #008cff;
+}
+
+/* 1〜9 チャンネル展開オーバーレイ */
+.channel-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(7, 17, 30, 0.95);
+    backdrop-filter: blur(4px);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 10;
+    transition: opacity 0.2s ease;
+}
+
+.channel-overlay.hidden {
+    display: none;
+}
+
+.channel-overlay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: clamp(11px, 2cqw, 13px);
+    color: #b3c1d3;
+}
+
+.close-overlay {
+    background: none;
+    border: none;
+    color: #a9b7ca;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.channel-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    flex: 1;
+    margin-top: 6px;
+}
+
+.num-btn {
+    background: linear-gradient(145deg, #18263b, #091321);
+    border: 1px solid #30445e;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: clamp(13px, 3cqw, 16px);
+    font-weight: bold;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.05s;
+}
+
+.num-btn:active {
+    border-color: #008cff;
+    background: #008cff;
+    transform: scale(0.95);
+}
+
+/* =========================================================
+   エアコン
+========================================================= */
+
+.aircon-content {
+    flex: 1;
+    min-height: 0;
+    padding: 0 4cqw;
+    
+    /* 左右をグリッド比率で分割 (例: 左 1.1 : 右 0.9) */
+    display: grid;
+    grid-template-columns: 0.5fr 0.5fr;
+    align-items: center;
+    gap: 3cqw;
+}
+
+/* 左側：ダイヤルコンテナ */
+.temperature-dial {
+    position: relative;
+    /* 幅を基準に正方形を維持 */
+    width: 80%;
+    max-width: 190px;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    background: conic-gradient(
+        from 210deg,
+        #1b283a 0deg,
+        #008cff 105deg,
+        #68d8ff 150deg,
+        #1b283a 150deg
+    );
+    box-shadow: 0 0 25px rgba(0, 129, 255, 0.22);
+}
+
+.dial-inner {
+    width: calc(100% - 14px);
+    height: calc(100% - 14px);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, #111d2d, #07111e);
+    user-select: none;
+}
+
+.temperature {
+    font-size: clamp(24px, 7cqw, 48px);
+    line-height: 1;
+    color: #ffffff;
+}
+
+.temperature span {
+    font-size: 40%;
+}
+
+.setting-label {
+    margin-top: 1cqh;
+    color: #b3c1d3;
+    font-size: clamp(9px, 2cqw, 13px);
+}
+
+/* 温度調節ボタン（ダイヤルサイズに応じた比率配置） */
+.temp-btn {
+    position: absolute;
+    width: 44%;
+    height: 44%;
+    max-width: 55px;
+    max-height: 55px;
+    background: linear-gradient(145deg, #18263b, #091321);
+    border: 1px solid #30445e;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: clamp(44px, 3.5cqw, 20px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 0%;
+    transition: background 0.2s, transform 0.1s, border-color 0.2s;
+    user-select: none;
+}
+
+.temp-btn:active {
+    transform: scale(0.92);
+    border-color: #008cff;
+}
+
+.temp-btn.minus {
+    left: -5%;
+    bottom: -5%;
+}
+
+.temp-btn.plus {
+    right: -5%;
+    bottom: -5%;
+}
+
+/* 右側：ステータス・操作エリア */
+.aircon-status {
+    width: 100%;
+    height: 85%;
+    padding-left: 3cqw;
+    border-left: 1px solid rgba(145, 170, 200, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 5% 0 5% 0;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+    padding: 4px 6px;
+    margin: 0;
+    background: transparent;
+    border: none;
+    text-align: left;
+    width: 100%;
+}
+
+.status-item.clickable {
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.status-item.clickable:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.status-item.clickable:active {
+    transform: scale(0.97);
+}
+
+.status-icon {
+    font-size: clamp(20px, 6cqw, 30px);
+    color: #67d9ff;
+    width: 32px;
+    flex-shrink: 0;
+    text-align: center;
+    user-select: none;
+}
+
+.status-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.status-value {
+    font-size: clamp(12px, 2.8cqw, 16px);
+    font-weight: bold;
+    color: #ffffff;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-label {
+    margin-top: 2px;
+    color: #a9b7ca;
+    font-size: clamp(9px, 2cqw, 12px);
+    white-space: nowrap;
+}
+
+/* =========================================================
+   照明
+========================================================= */
+/* =========================================================
+   ライトカード (IRリモコン仕様)
+========================================================= */
+
+/* ヘッダー電源ボタングループ */
+.light-power-group {
+    display: flex;
+    gap: 6px;
+}
+
+.light-pwr-btn {
+    padding: 3px 10px;
+    font-size: clamp(10px, 2cqw, 12px);
+    font-weight: bold;
+    border-radius: 6px;
+    border: 1px solid #30445e;
+    background: linear-gradient(145deg, #18263b, #091321);
+    color: #a9b7ca;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.light-pwr-btn.on:active {
+    background: #008cff;
+    color: #ffffff;
+    border-color: #008cff;
+}
+
+.light-pwr-btn.off:active {
+    background: #ff4757;
+    color: #ffffff;
+    border-color: #ff4757;
+}
+
+/* カード内部レイアウト (左右比率 1.1 : 0.9) */
+.light-content {
+    flex: 1;
+    min-height: 0;
+    padding: 1cqh 2cqw;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 3cqw;
+}
+
+/* 左側：調光・調色 コントローラー */
+.light-adjust-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.adjust-grid {
+    position: relative;
+    width: 100%;
+    max-width: 160px;
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 4px;
+}
+
+.adjust-center {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(circle, #152233, #091321);
+}
+
+.bulb-symbol {
+    font-size: clamp(14px, 6cqw, 40px);
+    color: #ffd15c;
+    filter: drop-shadow(0 0 6px rgba(255, 209, 92, 0.4));
+}
+
+.adjust-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+
+.adjust-btn .icon {
+    font-size: clamp(9px, 4cqw, 20px);
+    line-height: 1;
+}
+
+.adjust-btn .lbl {
+    font-size: clamp(8px, 2cqw, 20px);
+    margin-top: 2px;
+}
+
+/* 十字キー配置指定 */
+.adjust-btn.up    { grid-column: 2; grid-row: 1; }
+.adjust-btn.down  { grid-column: 2; grid-row: 3; }
+.adjust-btn.left  { grid-column: 1; grid-row: 2; color: #ffad66; }
+.adjust-btn.right { grid-column: 3; grid-row: 2; color: #80d4ff; }
+
+/* 右側：シーン & タイマー */
+.light-sub-section {
+    height: 85%;
+    padding-left: 3cqw;
+    border-left: 1px solid rgba(145, 170, 200, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sub-action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5cqh;
+    width: 100%;
+}
+
+.action-label {
+    font-size: clamp(9px, 1.8cqw, 11px);
+    color: #a9b7ca;
+}
+
+.feature-btn {
+    width: 100%;
+    padding: 12px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: clamp(10px, 5cqw, 20px);
+}
+
+.feature-btn .btn-icon {
+    font-size: clamp(11px, 3cqw, 20px);
+}
+
+/* 共通ボタンスタイル */
+.light-btn {
+    background: linear-gradient(145deg, #18263b, #091321);
+    border: 1px solid #30445e;
+    border-radius: 6px;
+    color: #ffffff;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.light-btn:active {
+    transform: scale(0.95);
+    border-color: #008cff;
+    background: #101c2b;
+}
+/* =========================================================
+   詳細ライトカード (横切りレイアウト + RGB詳細パレット)
+========================================================= */
+
+.detail-light-content-vertical {
+    position: relative; /* オーバーレイの基準点 */
+    flex: 1;
+    min-height: 0;
+    padding: 1.5cqh 4cqw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5cqh;
+}
+
+/* 上段ツール行 */
+.top-control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1cqh;
+    border-bottom: 1px solid rgba(145, 170, 200, 0.12);
+    width: 100%;
+}
+
+.bulb-halo {
+    width: clamp(34px, 8cqh, 42px);
+    height: clamp(34px, 8cqh, 42px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(255, 190, 83, 0.3) 0%, rgba(17, 29, 45, 0) 70%);
+    box-shadow: 0 0 16px rgba(255, 190, 83, 0.4);
+    transition: all 0.3s ease;
+}
+
+.bulb-icon {
+    font-size: clamp(16px, 4cqw, 22px);
+    user-select: none;
+}
+
+.color-tools {
+    display: flex;
+    align-items: center;
+    gap: 1.5cqw;
+}
+
+.preset-dot {
+    width: clamp(12px, 2.5cqw, 15px);
+    height: clamp(12px, 2.5cqw, 15px);
+    border-radius: 50%;
+    background-color: var(--c);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.preset-dot:active {
+    transform: scale(1.25);
+}
+
+/* 色変更の詳細ボタン */
+.color-detail-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    background: rgba(0, 140, 255, 0.12);
+    border: 1px solid rgba(0, 140, 255, 0.35);
+    border-radius: 6px;
+    color: #68d8ff;
+    font-size: clamp(9px, 1.8cqw, 11px);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.color-detail-btn:hover {
+    background: rgba(0, 140, 255, 0.22);
+}
+
+.color-detail-btn:active {
+    transform: scale(0.95);
+}
+
+.color-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ffbe53;
+    border: 1px solid #ffffff;
+}
+
+/* リセットボタン */
+.reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: linear-gradient(145deg, #18263b, #091321);
+    border: 1px solid #30445e;
+    border-radius: 6px;
+    color: #a9b7ca;
+    font-size: clamp(10px, 2cqw, 12px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.reset-btn:hover {
+    border-color: #68d8ff;
+    color: #ffffff;
+}
+
+.reset-btn:active {
+    transform: scale(0.94);
+}
+
+.reset-icon {
+    font-size: 12px;
+}
+
+/* 下段スライダー */
+.bottom-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2cqh;
+    width: 100%;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3cqh;
+    width: 100%;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slider-label {
+    font-size: clamp(10px, 2cqw, 12px);
+    color: #a9b7ca;
+}
+
+.slider-val {
+    font-size: clamp(10px, 2cqw, 12px);
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.slider-track-wrap {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+}
+
+.slider-icon {
+    font-size: clamp(10px, 2cqw, 12px);
+    user-select: none;
+}
+
+.light-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.brightness-slider {
+    background: linear-gradient(90deg, #1b283a, #ffbe53);
+}
+
+.temp-slider {
+    background: linear-gradient(90deg, #ff9b3d, #ffffff, #68d8ff);
+}
+
+.light-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #008cff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+}
+
+/* =========================================================
+   詳細ライトカード (電球中央配置レイアウト)
+========================================================= */
+
+.detail-light-center-layout {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    padding: 1cqh 4cqw 2cqh 4cqw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1cqh;
+}
+
+/* 上段ツールバー */
+.light-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-bottom: 0.8cqh;
+    border-bottom: 1px solid rgba(145, 170, 200, 0.12);
+}
+
+.color-tools-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5cqw;
+}
+
+.preset-dot {
+    width: clamp(12px, 2.5cqw, 15px);
+    height: clamp(12px, 2.5cqw, 15px);
+    border-radius: 50%;
+    background-color: var(--c);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.preset-dot:active {
+    transform: scale(1.25);
+}
+
+.color-detail-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 7px;
+    background: rgba(0, 140, 255, 0.12);
+    border: 1px solid rgba(0, 140, 255, 0.35);
+    border-radius: 6px;
+    color: #68d8ff;
+    font-size: clamp(9px, 1.8cqw, 11px);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.color-detail-btn:hover {
+    background: rgba(0, 140, 255, 0.22);
+}
+
+.color-indicator {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: #ffbe53;
+    border: 1px solid #ffffff;
+}
+
+.reset-btn {
+    padding: 3px 7px;
+    background: linear-gradient(145deg, #18263b, #091321);
+    border: 1px solid #30445e;
+    border-radius: 6px;
+    color: #a9b7ca;
+    font-size: clamp(9px, 1.8cqw, 11px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.reset-btn:active {
+    transform: scale(0.94);
+}
+
+/* 中央：電球ビジュアル */
+.light-center-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.5cqh 0;
+}
+
+.bulb-halo {
+    width: clamp(48px, 40cqh, 200px);
+    height: clamp(48px, 40cqh, 200px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(255, 190, 83, 0.35) 0%, rgba(17, 29, 45, 0) 72%);
+    box-shadow: 0 0 60px rgba(255, 190, 83, 0.45);
+    transition: all 0.3s ease;
+}
+
+.bulb-icon {
+    font-size: clamp(24px, 20cqw, 60px);
+    user-select: none;
+}
+
+/* 下段：スライダーコントロール群 */
+.light-bottom-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 1cqh;
+    width: 100%;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2cqh;
+    width: 100%;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slider-label {
+    font-size: clamp(9px, 1.8cqw, 11px);
+    color: #a9b7ca;
+}
+
+.slider-val {
+    font-size: clamp(9px, 1.8cqw, 11px);
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.slider-track-wrap {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+}
+
+.slider-icon {
+    font-size: clamp(9px, 1.8cqw, 11px);
+    user-select: none;
+}
+
+.light-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 5px;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.brightness-slider {
+    background: linear-gradient(90deg, #1b283a, #ffbe53);
+}
+
+.temp-slider {
+    background: linear-gradient(90deg, #ff9b3d, #ffffff, #68d8ff);
+}
+
+.light-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #008cff;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+}
+
+/* モーダル */
+.rgb-palette-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(7, 17, 30, 0.96);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 20;
+}
+
+.rgb-palette-overlay.hidden {
+    display: none;
+}
+
+.palette-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #b3c1d3;
+}
+
+.close-palette {
+    background: none;
+    border: none;
+    color: #a9b7ca;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.palette-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+}
+
+.custom-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.palette-cell {
+    aspect-ratio: 1 / 1;
+    max-height: 26px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+
+#native-color-picker {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.palette-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 3px;
+    border-top: 1px solid rgba(145, 170, 200, 0.15);
+}
+
+.hex-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hex-label {
+    font-size: 10px;
+    color: #a9b7ca;
+}
+
+#hex-input {
+    width: 65px;
+    background: #101c2b;
+    border: 1px solid #30445e;
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 10px;
+    padding: 2px 4px;
+    text-transform: uppercase;
+}
+
+.native-picker-trigger {
+    padding: 2px 6px;
+    background: linear-gradient(145deg, #18263b, #091321);
+    border: 1px solid #30445e;
+    border-radius: 5px;
+    color: #68d8ff;
+    font-size: 9px;
+    cursor: pointer;
+}
+/* =========================================================
+   パソコンカード
+========================================================= */
+
+.pc-content {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    padding: 2cqh 4cqw;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 3cqw;
+}
+
+/* 左側：PCステータスビジュアル */
+.pc-visual-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5cqh;
+    width: 100%;
+}
+
+.pc-halo {
+    width: clamp(48px, 12cqh, 65px);
+    height: clamp(48px, 12cqh, 65px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(0, 140, 255, 0.25) 0%, rgba(17, 29, 45, 0) 70%);
+    transition: all 0.3s ease;
+}
+
+.pc-halo.on {
+    background: radial-gradient(circle, rgba(0, 230, 118, 0.3) 0%, rgba(17, 29, 45, 0) 70%);
+    box-shadow: 0 0 20px rgba(0, 230, 118, 0.35);
+}
+
+.pc-halo.off {
+    background: radial-gradient(circle, rgba(145, 170, 200, 0.1) 0%, rgba(17, 29, 45, 0) 70%);
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+.pc-display-icon {
+    font-size: clamp(24px, 5.5cqw, 32px);
+    user-select: none;
+}
+
+.pc-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.status-dot.on {
+    background-color: #00e676;
+    box-shadow: 0 0 8px #00e676;
+}
+
+.status-dot.off {
+    background-color: #78909c;
+}
+
+.status-text {
+    font-size: clamp(10px, 2.2cqw, 13px);
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* 右側：操作ボタン */
+.pc-action-wrap {
+    height: 85%;
+    padding-left: 3cqw;
+    border-left: 1px solid rgba(145, 170, 200, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.pc-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5cqh;
+    width: 100%;
+}
+
+.pc-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: clamp(10px, 2.2cqw, 12px);
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.boot-btn {
+    background: rgba(0, 140, 255, 0.12);
+    border: 1px solid rgba(0, 140, 255, 0.4);
+    color: #68d8ff;
+}
+
+.boot-btn:active {
+    background: rgba(0, 140, 255, 0.3);
+    transform: scale(0.96);
+}
+
+.shutdown-btn {
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid rgba(255, 71, 87, 0.4);
+    color: #ff6b81;
+}
+
+.shutdown-btn:active {
+    background: rgba(255, 71, 87, 0.25);
+    transform: scale(0.96);
+}
+
+/* シャットダウン確認モーダル */
+.pc-confirm-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 12, 22, 0.96);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    transition: opacity 0.2s ease;
+}
+
+.pc-confirm-overlay.hidden {
+    display: none;
+}
+
+.confirm-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.confirm-icon {
+    font-size: 24px;
+    color: #ffd15c;
+}
+
+.confirm-title {
+    font-size: clamp(12px, 2.6cqw, 14px);
+    font-weight: bold;
+    color: #ffffff;
+    margin-top: 2px;
+}
+
+.confirm-desc {
+    font-size: clamp(9px, 1.9cqw, 11px);
+    color: #a9b7ca;
+    margin: 4px 0 10px 0;
+    line-height: 1.3;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 8px;
+    width: 90%;
+}
+
+.confirm-btn {
+    flex: 1;
+    padding: 5px 0;
+    border-radius: 6px;
+    font-size: clamp(10px, 2cqw, 12px);
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+}
+
+.confirm-btn.cancel {
+    background: linear-gradient(145deg, #18263b, #091321);
+    border: 1px solid #30445e;
+    color: #b3c1d3;
+}
+
+.confirm-btn.cancel:active {
+    background: #101c2b;
+}
+
+.confirm-btn.exec {
+    background: #ff4757;
+    border: 1px solid #ff4757;
+    color: #ffffff;
+}
+
+.confirm-btn.exec:active {
+    background: #e84118;
+}
+/* =========================================================
+   プラグミニ / コンセントカード
+========================================================= */
+
+.plug-content {
+    flex: 1;
+    min-height: 0;
+    padding: 1.5cqh 4cqw;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    align-items: center;
+    gap: 3cqw;
+}
+
+/* 左側：プラグビジュアル & W数 */
+.plug-status-section {
+    display: flex;
+    align-items: center;
+    gap: 3cqw;
+    width: 100%;
+}
+
+.plug-socket-icon {
+    width: clamp(38px, 9cqh, 48px);
+    height: clamp(38px, 9cqh, 48px);
+    border-radius: 10px;
+    background: radial-gradient(circle, #1a293d, #0d1724);
+    border: 1.5px solid #2f445e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.plug-socket-icon.active {
+    border-color: #008cff;
+    box-shadow: 0 0 16px rgba(0, 140, 255, 0.35);
+}
+
+.socket-holes {
+    display: flex;
+    gap: 8px;
+}
+
+.socket-holes .hole {
+    width: 3px;
+    height: 12px;
+    background: #060e18;
+    border-radius: 1px;
+}
+
+.power-stat-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.power-stat-label {
+    font-size: clamp(9px, 1.8cqw, 11px);
+    color: #a9b7ca;
+    white-space: nowrap;
+}
+
+.power-stat-val {
+    font-size: clamp(18px, 4.5cqw, 24px);
+    font-weight: bold;
+    color: #ffffff;
+    line-height: 1.1;
+    margin-top: 2px;
+}
+
+.power-stat-val span {
+    font-size: 55%;
+    color: #67d9ff;
+    margin-left: 2px;
+}
+
+/* 右側：使用量 & 波形グラフ */
+.plug-graph-section {
+    height: 85%;
+    padding-left: 3cqw;
+    border-left: 1px solid rgba(145, 170, 200, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+}
+
+.today-usage-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.usage-label {
+    font-size: clamp(9px, 1.8cqw, 11px);
+    color: #a9b7ca;
+}
+
+.usage-val {
+    font-size: clamp(11px, 2.2cqw, 13px);
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.usage-val span {
+    font-size: 80%;
+    color: #a9b7ca;
+}
+
+/* 簡易波形SVG */
+.plug-wave-container {
+    width: 100%;
+    height: clamp(26px, 6cqh, 34px);
+    margin-top: 4px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.plug-wave-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.wave-area {
+    fill: url(#waveGradient);
+}
+
+.wave-line {
+    fill: none;
+    stroke: #008cff;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+
+/* =========================================================
+   電力カード
+========================================================= */
+
+.energy-card {
+    container-type: size;
+
+    display: flex;
+    align-items: center;
+
+    min-width: 0;
+    min-height: 0;
+
+    padding:
+        3cqh
+        4cqw;
+
+    border-radius: 22px;
+
+    border:
+        1px solid rgba(80, 128, 186, 0.45);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(10, 25, 45, 0.94),
+            rgba(3, 14, 27, 0.97)
+        );
+}
+
+.energy-main {
+    width: 28%;
+
+    min-width: 0;
+}
+
+.energy-title {
+    color: #ffd33d;
+
+    font-size: clamp(
+        10px,
+        2cqh,
+        16px
+    );
+}
+
+.energy-number {
+    margin-top: 1cqh;
+
+    font-size: clamp(
+        20px,
+        5cqh,
+        38px
+    );
+}
+
+.energy-number span {
+    font-size: 45%;
+
+    color: #bdcadd;
+}
+
+.energy-chart {
+    position: relative;
+
+    width: 40%;
+    height: 60cqh;
+
+    min-width: 0;
+
+    display: flex;
+    align-items: flex-end;
+
+    gap: 0.5cqw;
+
+    padding:
+        0
+        1cqw;
+}
+
+.bar {
+    flex: 1;
+
+    min-width: 2px;
+
+    border-radius:
+        4px 4px 0 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            #0da2ff,
+            #064f9e
+        );
+}
+
+.chart-label {
+    position: absolute;
+
+    bottom: -3cqh;
+    left: 0;
+
+    width: 100%;
+
+    color: #8192a9;
+
+    font-size: clamp(
+        7px,
+        1.3cqh,
+        10px
+    );
+
+    white-space: nowrap;
+}
+
+.month-energy {
+    flex: 1;
+
+    min-width: 0;
+
+    padding-left: 3cqw;
+
+    border-left:
+        1px solid
+        rgba(150, 180, 210, 0.2);
+}
+
+.month-title {
+    color: #a9b9cd;
+
+    font-size: clamp(
+        9px,
+        1.8cqh,
+        14px
+    );
+}
+
+.month-number {
+    margin-top: 0.5cqh;
+
+    font-size: clamp(
+        13px,
+        2.5cqh,
+        20px
+    );
+}
+
+.month-number span {
+    font-size: 65%;
+}
+
+.month-target {
+    margin-top: 0.5cqh;
+
+    font-size: clamp(
+        8px,
+        1.5cqh,
+        12px
+    );
+
+    color: #9caec3;
+}
+
+.target-bar {
+    height: 0.8cqh;
+
+    min-height: 3px;
+
+    margin-top: 1cqh;
+
+    border-radius: 10px;
+
+    background: #25364b;
+}
+
+.target-value {
+    width: 78%;
+
+    height: 100%;
+
+    border-radius: 10px;
+
+    background: #15c9a0;
+
+    box-shadow:
+        0 0 8px
+        rgba(21, 201, 160, 0.4);
+}
+
+
+/* =========================================================
+   シーン
+========================================================= */
+
+.scene-buttons {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 2cqw;
+
+    min-width: 0;
+    min-height: 0;
+}
+
+.scene-button {
+    min-width: 0;
+    min-height: 0;
+
+    padding: 2cqh;
+
+    border-radius: 20px;
+
+    border: 1px solid;
+
+    cursor: pointer;
+
+    color: white;
+
+    font-size: clamp(
+        11px,
+        2.5cqh,
+        18px
+    );
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 1cqh;
+
+    transition:
+        transform 0.2s,
+        filter 0.2s;
+}
+
+.scene-button:hover {
+    transform: translateY(-2px);
+
+    filter: brightness(1.15);
+}
+
+.scene-icon {
+    font-size: clamp(
+        18px,
+        4cqh,
+        30px
+    );
+}
+
+.scene-button.away {
+    border-color: #8b55ff;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(84, 39, 140, 0.55),
+            rgba(38, 21, 68, 0.65)
+        );
+}
+
+.scene-button.all-light {
+    border-color: #ff9f1c;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(133, 78, 15, 0.5),
+            rgba(65, 39, 11, 0.65)
+        );
+}
+
+.scene-button.all-off {
+    border-color: #bd3f63;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(125, 31, 54, 0.52),
+            rgba(66, 18, 32, 0.7)
+        );
+}
+
+
+/* =========================================================
+   レスポンシブ
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .sidebar {
+        width: 220px;
+    }
+
+    .main {
+        padding: 20px;
+    }
+
+    /* ここではカード内部のサイズを上書きしない */
+}
+
+
+/* =========================================================
+   スマホ
+========================================================= */
+
+@media (max-width: 900px) {
+
+    body {
+        overflow: auto;
+    }
+
+    .app {
+        height: auto;
+
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        width: 100%;
+
+        height: auto;
+
+        min-height: 100vh;
+
+        padding: 16px;
+    }
+
+    .header {
+        height: auto;
+
+        min-height: 70px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns:
+            repeat(12, minmax(0, 1fr));
+
+        grid-template-rows:
+            repeat(8, minmax(0, 1fr));
+
+        gap: 12px;
+
+        height: auto;
+
+        min-height: 0;
+
+        background-size:
+            calc(100% / 12)
+            calc(100% / 8);
+    }
+
+    .device-card {
+        min-height: 250px;
+    }
+
+    .energy-card {
+        min-height: 160px;
+    }
+}

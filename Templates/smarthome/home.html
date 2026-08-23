@@ -1,0 +1,1128 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Home</title>
+
+    <link rel="stylesheet"
+          href="{% static 'smarthome/css/style.css' %}">
+</head>
+
+<body>
+<!-- CSRFトークンを非同期送信用に保持 -->
+    <form style="display: none;">
+        {% csrf_token %}
+    </form>
+
+<div class="app">
+
+    <!-- =========================
+         サイドバー
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo-area">
+            <div class="logo-icon">⌂</div>
+
+            <div>
+                <div class="logo-title">Smart Home</div>
+                <div class="logo-subtitle">Dashboard</div>
+            </div>
+        </div>
+
+
+        <nav class="menu">
+
+            <a class="menu-item active" href="#">
+                <span class="menu-icon">⌂</span>
+                <span>ホーム</span>
+            </a>
+
+            <a class="menu-item" href="#">
+                <span class="menu-icon">▦</span>
+                <span>デバイス</span>
+            </a>
+
+            <a class="menu-item" href="#">
+                <span class="menu-icon">▱</span>
+                <span>シーン</span>
+            </a>
+
+            <a class="menu-item" href="#">
+                <span class="menu-icon">◔</span>
+                <span>履歴</span>
+            </a>
+
+            <a class="menu-item" href="#">
+                <span class="menu-icon">⚙</span>
+                <span>設定</span>
+            </a>
+
+        </nav>
+
+
+        <!-- 外出モード -->
+
+        <div class="away-box">
+
+            <div class="away-header">
+                <span class="away-icon">⬟</span>
+
+                <span class="away-title">
+                    外出モード
+                </span>
+
+                <span class="mini-switch">
+                    <span>OFF</span>
+                    <span class="mini-knob"></span>
+                </span>
+            </div>
+
+            <div class="away-description">
+                すべてのデバイスは<br>
+                通常モードです
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================
+         メイン
+    ========================== -->
+
+    <main class="main">
+        <!-- ヘッダー -->
+        <header class="header">
+            <div></div>
+
+            <div class="header-right">
+                <!-- 時計・日付エリア -->
+                <div class="clock-area">
+                    <div class="clock" id="clock">--:--</div>
+                    <div class="date" id="date-display">--月--日（-）</div>
+                </div>
+
+                <!-- 天気エリア -->
+                <div class="weather">
+                    <div class="weather-icon" id="weather-icon">☁</div>
+                    <div>
+                        <div class="weather-temperature" id="weather-temp">--°C</div>
+                        <div class="weather-location">江東区</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- =========================
+             デバイスグリッド
+        ========================== -->
+
+        <section class="dashboard-grid">
+
+            {% for remote in remotes %}
+
+                <div
+                    class="device-card {{ remote.type }}-card"
+                    data-device-id="{{ remote.device_id }}"
+                    style="
+                        grid-column: {{ remote.x|add:1 }}
+                            / span {{ remote.width }};
+
+                        grid-row: {{ remote.y|add:1 }}
+                            / span {{ remote.height }};
+                    "
+                >
+                    <!-- ライトカード (IRリモコン仕様) -->
+                    {% if remote.type == "light" %}
+
+                        <div class="card-header">
+                            <div class="device-title">
+                                <div class="device-icon light">💡</div>
+                                <div>
+                                    <div class="title">{{ remote.title }}</div>
+                                    <div class="subtitle">{{ remote.sub_title }}</div>
+                                </div>
+                            </div>
+                            <!-- IR仕様のため個別のON/OFFプッシュキー -->
+                            <div class="light-power-group">
+                                <button type="button" class="light-pwr-btn on" data-command-name="ON">ON</button>
+                                <button type="button" class="light-pwr-btn off" data-command-name="OFF">OFF</button>
+                            </div>
+                        </div>
+
+                        <div class="light-content">
+                            <!-- 左側：調光・調色ステップキー (十字型/グリッド配置) -->
+                            <div class="light-adjust-section">
+                                <div class="adjust-grid">
+                                    <button type="button" class="light-btn adjust-btn up" data-command-name="bright-up" title="明るく">
+                                        <span class="icon">▲</span>
+                                        <span class="lbl">明るく</span>
+                                    </button>
+                                    <button type="button" class="light-btn adjust-btn left" data-command-name="temperature-worm" title="暖かく">
+                                        <span class="icon">◀</span>
+                                        <span class="lbl">暖色</span>
+                                    </button>
+                                    <div class="adjust-center">
+                                        <span class="bulb-symbol">🔆</span>
+                                    </div>
+                                    <button type="button" class="light-btn adjust-btn right" data-command-name="temperature-cold" title="冷たく">
+                                        <span class="icon">▶</span>
+                                        <span class="lbl">寒色</span>
+                                    </button>
+                                    <button type="button" class="light-btn adjust-btn down" data-command-name="bright-down" title="暗く">
+                                        <span class="icon">▼</span>
+                                        <span class="lbl">暗く</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 右側：シーン・タイマー機能 -->
+                            <div class="light-sub-section">
+                                <div class="sub-action-group">
+                                    <span class="action-label">プリセット / タイマー</span>
+                                    <button type="button" class="light-btn feature-btn" data-command-name="other\scene">
+                                        <span class="btn-icon">🎨</span>
+                                        <span>シーン切替</span>
+                                    </button>
+                                    <button type="button" class="light-btn feature-btn" data-command-name="other\night-light">
+                                        <span class="btn-icon">🌙</span>
+                                        <span>常夜灯</span>
+                                    </button>
+                                    <button type="button" class="light-btn feature-btn timer" data-command-name="other\timer-30">
+                                        <span class="btn-icon">⏱</span>
+                                        <span>30分切</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif remote.type == "light_detail" %}
+                        <!-- 詳細ライトカード (電球中央配置レイアウト) -->
+                        <div class="card-header">
+                            <div class="device-title">
+                                <div class="device-icon light">💡</div>
+                                <div>
+                                    <div class="title">{{ remote.title }}</div>
+                                    <div class="subtitle">{{ remote.sub_title }}</div>
+                                </div>
+                            </div>
+                            <div class="power-switch off" id="detail-light-power">
+                                <span class="power-label" id="detail-power-label">OFF</span>
+                                <span class="switch-knob"></span>
+                            </div>
+                        </div>
+
+                        <div class="detail-light-center-layout">
+                            <!-- 上段ツールバー：プリセット / 色変更詳細 / リセット -->
+                            <div class="light-top-bar">
+                                <button type="button" class="color-detail-btn" id="btn-open-palette" title="RGB詳細パレットを開く">
+                                    <span class="color-indicator" id="current-color-dot"></span>
+                                    <span>色詳細 ▾</span>
+                                </button>
+
+                                <button type="button" class="reset-btn" id="btn-light-reset" title="初期状態に戻す">
+                                    <span>↺ リセット</span>
+                                </button>
+                            </div>
+
+                            <!-- 中央：メイン電球プレビュー（状態の中心） -->
+                            <div class="light-center-visual">
+                                <div class="bulb-halo" id="bulb-glow">
+                                    <span class="bulb-icon">💡</span>
+                                </div>
+                            </div>
+
+                            <!-- 下段：明るさ & 色温度スライダー -->
+                            <div class="light-bottom-sliders">
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <span class="slider-label">明るさ</span>
+                                        <span class="slider-val" id="val-brightness" >80%</span>
+                                    </div>
+                                    <div class="slider-track-wrap">
+                                        <span class="slider-icon">🌑</span>
+                                        <input type="range" min="1" max="100" value="80" class="light-slider brightness-slider" id="slider-brightness">
+                                        <span class="slider-icon">☀️</span>
+                                    </div>
+                                </div>
+
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <span class="slider-label">色温度</span>
+                                        <span class="slider-val" id="val-temp">4000K</span>
+                                    </div>
+                                    <div class="slider-track-wrap">
+                                        <span class="slider-icon">🧡</span>
+                                        <input type="range" min="2700" max="6500" step="100" value="4000" class="light-slider temp-slider" id="slider-temp">
+                                        <span class="slider-icon">💙</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- RGB詳細カラーパレット（オーバーレイ） -->
+                            <div class="rgb-palette-overlay hidden" id="rgb-palette-overlay">
+                                <div class="palette-header">
+                                    <span>RGB カラー詳細選択</span>
+                                    <button type="button" class="close-palette" id="btn-close-palette">✕</button>
+                                </div>
+                                <div class="palette-body">
+                                    <input type="color" id="native-color-picker" value="#ffbe53">
+                                    <div class="custom-palette-grid">
+                                        <button type="button" class="palette-cell" style="background:#ff4d4f" data-color="#ff4d4f"></button>
+                                        <button type="button" class="palette-cell" style="background:#ff7a45" data-color="#ff7a45"></button>
+                                        <button type="button" class="palette-cell" style="background:#ffa940" data-color="#ffa940"></button>
+                                        <button type="button" class="palette-cell" style="background:#ffec3d" data-color="#ffec3d"></button>
+                                        <button type="button" class="palette-cell" style="background:#73d13d" data-color="#73d13d"></button>
+                                        <button type="button" class="palette-cell" style="background:#36cfc9" data-color="#36cfc9"></button>
+                                        <button type="button" class="palette-cell" style="background:#4096ff" data-color="#4096ff"></button>
+                                        <button type="button" class="palette-cell" style="background:#597ef7" data-color="#597ef7"></button>
+                                        <button type="button" class="palette-cell" style="background:#9254de" data-color="#9254de"></button>
+                                        <button type="button" class="palette-cell" style="background:#f759ab" data-color="#f759ab"></button>
+                                    </div>
+                                    <div class="palette-footer">
+                                        <div class="hex-input-wrap">
+                                            <span class="hex-label">HEX:</span>
+                                            <input type="text" id="hex-input" value="#FFBE53" maxlength="7">
+                                        </div>
+                                        <label class="native-picker-trigger" for="native-color-picker">
+                                            ホイール 🎨
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% elif remote.type == "aircon" %}
+
+                        <!-- エアコンカード -->
+
+                        <div class="card-header">
+                            <div class="device-title">
+                                <div class="device-icon snow">
+                                    ❄
+                                </div>
+                                <div>
+                                    <div class="title">
+                                        {{ remote.title }}
+                                    </div>
+                                    <div class="subtitle">
+                                        {{ remote.sub_title }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="power-switch off">
+                                <span class="power-label">OFF</span>
+                                <span class="switch-knob"></span>
+                            </div>
+                        </div><div class="aircon-content">
+                        <!-- 温度ダイヤル & プラス/マイナスボタン -->
+                        <div class="temperature-dial">
+                            <div class="dial-inner">
+                                <div class="temperature" id="temp-display">24<span>°C</span></div>
+                                <div class="setting-label">設定温度</div>
+                            </div>
+                            <button type="button" class="temp-btn minus" id="btn-temp-minus" aria-label="温度を下げる">−</button>
+                            <button type="button" class="temp-btn plus" id="btn-temp-plus" aria-label="温度を上げる">+</button>
+                        </div>
+
+                        <!-- ステータス・操作エリア -->
+                        <div class="aircon-status">
+                            <!-- 運転モード切り替えボタン -->
+                            <button type="button" class="status-item clickable" id="btn-mode">
+                                <div class="status-icon" id="mode-icon">❄</div>
+                                <div class="status-details">
+                                    <div class="status-value" id="mode-value">冷房</div>
+                                    <div class="status-label">運転モード</div>
+                                </div>
+                            </button>
+
+                            <!-- 風量切り替えボタン -->
+                            <button type="button" class="status-item clickable" id="btn-fan">
+                                <div class="status-icon">💨</div>
+                                <div class="status-details">
+                                    <div class="status-value" id="fan-value">自動</div>
+                                    <div class="status-label">風量</div>
+                                </div>
+                            </button>
+
+                            <!-- 室温表示（固定表示） -->
+                            <div class="status-item">
+                                <div class="status-icon">🌡</div>
+                                <div class="status-details">
+                                    <div class="status-value">26°C</div>
+                                    <div class="status-label">室温</div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+
+                    {% elif remote.type == "tv" %}
+
+                        <!-- テレビカード (フル機能IRリモコン) -->
+                        <div class="card-header">
+                            <div class="device-title">
+                                <div class="device-icon tv">📺</div>
+                                <div>
+                                    <div class="title">{{ remote.title }}</div>
+                                    <div class="subtitle">{{ remote.sub_title }}</div>
+                                </div>
+                            </div>
+                            <div class="power-switch off" id="tv-power">
+                                <span class="power-label" id="tv-power-label">ON</span>
+                                <span class="switch-knob"></span>
+                            </div>
+                        </div>
+
+                        <div class="tv-content">
+                            <!-- 左側：十字キー & ナビゲーション -->
+                            <div class="tv-nav-section">
+                                <div class="dpad">
+                                    <button type="button" class="dpad-btn up" data-key="up" aria-label="上">▲</button>
+                                    <button type="button" class="dpad-btn left" data-key="left" aria-label="左">◀</button>
+                                    <button type="button" class="dpad-btn ok" data-key="enter">決定</button>
+                                    <button type="button" class="dpad-btn right" data-key="right" aria-label="右">▶</button>
+                                    <button type="button" class="dpad-btn down" data-key="down" aria-label="下">▼</button>
+                                </div>
+                                <div class="nav-sub-btns">
+                                    <button type="button" class="tv-btn small" data-key="tv">TV</button>
+                                    <button type="button" class="tv-btn small" data-key="back">戻る</button>
+                                </div>
+                            </div>
+
+                            <!-- 右側：基本操作 & 特殊メニュー -->
+                            <div class="tv-controls-section">
+                                <!-- 音量 & チャンネル操作 -->
+                                <div class="rocker-group">
+                                    <div class="rocker">
+                                        <button type="button" class="tv-btn step-btn" data-key="vol-up">＋</button>
+                                        <span class="rocker-label">音量</span>
+                                        <button type="button" class="tv-btn step-btn" data-key="vol-down">ー</button>
+                                    </div>
+                                    <div class="rocker">
+                                        <button type="button" class="tv-btn step-btn" data-key="ch-up">▲</button>
+                                        <span class="rocker-label">選局</span>
+                                        <button type="button" class="tv-btn step-btn" data-key="ch-down">▼</button>
+                                    </div>
+                                </div>
+
+                                <!-- チャンネル数字キー展開ボタン -->
+                                <button type="button" class="tv-btn primary-btn" id="btn-toggle-keypad">
+                                    チャンネル 1〜9 ▾
+                                </button>
+
+                                <!-- 番組表・録画系ボタン -->
+                                <div class="rec-buttons">
+                                    <button type="button" class="tv-btn sub" data-key="epg">番組表</button>
+                                    <button type="button" class="tv-btn sub" data-key="rec-reserve">録画予約</button>
+                                    <button type="button" class="tv-btn sub" data-key="rec-list">録画一覧</button>
+                                </div>
+                            </div>
+
+                            <!-- 1〜9 チャンネル数字キーポップアップ -->
+                            <div class="channel-overlay hidden" id="channel-overlay">
+                                <div class="channel-overlay-header">
+                                    <span>チャンネル直接選局</span>
+                                    <button type="button" class="close-overlay" id="btn-close-keypad">✕</button>
+                                </div>
+                                <div class="channel-grid">
+                                    <button type="button" class="num-btn" data-key="ch-1">1</button>
+                                    <button type="button" class="num-btn" data-key="ch-2">2</button>
+                                    <button type="button" class="num-btn" data-key="ch-3">3</button>
+                                    <button type="button" class="num-btn" data-key="ch-4">4</button>
+                                    <button type="button" class="num-btn" data-key="ch-5">5</button>
+                                    <button type="button" class="num-btn" data-key="ch-6">6</button>
+                                    <button type="button" class="num-btn" data-key="ch-7">7</button>
+                                    <button type="button" class="num-btn" data-key="ch-8">8</button>
+                                    <button type="button" class="num-btn" data-key="ch-9">9</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif remote.type == "PC" %}
+                        <!-- パソコンカード -->
+                        <div class="card-header">
+                            <div class="device-title">
+                                <div class="device-icon pc">💻</div>
+                                <div>
+                                    <div class="title">{{ remote.title }}</div>
+                                    <div class="subtitle">{{ remote.sub_title }}</div>
+                                </div>
+                            </div>
+                            <!-- リアルタイム同期用ステータストグル -->
+                            <div class="power-switch pc-switch off" id="pc-power-switch">
+                                <span class="power-label" id="pc-status-label">OFF</span>
+                                <span class="switch-knob"></span>
+                            </div>
+                        </div>
+
+                        <div class="pc-content">
+                            <!-- 左側：PCビジュアル ＆ ステータスバッジ -->
+                            <div class="pc-visual-wrap">
+                                <div class="pc-halo off" id="pc-glow">
+                                    <span class="pc-display-icon">🖥️</span>
+                                </div>
+                                <div class="pc-status-indicator">
+                                    <span class="status-dot off" id="pc-status-dot"></span>
+                                    <span class="status-text" id="pc-status-text">電源 OFF</span>
+                                </div>
+                            </div>
+
+                            <!-- 右側：電源操作アクション -->
+                            <div class="pc-action-wrap">
+                                <div class="pc-btn-group">
+                                    <button type="button" class="pc-btn boot-btn" id="btn-pc-boot">
+                                        <span class="btn-icon">⚡</span>
+                                        <span>起動 (WoL)</span>
+                                    </button>
+                                    <button type="button" class="pc-btn shutdown-btn" id="btn-pc-shutdown">
+                                        <span class="btn-icon">⏻</span>
+                                        <span>シャットダウン</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- シャットダウン確認モーダル -->
+                            <div class="pc-confirm-overlay hidden" id="pc-confirm-overlay">
+                                <div class="confirm-box">
+                                    <div class="confirm-icon">⚠️</div>
+                                    <div class="confirm-title">シャットダウン確認</div>
+                                    <p class="confirm-desc">パソコンの電源を完全に切りますか？<br>未保存の作業内容は失われます。</p>
+                                    <div class="confirm-buttons">
+                                        <button type="button" class="confirm-btn cancel" id="btn-cancel-shutdown">キャンセル</button>
+                                        <button type="button" class="confirm-btn exec" id="btn-exec-shutdown">シャットダウン</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif remote.type == "concent" %}
+                        <!-- プラグミニ / コンセントカード -->
+                        <div class="card-header">
+                            <div class="device-title">
+                                <div class="device-icon outlet">🔌</div>
+                                <div>
+                                    <div class="title">{{ remote.title }}</div>
+                                    <div class="subtitle">{{ remote.sub_title }}</div>
+                                </div>
+                            </div>
+                            <!-- 電源トグルスイッチ -->
+                            <div class="power-switch off" id="plug-power-switch">
+                                <span class="power-label" id="plug-power-label">ON</span>
+                                <span class="switch-knob"></span>
+                            </div>
+                        </div>
+
+                        <div class="plug-content">
+                            <!-- 左側：プラグアイコン ＆ リアルタイム電力 -->
+                            <div class="plug-status-section">
+                                <div class="plug-socket-icon active" id="plug-socket-visual">
+                                    <div class="socket-holes">
+                                        <span class="hole"></span>
+                                        <span class="hole"></span>
+                                    </div>
+                                </div>
+                                <div class="power-stat-group">
+                                    <div class="power-stat-label">現在の電力</div>
+                                    <div class="power-stat-val" id="current-watts">15<span>W</span></div>
+                                </div>
+                            </div>
+
+                            <!-- 右側：積算電力 ＆ 簡易リアルタイム波形 -->
+                            <div class="plug-graph-section">
+                                <div class="today-usage-row">
+                                    <span class="usage-label">今日の使用量</span>
+                                    <span class="usage-val" id="today-kwh">0.32 <span>kWh</span></span>
+                                </div>
+
+                                <!-- リアルタイム電力波形SVG -->
+                                <div class="plug-wave-container">
+                                    <svg class="plug-wave-svg" viewBox="0 0 120 40" preserveAspectRatio="none">
+                                        <defs>
+                                            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" stop-color="#008cff" stop-opacity="0.45" />
+                                                <stop offset="100%" stop-color="#008cff" stop-opacity="0.0" />
+                                            </linearGradient>
+                                        </defs>
+                                        <path class="wave-area" d="M 0 35 Q 20 15, 40 28 T 80 18 T 120 22 L 120 40 L 0 40 Z" />
+                                        <path class="wave-line" d="M 0 35 Q 20 15, 40 28 T 80 18 T 120 22" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+
+                        <!-- 通常リモコン -->
+
+                        <div class="card-header">
+
+                            <div class="device-title">
+
+                                <div class="device-icon">
+                                    🎛
+                                </div>
+
+                                <div>
+                                    <div class="title">
+                                        {{ remote.title }}
+                                    </div>
+
+                                    <div class="subtitle">
+                                        {{ remote.sub_title }}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                {% endif %}
+
+                </div>
+
+            {% empty %}
+
+                <div class="no-devices">
+                    デバイスが登録されていません
+                </div>
+
+            {% endfor %}
+            <!-- =====================
+                 電力
+            ====================== -->
+
+            <div class="energy-card" style="grid-column: 1 / span 10;
+             grid-row: 11 / span 2;">
+
+                <div class="energy-main">
+
+                    <div class="energy-title">
+                        ⚡ 今日の電力使用量
+                    </div>
+
+                    <div class="energy-number">
+                        {{ today_power }}
+                        <span>kWh</span>
+                    </div>
+
+                </div>
+
+
+                <div class="energy-chart">
+
+                    <div class="bar b1"></div>
+                    <div class="bar b2"></div>
+                    <div class="bar b3"></div>
+                    <div class="bar b4"></div>
+                    <div class="bar b5"></div>
+                    <div class="bar b6"></div>
+                    <div class="bar b7"></div>
+                    <div class="bar b8"></div>
+                    <div class="bar b9"></div>
+                    <div class="bar b10"></div>
+                    <div class="bar b11"></div>
+                    <div class="bar b12"></div>
+
+                    <div class="chart-label">
+                        0時　4時　8時　12時　16時　20時　24時
+                    </div>
+
+                </div>
+
+
+                <div class="month-energy">
+
+                    <div class="month-title">
+                        今月の使用量
+                    </div>
+
+                    <div class="month-number">
+                        {{ month_power }}
+                        <span>kWh</span>
+                    </div>
+
+                    <div class="month-target">
+                        目標 {{ month_target }} kWh
+                    </div>
+
+                    <div class="target-bar">
+                        <div class="target-value"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================
+                 シーンボタン
+            ====================== -->
+
+            <div class="scene-buttons"style="
+             grid-column: 11 / span 6;
+             grid-row: 11 / span 2;    ">
+
+                <button class="scene-button away">
+
+                    <div class="scene-icon">
+                        ▣
+                    </div>
+
+                    <div>
+                        外出モード
+                    </div>
+
+                </button>
+
+
+                <button class="scene-button all-light">
+
+                    <div class="scene-icon">
+                        💡
+                    </div>
+
+                    <div>
+                        全消灯
+                    </div>
+
+                </button>
+
+
+                <button class="scene-button all-off">
+
+                    <div class="scene-icon">
+                        ◉
+                    </div>
+
+                    <div>
+                        全機器OFF
+                    </div>
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script>
+    //時刻&天気更新
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- 1. 時計・日付のリアルタイム更新 ---
+        const clockEl = document.getElementById('clock');
+        const dateEl = document.getElementById('date-display');
+        const days = ['日', '月', '火', '水', '木', '金', '土'];
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            if (clockEl) clockEl.textContent = `${hours}:${minutes}`;
+
+            if (dateEl) {
+                const month = now.getMonth() + 1;
+                const date = now.getDate();
+                const dayName = days[now.getDay()];
+                dateEl.textContent = `${month}月${date}日（${dayName}）`;
+            }
+        }
+
+        // 1秒ごとに時計を更新
+        updateClock();
+        setInterval(updateClock, 1000);
+
+
+        // --- 2. 東京都江東区の天気・気温取得 (Open-Meteo API) ---
+        // 江東区の緯度・経度 (北緯 35.6728, 東経 139.8174)
+        const LAT = 35.6728;
+        const LON = 139.8174;
+        const tempEl = document.getElementById('weather-temp');
+        const iconEl = document.getElementById('weather-icon');
+
+        // WMO気象コードに応じたアイコン変換
+        function getWeatherIcon(code) {
+            if (code === 0) return '☀️'; // 快晴
+            if ([1, 2].includes(code)) return '🌤'; // 晴れ・一部曇り
+            if (code === 3) return '☁️'; // 曇り
+            if ([45, 48].includes(code)) return '🌫'; // 霧
+            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return '🌧'; // 雨
+            if ([71, 73, 75, 85, 86].includes(code)) return '❄️'; // 雪
+            if ([95, 96, 99].includes(code)) return '⚡'; // 雷雨
+            return '☁️';
+        }
+
+        async function fetchKotoWeather() {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&timezone=Asia%2FTokyo`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.current) {
+                    // 気温の反映 (四捨五入して整数表示、または小数点第1位)
+                    const temp = Math.round(data.current.temperature_2m);
+                    if (tempEl) tempEl.textContent = `${temp}°C`;
+
+                    // 天気アイコンの反映
+                    const code = data.current.weather_code;
+                    if (iconEl) iconEl.textContent = getWeatherIcon(code);
+                }
+            } catch (error) {
+                console.error('江東区の天気取得エラー:', error);
+            }
+        }
+
+        // 初回取得 ＆ 15分ごとに自動更新
+        fetchKotoWeather();
+        setInterval(fetchKotoWeather, 15 * 60 * 1000);
+    });
+    // エアコン
+    document.addEventListener('DOMContentLoaded', () => {
+        // 状態管理
+        let currentTemp = 24;
+        let modeIndex = 0;
+        let fanIndex = 0;
+
+        const modes = [
+            { label: '冷房', icon: '❄' },
+            { label: '暖房', icon: '☀️' },
+            { label: '除湿', icon: '💧' },
+            { label: '送風', icon: '🍃' }
+        ];
+
+        const fanSpeeds = ['自動', '弱', '中', '強'];
+
+        // 要素取得
+        const tempDisplay = document.getElementById('temp-display');
+        const btnTempMinus = document.getElementById('btn-temp-minus');
+        const btnTempPlus = document.getElementById('btn-temp-plus');
+
+        const btnMode = document.getElementById('btn-mode');
+        const modeValue = document.getElementById('mode-value');
+        const modeIcon = document.getElementById('mode-icon');
+
+        const btnFan = document.getElementById('btn-fan');
+        const fanValue = document.getElementById('fan-value');
+
+        // 温度変更（16°C 〜 30°C）
+        btnTempMinus.addEventListener('click', () => {
+            if (currentTemp > 16) {
+                currentTemp--;
+                tempDisplay.innerHTML = `${currentTemp}<span>°C</span>`;
+            }
+        });
+
+        btnTempPlus.addEventListener('click', () => {
+            if (currentTemp < 30) {
+                currentTemp++;
+                tempDisplay.innerHTML = `${currentTemp}<span>°C</span>`;
+            }
+        });
+
+        // 運転モード切り替え（クリックでループ）
+        btnMode.addEventListener('click', () => {
+            modeIndex = (modeIndex + 1) % modes.length;
+            modeValue.textContent = modes[modeIndex].label;
+            modeIcon.textContent = modes[modeIndex].icon;
+        });
+
+        // 風量切り替え（クリックでループ）
+        btnFan.addEventListener('click', () => {
+            fanIndex = (fanIndex + 1) % fanSpeeds.length;
+            fanValue.textContent = fanSpeeds[fanIndex];
+        });
+    });
+
+    //テレビ
+    document.addEventListener('DOMContentLoaded', () => {
+        const keypadToggleBtn = document.getElementById('btn-toggle-keypad');
+        const keypadCloseBtn = document.getElementById('btn-close-keypad');
+        const channelOverlay = document.getElementById('channel-overlay');
+
+        // チャンネル直接選局オーバーレイの表示・非表示
+        keypadToggleBtn.addEventListener('click', () => {
+            channelOverlay.classList.remove('hidden');
+        });
+
+        keypadCloseBtn.addEventListener('click', () => {
+            channelOverlay.classList.add('hidden');
+        });
+
+        // 全てのIRキーボタンにイベント設定
+        document.querySelectorAll('[data-key]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const key = btn.getAttribute('data-key');
+                handleCommand(key);
+
+                // 数字キーを押した後は自動でモーダルを閉じる
+                if (key.startsWith('ch-')) {
+                    channelOverlay.classList.add('hidden');
+                }
+            });
+        });
+    });
+    //ライト
+    
+    //ライト詳細
+    document.addEventListener('DOMContentLoaded', () => {
+        // CSRFトークンを取得
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        // 操作対象カード要素とデバイスIDの取得
+        const lightCard = document.querySelector('.card-light_detail');
+        const deviceId = lightCard ? lightCard.dataset.deviceId : null;
+        
+        const DEFAULT_CONFIG = {
+            brightness: 80,
+            temp: 4000,
+            color: '#FFBE53'
+        };
+
+        // 要素取得
+        const sliderBrightness = document.getElementById('slider-brightness');
+        const valBrightness = document.getElementById('val-brightness');
+        const sliderTemp = document.getElementById('slider-temp');
+        const valTemp = document.getElementById('val-temp');
+
+        const bulbGlow = document.getElementById('bulb-glow');
+        const currentColorDot = document.getElementById('current-color-dot');
+        const btnReset = document.getElementById('btn-light-reset');
+
+        // モーダル関連要素
+        const paletteOverlay = document.getElementById('rgb-palette-overlay');
+        const btnOpenPalette = document.getElementById('btn-open-palette');
+        const btnClosePalette = document.getElementById('btn-close-palette');
+        const nativePicker = document.getElementById('native-color-picker');
+        const hexInput = document.getElementById('hex-input');
+
+        // パレットの開閉
+        btnOpenPalette.addEventListener('click', () => {
+            paletteOverlay.classList.remove('hidden');
+        });
+
+        btnClosePalette.addEventListener('click', () => {
+            paletteOverlay.classList.add('hidden');
+        });
+
+        // 明るさ変更
+        sliderBrightness.addEventListener('input', (e) => {
+            const val = e.target.value;
+            valBrightness.textContent = `${val}%`;
+            bulbGlow.style.opacity = Math.max(val / 100, 0.2);
+        });
+
+        // 色温度変更
+        sliderTemp.addEventListener('input', (e) => {
+            valTemp.textContent = `${e.target.value}K`;
+        });
+
+        // プリセット & パレットセルクリック時
+        document.querySelectorAll('.preset-dot, .palette-cell').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const color = btn.getAttribute('data-color');
+                applyColor(color);
+                });
+            });
+
+        // ネイティブカラーピッカー変更時
+        nativePicker.addEventListener('input', (e) => {
+            applyColor(e.target.value);
+        });
+
+        // HEX手入力
+        hexInput.addEventListener('change', (e) => {
+            let val = e.target.value.trim();
+            if (!val.startsWith('#')) val = '#' + val;
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                applyColor(val);
+            }
+        });
+
+        // リセット
+        btnReset.addEventListener('click', () => {
+            sliderBrightness.value = DEFAULT_CONFIG.brightness;
+            valBrightness.textContent = `${DEFAULT_CONFIG.brightness}%`;
+            bulbGlow.style.opacity = DEFAULT_CONFIG.brightness / 100;
+
+            sliderTemp.value = DEFAULT_CONFIG.temp;
+            valTemp.textContent = `${DEFAULT_CONFIG.temp}K`;
+
+            applyColor(DEFAULT_CONFIG.color);
+        });
+
+        // 色反映関数
+        function applyColor(color) {
+            currentColorDot.style.backgroundColor = color;
+            nativePicker.value = color;
+            hexInput.value = color.toUpperCase();
+
+            bulbGlow.style.boxShadow = `0 0 20px ${color}`;
+            bulbGlow.style.background = `radial-gradient(circle, ${color}55 0%, rgba(17, 29, 45, 0) 70%)`;
+        }
+    });
+    //パソコン
+        document.addEventListener('DOMContentLoaded', () => {
+        // 現在のPC状態（true: 起動中, false: 停止中）
+        let isPcOn = false;
+
+        // DOM要素
+        const glow = document.getElementById('pc-glow');
+        const dot = document.getElementById('pc-status-dot');
+        const statusText = document.getElementById('pc-status-text');
+        const statusLabel = document.getElementById('pc-status-label');
+        const switchElement = document.getElementById('pc-power-switch');
+
+        const btnBoot = document.getElementById('btn-pc-boot');
+        const btnShutdown = document.getElementById('btn-pc-shutdown');
+
+        const overlay = document.getElementById('pc-confirm-overlay');
+        const btnCancel = document.getElementById('btn-cancel-shutdown');
+        const btnExec = document.getElementById('btn-exec-shutdown');
+
+        // 外部（API/WebSocket/リクエスト）からステータスを受信した際の描画更新
+        window.updatePcState = (online) => {
+            isPcOn = online;
+            if (online) {
+                glow.className = 'pc-halo on';
+                dot.className = 'status-dot on';
+                statusText.textContent = '起動中 (ONLINE)';
+                statusLabel.textContent = 'ON';
+                switchElement.classList.add('active');
+            } else {
+                glow.className = 'pc-halo off';
+                dot.className = 'status-dot off';
+                statusText.textContent = '電源 OFF';
+                statusLabel.textContent = 'OFF';
+                switchElement.classList.remove('active');
+            }
+        };
+
+        // 起動ボタン押下 (WoL送信)
+        btnBoot.addEventListener('click', () => {
+            console.log('Sending WoL (Wake on LAN) Magic Packet...');
+            // ここに起動APIリクエスト（例: fetch('/api/pc/boot/')）
+        });
+
+        // シャットダウンボタン押下時 → モーダルを開く
+        btnShutdown.addEventListener('click', () => {
+            overlay.classList.remove('hidden');
+        });
+
+        // ヘッダーの電源トグルを押したときの挙動
+        switchElement.addEventListener('click', () => {
+            if (isPcOn) {
+                overlay.classList.remove('hidden');
+            } else {
+                console.log('Sending WoL via switch...');
+            }
+        });
+
+        // モーダル：キャンセル
+        btnCancel.addEventListener('click', () => {
+            overlay.classList.add('hidden');
+        });
+
+        // モーダル：確定シャットダウン
+        btnExec.addEventListener('click', () => {
+            overlay.classList.add('hidden');
+            console.log('Sending Shutdown Command (RPC / SSH / Agent)...');
+            // ここにシャットダウンAPIリクエスト（例: fetch('/api/pc/shutdown/')）
+        });
+    });
+    //onoffスイッチ
+    document.addEventListener('DOMContentLoaded', () => {
+        // ページ内のすべての .power-switch のクリックを監視
+        document.addEventListener('click', (e) => {
+            const sw = e.target.closest('.power-switch');
+            if (!sw) return;
+
+            const label = sw.querySelector('.power-label');
+            const isCurrentlyOn = sw.classList.contains('on');
+
+            if (isCurrentlyOn) {
+                // ON -> OFF
+                sw.classList.remove('on');
+                sw.classList.add('off');
+                if (label) label.textContent = 'OFF';
+            } else {
+                // OFF -> ON
+                sw.classList.remove('off');
+                sw.classList.add('on');
+                if (label) label.textContent = 'ON';
+            }
+        });
+    });
+
+    //送信ハンドル
+    document.addEventListener('DOMContentLoaded', () => {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+        // コマンド送信共通関数
+        window.sendDeviceAction = async function(deviceId, commandName, parameter = null) {
+            if (!deviceId || !commandName) {
+                console.warn('パラメータが不足しています:', { deviceId, commandName });
+                return;
+            }
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value 
+                 || document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+
+            // FormData を作成
+            const formData = new FormData();
+            formData.append('device_id', deviceId);
+            formData.append('command_name', commandName);
+            if (parameter) {
+                formData.append('parameter', parameter);
+            }
+
+            try {
+                const response = await fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                console.log(data)
+                if (data.status !== 'success') {
+                    console.error('送信エラー:', data.message);
+                }
+                else if(data.result.message == 'unknown command'){
+                    console.error('送信エラー:', data.result.message);
+                }
+            } catch (error) {
+                console.error('通信エラー:', error);
+            }
+        };
+
+        // 全てのクリック操作を一括監視
+        document.addEventListener('click', (e) => {
+            console.log("ボタンが押されたよ")
+            const btn = e.target.closest('[data-command-name]');
+            if (!btn) return;
+            const card = btn.closest('[data-device-id]');
+            const deviceId = card ? card.dataset.deviceId : null;
+            console.log(deviceId);
+            const commandName = btn.dataset.commandName;
+
+            if (deviceId && commandName) {
+                window.sendDeviceAction(deviceId, commandName);
+                console.log(deviceId);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
