@@ -20,10 +20,6 @@ from . import views
 
 urlpatterns = [
     path("", views.home, name="home"),
-    path(
-        "remote/<int:pk>/",
-        views.remote_detail,
-        name="remote_detail"
-    ),
-    path("api/status/", views.api_status, name="api_status"),
+    # ⭐ 全デバイス一括取得は単体取得より「前」に置く
+    path("api/devices/status/all/", views.get_all_devices_status_view, name="all_devices_status"),
 ]

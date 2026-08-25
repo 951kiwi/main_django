@@ -5,10 +5,11 @@ import hashlib
 import base64
 import uuid
 import requests
+from django.http import JsonResponse
 
+token = os.getenv("SWITCHBOT_TOKEN")
+secret = os.getenv("SWITCHBOT_SECRET")
 def get_switchbot_headers():
-    token = os.getenv("SWITCHBOT_TOKEN")
-    secret = os.getenv("SWITCHBOT_SECRET")
 
     if not token or not secret:
         raise ValueError("SwitchBot credentials are not set in environment variables.")
@@ -40,4 +41,11 @@ def send_switchbot_command(device_id: str, command: str, parameter: str = "defau
     }
 
     response = requests.post(url, headers=headers, json=payload, timeout=5)
+    return response.json()
+
+def fetch_switchbot_status(device_id: str):
+    """デバイスのステータスを取得する"""
+    url = f"https://api.switch-bot.com/v1.1/devices/{device_id}/status"
+    headers = get_switchbot_headers()
+    response = requests.get(url, headers=headers, timeout=5)
     return response.json()

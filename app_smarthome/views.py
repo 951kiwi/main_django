@@ -4,8 +4,12 @@ from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from .models import Device,Command,Card
 # 作成した switchbot.py から関数をインポート
-from .SwitchBot import send_switchbot_command
+from .SwitchBot import send_switchbot_command,fetch_switchbot_status
+from django.views.decorators.csrf import (  # POSTをJSから叩く場合のCSRF対策（必要に応じて）
+    csrf_exempt,
+)
 import json
+from django.views.decorators.http import require_GET, require_POST
 
 def home(request):
     # =========================================================
@@ -80,8 +84,21 @@ def remote_detail(request, pk):
         }
     )
 
+@require_GET
+def get_all_devices_status_view(request):
+    """画面上の全デバイスのステータスをまとめて返す"""
+    # 表示対象のカードに紐づく device_id 一覧を取得
+    devices = Device.objects.filter(card__visible=True)
 
+    status_list = {}
+    for dev in devices:
+        try:
+            # 各デバイスのステータスを取得
+            status_list[dev.device_id] = fetch_switchbot_status(dev.device_id)
+        except Exception:
+            status_list[dev.device_id] = None
 
+    return JsonResponse({"devices": status_list})
 
 def api_status(request):
     """

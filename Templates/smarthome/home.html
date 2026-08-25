@@ -215,7 +215,7 @@
                                 </div>
                             </div>
                             <div class="power-switch off" id="detail-light-power">
-                                <span class="power-label" id="detail-power-label">OFF</span>
+                                <span class="power-label" id="detail-power-label" data-command-name="ON">OFF</span>
                                 <span class="switch-knob"></span>
                             </div>
                         </div>
@@ -249,7 +249,7 @@
                                     </div>
                                     <div class="slider-track-wrap">
                                         <span class="slider-icon">🌑</span>
-                                        <input type="range" min="1" max="100" value="80" class="light-slider brightness-slider" id="slider-brightness">
+                                        <input type="range" min="1" max="100" value="80" class="light-slider brightness-slider" id="slider-brightness" data-command-name="bright-set">
                                         <span class="slider-icon">☀️</span>
                                     </div>
                                 </div>
@@ -261,7 +261,7 @@
                                     </div>
                                     <div class="slider-track-wrap">
                                         <span class="slider-icon">🧡</span>
-                                        <input type="range" min="2700" max="6500" step="100" value="4000" class="light-slider temp-slider" id="slider-temp">
+                                        <input type="range" min="2700" max="6500" step="100" value="4000" class="light-slider temp-slider" id="slider-temp" data-command-name="temperature-set">
                                         <span class="slider-icon">💙</span>
                                     </div>
                                 </div>
@@ -1053,11 +1053,13 @@
                 // ON -> OFF
                 sw.classList.remove('on');
                 sw.classList.add('off');
+                sw.dataset.commandName = "OFF";
                 if (label) label.textContent = 'OFF';
             } else {
                 // OFF -> ON
                 sw.classList.remove('off');
                 sw.classList.add('on');
+                sw.dataset.commandName = "ON";
                 if (label) label.textContent = 'ON';
             }
         });
@@ -1110,18 +1112,94 @@
         document.addEventListener('click', (e) => {
             console.log("ボタンが押されたよ")
             const btn = e.target.closest('[data-command-name]');
-            if (!btn) return;
+            if (!btn) {syncAllDevices(); return};
+            console.log("処理開始",btn);
             const card = btn.closest('[data-device-id]');
             const deviceId = card ? card.dataset.deviceId : null;
-            console.log(deviceId);
             const commandName = btn.dataset.commandName;
+            let parameter = null;
+            setTimeout(() => {
+                syncAllDevices();
+            }, 3000);
+            if(commandName == "bright-set"){
+                parameter = btn.closest("#slider-brightness").value             
+            }
+            else if(commandName == "temperature-set"){
+                parameter = btn.closest("#slider-temp").value             
+            }
+            else{
 
+            }
             if (deviceId && commandName) {
-                window.sendDeviceAction(deviceId, commandName);
+                window.sendDeviceAction(deviceId, commandName, parameter);
                 console.log(deviceId);
             }
         });
     });
+    function updateUIFromStatusData(data) { //ステータス反映
+        // data の全キー（deviceId）をループ処理
+        Object.entries(data).forEach(([deviceId, res]) => {
+            // 1. deviceId に一致するカード要素を取得
+            const card = document.querySelector(`[data-device-id="${deviceId}"]`);
+            if (!card) {return};
+
+            // 2. APIレスポンスの成功判定
+            if (res.statusCode !== 100 || !res.body) {
+                console.warn(`[${deviceId}] ステータス取得エラー:`, res.message);
+                // 必要に応じてカードをオフライン表示などにする
+                // card.classList.add('offline');
+                return;
+            }
+            const status = res.body;
+
+            // 3. 電源状態（power）の反映
+            // SwitchBot の power は 'ON' / 'OFF' または ON/OFF プロパティが存在する
+            const powerState = status.power; // 例: 'ON' または 'OFF'
+            const powerSwitch = card.querySelector('.power-switch');
+            const powerLabel = card.querySelector('.power-label');
+
+            if (powerSwitch && powerState) {
+                const isOn = powerState.toUpperCase() === 'ON';
+                powerSwitch.classList.toggle('on', isOn);
+                powerSwitch.classList.toggle('off', !isOn);
+
+                if (powerLabel) {
+                    powerLabel.textContent = isOn ? 'ON' : 'OFF';
+                }
+            }
+
+            // 4. 明るさスライダー（brightness）の反映
+            if (status.brightness !== undefined) {
+                const brightSlider = card.querySelector('.slider-brightness, #slider-brightness');
+                if (brightSlider) {
+                    brightSlider.value = status.brightness;
+                }
+            }
+
+            // 5. 温度（temperature）などの反映
+            if (status.temperature !== undefined) {
+                const tempSlider = card.querySelector('.slider-temp, #slider-temp');
+                const tempDisplay = card.querySelector('.temp-display');
+                if (tempSlider) tempSlider.value = status.temperature;
+                if (tempDisplay) tempDisplay.textContent = `${status.temperature}℃`;
+            }
+        });
+    }
+    // 1回のリクエストで画面全体のステータスを一括更新
+    async function syncAllDevices() {
+        try{
+            const res = await fetch('/smarthome/api/devices/status/all/');
+            const data = await res.json();
+            console.log(data.devices);
+            updateUIFromStatusData(data.devices || data)
+        }catch(err){
+            console.error('一括ステータス取得失敗：',err);
+        }
+        // data.devices = { "deviceId_1": {...}, "deviceId_2": {...} }
+        // それぞれのカードのUIを反映
+        //smarthome/:1 The Cross-Origin-Opener-Policy header has been ignored, because the URL's origin was untrustworthy. It was defined either in the final response or a redirect. Please deliver the response using the HTTPS protocol. You can also use the 'localhost' origin instead. See https://www.w3.org/TR/powerful-features/#potentially-trustworthy-origin and https://html.spec.whatwg.org/#the-cross-origin-opener-policy-header.
+    }
+
 </script>
 
 </body>
