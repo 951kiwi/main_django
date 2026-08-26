@@ -4,11 +4,12 @@ from django.db import models
 class Device(models.Model):
 
     TYPE_CHOICES = [
-        ("tv", "テレビ"),
+        ("hub","ハブ"),
         ("light", "ライト"),
         ("light_detail","ライト詳細付き"),
-        ("aircon", "エアコン"),
         ("concent","コンセント"),
+        ("tv", "テレビ"),
+        ("aircon", "エアコン"),
         ("PC","パソコン"),
         ("remote", "リモコン"),
     ]

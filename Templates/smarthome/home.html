@@ -18,7 +18,21 @@
     <form style="display: none;">
         {% csrf_token %}
     </form>
+<!-- 操作不能用オーバーレイ -->
+<div id="lock-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center; cursor: wait; backdrop-filter: blur(2px);">
+    <div style="background: #ffffff; color: #333333; padding: 36px 48px; border-radius: 16px; font-size: 1.25rem; font-weight: 600; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); text-align: center; min-width: 280px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+        <!-- ローディングスピナー（CSSアニメーション） -->
+        <div style="width: 36px; height: 36px; border: 4px solid #e0e0e0; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+        <span>最新状態を同期中...</span>
+    </div>
+</div>
 
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
 <div class="app">
 
     <!-- =========================
@@ -133,6 +147,7 @@
                 <div
                     class="device-card {{ remote.type }}-card"
                     data-device-id="{{ remote.device_id }}"
+                    data-device-type="{{ remote.type }}"
                     style="
                         grid-column: {{ remote.x|add:1 }}
                             / span {{ remote.width }};
@@ -326,17 +341,17 @@
                         <!-- 温度ダイヤル & プラス/マイナスボタン -->
                         <div class="temperature-dial">
                             <div class="dial-inner">
-                                <div class="temperature" id="temp-display">24<span>°C</span></div>
+                                <div class="temperature" id="temp-display" data-command-name="AirC_temp_display">24<span>°C</span></div>
                                 <div class="setting-label">設定温度</div>
                             </div>
-                            <button type="button" class="temp-btn minus" id="btn-temp-minus" aria-label="温度を下げる">−</button>
-                            <button type="button" class="temp-btn plus" id="btn-temp-plus" aria-label="温度を上げる">+</button>
+                            <button type="button" class="temp-btn minus" id="btn-temp-minus" aria-label="温度を下げる" data-command-name="AirC_temp_down">−</button>
+                            <button type="button" class="temp-btn plus" id="btn-temp-plus" aria-label="温度を上げる" data-command-name="AirC_temp_up">+</button>
                         </div>
 
                         <!-- ステータス・操作エリア -->
                         <div class="aircon-status">
                             <!-- 運転モード切り替えボタン -->
-                            <button type="button" class="status-item clickable" id="btn-mode">
+                            <button type="button" class="status-item clickable" id="btn-mode" data-command-name="AirC_mode">
                                 <div class="status-icon" id="mode-icon">❄</div>
                                 <div class="status-details">
                                     <div class="status-value" id="mode-value">冷房</div>
@@ -345,7 +360,7 @@
                             </button>
 
                             <!-- 風量切り替えボタン -->
-                            <button type="button" class="status-item clickable" id="btn-fan">
+                            <button type="button" class="status-item clickable" id="btn-fan" data-command-name="AirC_fan">
                                 <div class="status-icon">💨</div>
                                 <div class="status-details">
                                     <div class="status-value" id="fan-value">自動</div>
@@ -386,15 +401,15 @@
                             <!-- 左側：十字キー & ナビゲーション -->
                             <div class="tv-nav-section">
                                 <div class="dpad">
-                                    <button type="button" class="dpad-btn up" data-key="up" aria-label="上">▲</button>
-                                    <button type="button" class="dpad-btn left" data-key="left" aria-label="左">◀</button>
-                                    <button type="button" class="dpad-btn ok" data-key="enter">決定</button>
-                                    <button type="button" class="dpad-btn right" data-key="right" aria-label="右">▶</button>
-                                    <button type="button" class="dpad-btn down" data-key="down" aria-label="下">▼</button>
+                                    <button type="button" class="dpad-btn up" data-command-name="tv_up" aria-label="上">▲</button>
+                                    <button type="button" class="dpad-btn left" data-command-name="tv_left" aria-label="左">◀</button>
+                                    <button type="button" class="dpad-btn ok" data-command-name="tv_enter">決定</button>
+                                    <button type="button" class="dpad-btn right" data-command-name="tv_right" aria-label="右">▶</button>
+                                    <button type="button" class="dpad-btn down" data-command-name="tv_down" aria-label="下">▼</button>
                                 </div>
                                 <div class="nav-sub-btns">
-                                    <button type="button" class="tv-btn small" data-key="tv">TV</button>
-                                    <button type="button" class="tv-btn small" data-key="back">戻る</button>
+                                    <button type="button" class="tv-btn small" data-command-name="tv_tv">TV</button>
+                                    <button type="button" class="tv-btn small" data-command-name="tv_back">戻る</button>
                                 </div>
                             </div>
 
@@ -403,14 +418,14 @@
                                 <!-- 音量 & チャンネル操作 -->
                                 <div class="rocker-group">
                                     <div class="rocker">
-                                        <button type="button" class="tv-btn step-btn" data-key="vol-up">＋</button>
+                                        <button type="button" class="tv-btn step-btn" data-command-name="tv_vol-up">＋</button>
                                         <span class="rocker-label">音量</span>
-                                        <button type="button" class="tv-btn step-btn" data-key="vol-down">ー</button>
+                                        <button type="button" class="tv-btn step-btn" data-command-name="tv_vol-down">ー</button>
                                     </div>
                                     <div class="rocker">
-                                        <button type="button" class="tv-btn step-btn" data-key="ch-up">▲</button>
+                                        <button type="button" class="tv-btn step-btn" data-command-name="tv_ch-up">▲</button>
                                         <span class="rocker-label">選局</span>
-                                        <button type="button" class="tv-btn step-btn" data-key="ch-down">▼</button>
+                                        <button type="button" class="tv-btn step-btn" data-command-name="tv_ch-down">▼</button>
                                     </div>
                                 </div>
 
@@ -421,9 +436,9 @@
 
                                 <!-- 番組表・録画系ボタン -->
                                 <div class="rec-buttons">
-                                    <button type="button" class="tv-btn sub" data-key="epg">番組表</button>
-                                    <button type="button" class="tv-btn sub" data-key="rec-reserve">録画予約</button>
-                                    <button type="button" class="tv-btn sub" data-key="rec-list">録画一覧</button>
+                                    <button type="button" class="tv-btn sub" data-command-name="tv_epg">番組表</button>
+                                    <button type="button" class="tv-btn sub" data-command-name="tv_rec-reserve">録画予約</button>
+                                    <button type="button" class="tv-btn sub" data-command-name="tv_rec-list">録画一覧</button>
                                 </div>
                             </div>
 
@@ -434,15 +449,15 @@
                                     <button type="button" class="close-overlay" id="btn-close-keypad">✕</button>
                                 </div>
                                 <div class="channel-grid">
-                                    <button type="button" class="num-btn" data-key="ch-1">1</button>
-                                    <button type="button" class="num-btn" data-key="ch-2">2</button>
-                                    <button type="button" class="num-btn" data-key="ch-3">3</button>
-                                    <button type="button" class="num-btn" data-key="ch-4">4</button>
-                                    <button type="button" class="num-btn" data-key="ch-5">5</button>
-                                    <button type="button" class="num-btn" data-key="ch-6">6</button>
-                                    <button type="button" class="num-btn" data-key="ch-7">7</button>
-                                    <button type="button" class="num-btn" data-key="ch-8">8</button>
-                                    <button type="button" class="num-btn" data-key="ch-9">9</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-1">1</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-2">2</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-3">3</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-4">4</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-5">5</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-6">6</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-7">7</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-8">8</button>
+                                    <button type="button" class="num-btn" data-command-name="tv_ch-9">9</button>
                                 </div>
                             </div>
                         </div>
@@ -716,6 +731,22 @@
 
 
 <script>
+    // モードの変換マップ
+    const MODE_MAP = {
+        '自動': 1,
+        '冷房': 2,
+        'ドライ': 3,
+        '除湿': 3,
+        '送風': 4,
+        '暖房': 5
+                    };
+    const FAN_MAP = {
+        '自動': 1,
+        '微風': 2,
+        '弱': 2,
+        '中': 3,
+        '強': 4
+    };
     //時刻&天気更新
     document.addEventListener('DOMContentLoaded', () => {
         // --- 1. 時計・日付のリアルタイム更新 ---
@@ -780,6 +811,7 @@
                 }
             } catch (error) {
                 console.error('江東区の天気取得エラー:', error);
+                tempEl.textContent = `ERR°C`
             }
         }
 
@@ -798,7 +830,8 @@
             { label: '冷房', icon: '❄' },
             { label: '暖房', icon: '☀️' },
             { label: '除湿', icon: '💧' },
-            { label: '送風', icon: '🍃' }
+            { label: '送風', icon: '🍃' },
+            { label: '自動', icon: '🌡️' },
         ];
 
         const fanSpeeds = ['自動', '弱', '中', '強'];
@@ -1116,19 +1149,38 @@
             console.log("処理開始",btn);
             const card = btn.closest('[data-device-id]');
             const deviceId = card ? card.dataset.deviceId : null;
-            const commandName = btn.dataset.commandName;
+            let commandName = btn.dataset.commandName;
             let parameter = null;
             setTimeout(() => {
                 syncAllDevices();
-            }, 3000);
+            }, 1000);
+            
+            console.log(card.dataset.deviceType);
             if(commandName == "bright-set"){
                 parameter = btn.closest("#slider-brightness").value             
             }
             else if(commandName == "temperature-set"){
                 parameter = btn.closest("#slider-temp").value             
             }
+            else if(["AirC_temp_display", "AirC_temp_down", "AirC_temp_up", "AirC_fan", "AirC_mode"].includes(commandName) || card.dataset.deviceType === "aircon"){
+                const powerSwitch = card ? card.querySelector('.power-switch') : null;
+                // 状態（"on" か "off"）の取得
+                const status = powerSwitch?.classList.contains('on') ? 'on' : 'off';
+                const tempElem = card ? card.querySelector('.temperature') : null;
+                // "24°C" から数字のみを取り出して 24 (Number) に変換
+                const temp = tempElem ? parseInt(tempElem.textContent.replace(/[^\d]/g, ''), 10) : null;
+                const modeText = card ? card.querySelector('.status-value').textContent : null;
+                // 番号に変換（該当がない場合はデフォルトで 2: 冷房 などを設定）
+                const modeNumber = MODE_MAP[modeText] ?? 2;
+                const fanText = card ? card.querySelector('.fan_value')?.textContent.trim() : null;
+                const fanNumber = FAN_MAP[fanText] ?? 1; // デフォルト: 1 (自動)
+                console.log(temp,modeNumber,fanNumber,status);
+                commandName = "AirC_set_all"
+                parameter = `${temp},${modeNumber},${fanNumber},${status}`;
+                
+            }
             else{
-
+                console.log("else");
             }
             if (deviceId && commandName) {
                 window.sendDeviceAction(deviceId, commandName, parameter);
@@ -1200,6 +1252,86 @@
         //smarthome/:1 The Cross-Origin-Opener-Policy header has been ignored, because the URL's origin was untrustworthy. It was defined either in the final response or a redirect. Please deliver the response using the HTTPS protocol. You can also use the 'localhost' origin instead. See https://www.w3.org/TR/powerful-features/#potentially-trustworthy-origin and https://html.spec.whatwg.org/#the-cross-origin-opener-policy-header.
     }
 
+    //3分間待機時最新状態表示 & 初回更新
+    document.addEventListener('DOMContentLoaded', async () => {
+    const IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3分（ミリ秒）
+    const MIN_LOCK_DISPLAY_MS = 600;       // チラつき防止の最低表示時間（0.6秒）
+    
+    let lastActivityTime = Date.now();
+    let isSyncing = false;
+
+    const lockOverlay = document.getElementById('lock-overlay');
+
+    // 操作ロック/アンロック制御
+    function setLocked(locked) {
+        isSyncing = locked;
+        if (lockOverlay) {
+            lockOverlay.style.display = locked ? 'flex' : 'none';
+        }
+    }
+
+    // 最新状態の取得・画面更新
+    async function syncAllDevices() {
+        try {
+            const response = await fetch('/smarthome/api/devices/status/all/');
+            const json = await response.json();
+            if (typeof window.updateUIFromStatusData === 'function') {
+                window.updateUIFromStatusData(json.devices || json);
+            }
+        } catch (err) {
+            console.error('ステータス同期エラー:', err);
+        }
+    }
+
+    // ロックをかけて同期する共通関数（最低表示時間つき）
+    async function syncWithLock() {
+        setLocked(true);
+        try {
+            await Promise.all([
+                syncAllDevices(),
+                new Promise(resolve => setTimeout(resolve, MIN_LOCK_DISPLAY_MS))
+            ]);
+        } finally {
+            setLocked(false);
+            lastActivityTime = Date.now(); // 最終操作時刻を更新
+        }
+    }
+
+    // ─────────────────────────────────────────
+    // 1. ユーザー操作の監視（3分放置後の復帰検知）
+    // ─────────────────────────────────────────
+    ['click', 'touchstart'].forEach(eventType => {
+        document.addEventListener(eventType, async (e) => {
+            // 同期中は全タップをブロック
+            if (isSyncing) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
+
+            const now = Date.now();
+            // 3分以上放置されていた場合
+            if (now - lastActivityTime >= IDLE_TIMEOUT_MS) {
+                // 本来のボタン操作をキャンセルして同期を実行
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                console.log('3分間放置後の復帰検知: 操作をブロックして同期開始');
+                await syncWithLock();
+                return;
+            }
+
+            // 通常操作時は時刻を更新
+            lastActivityTime = now;
+        }, true); // true: キャプチャフェーズで最優先実行
+    });
+
+    // ─────────────────────────────────────────
+    // 2. ページロード時の初回同期実行
+    // ─────────────────────────────────────────
+    console.log('ページロード: 初期状態を同期中...');
+    await syncWithLock();
+});
 </script>
 
 </body>
