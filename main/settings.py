@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'app_fileuploader',
     'app_Xmas',
     'app_smarthome',
+    'app_Quoridor',
     'channels',
     'sslserver',
 ]

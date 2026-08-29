@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>{{ room.name }}</title>
+  <style>
+    * { box-sizing: border-box; touch-action: manipulation; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #121214;
+      color: #fff;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100vh;
+      user-select: none;
+      overflow: hidden;
+      padding: 8px 12px;
+      position: relative;
+    }
+
+    /* プレイヤーエリア（上側・下側） */
+    .player-section {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: opacity 0.3s;
+    }
+
+    /* 対面用の180度回転 */
+    .player-section.p2-section {
+      transform: rotate(180deg);
+    }
+
+    .player-section.inactive {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* プレイヤー情報バナー */
+    .player-banner {
+      width: 100%;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #27272a;
+      border-radius: 8px;
+    }
+    .p1-section .player-banner.active { background: #451a1a; border: 2px solid #ef4444; }
+    .p2-section .player-banner.active { background: #172554; border: 2px solid #3b82f6; }
+
+    .badge { font-weight: bold; padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; }
+    .p1-badge { background: #ef4444; color: #fff; }
+    .p2-badge { background: #3b82f6; color: #fff; }
+
+    /* 操作バー */
+    .mode-bar {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-mode {
+      flex: 1;
+      padding: 10px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border: 1px solid #52525b;
+      background: #27272a;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-mode.active { background: #eab308; color: #000; border-color: #fde047; }
+
+    /* 確定・キャンセルバー */
+    .confirm-bar {
+      display: none;
+      gap: 6px;
+      background: #27272a;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid #4ade80;
+    }
+    .btn-confirm {
+      flex: 1;
+      padding: 10px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-apply { background: #22c55e; color: #fff; }
+    .btn-cancel { background: #ef4444; color: #fff; }
+
+    /* 盤面 */
+    #board {
+      display: grid;
+      width: min(86vw, 48vh);
+      height: min(86vw, 48vh);
+      background: #27272a;
+      padding: 6px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    .cell {
+      background: #52525b;
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    /* 移動可能マスのハイライト */
+    .cell.movable {
+      background: #3f3f46;
+      border: 2px dashed #4ade80;
+    }
+    .cell.movable::after {
+      content: "";
+      width: 14px;
+      height: 14px;
+      background: #4ade80;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* コマスタイル */
+    .pawn {
+      width: 72%;
+      height: 72%;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      z-index: 10;
+      /* ★ 移動アニメーション（0.5秒） ★ */
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: transform;
+    }
+    .pawn.p1 { background: radial-gradient(circle at 30% 30%, #f87171, #dc2626); }
+    .pawn.p2 { background: radial-gradient(circle at 30% 30%, #60a5fa, #2563eb); }
+
+    /* 溝・交差点 */
+    .groove-h, .groove-v, .intersection {
+      background: transparent;
+      cursor: pointer;
+    }
+
+    /* 壁（色分け） */
+    .fence-p1 { background: #ef4444 !important; }
+    .fence-p2 { background: #3b82f6 !important; }
+
+    /* プレビュー壁（黄色・点滅） */
+    .fence-preview {
+      background: #facc15 !important;
+      opacity: 0.85;
+      animation: blink 0.8s infinite alternate;
+    }
+    @keyframes blink {
+      from { opacity: 0.4; }
+      to { opacity: 0.9; }
+    }
+
+    /* 勝利モーダル */
+    .winner-modal {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .winner-card {
+      background: #27272a;
+      border: 2px solid #52525b;
+      padding: 28px 20px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 380px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.7);
+    }
+    .winner-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .btn-action {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn-restart { background: #22c55e; }
+    .btn-restart:active { background: #16a34a; }
+    .btn-exit { background: #4b5563; }
+    .btn-exit:active { background: #374151; }
+  </style>
+</head>
+<body>
+
+  <!-- Player 2 エリア（上側・対面用に180度回転） -->
+  <div class="player-section p2-section" id="p2-section">
+    <div class="player-banner" id="p2-banner">
+      <span class="badge p2-badge">Player 2 (青)</span>
+      <span>残り壁: <strong id="p2-fences">{{ room.p2_fences_left }}</strong></span>
+    </div>
+    
+    <div class="confirm-bar" id="p2-confirm-bar">
+      <button class="btn-confirm btn-apply" onclick="confirmFence()">✅ 壁を設置</button>
+      <button class="btn-confirm btn-cancel" onclick="cancelPreview()">❌ 取消</button>
+    </div>
+
+    <div class="mode-bar" id="p2-mode-bar">
+      <button class="btn-mode active" id="p2-btn-move" onclick="setMode('move')">🚶 コマ移動</button>
+      <button class="btn-mode" id="p2-btn-h" onclick="setMode('fence_h')">➖ 横壁</button>
+      <button class="btn-mode" id="p2-btn-v" onclick="setMode('fence_v')">| 縦壁</button>
+    </div>
+  </div>
+
+  <!-- 中央盤面 -->
+  <div id="board"></div>
+
+  <!-- Player 1 エリア（下側・正位置） -->
+  <div class="player-section p1-section" id="p1-section">
+    <div class="confirm-bar" id="p1-confirm-bar">
+      <button class="btn-confirm btn-apply" onclick="confirmFence()">✅ 壁を設置</button>
+      <button class="btn-confirm btn-cancel" onclick="cancelPreview()">❌ 取消</button>
+    </div>
+
+    <div class="mode-bar" id="p1-mode-bar">
+      <button class="btn-mode active" id="p1-btn-move" onclick="setMode('move')">🚶 コマ移動</button>
+      <button class="btn-mode" id="p1-btn-h" onclick="setMode('fence_h')">➖ 横壁</button>
+      <button class="btn-mode" id="p1-btn-v" onclick="setMode('fence_v')">| 縦壁</button>
+    </div>
+
+    <div class="player-banner" id="p1-banner">
+      <span class="badge p1-badge">Player 1 (赤)</span>
+      <span>残り壁: <strong id="p1-fences">{{ room.p1_fences_left }}</strong></span>
+    </div>
+  </div>
+
+  <!-- 勝利確定モーダル -->
+  <div class="winner-modal" id="winner-modal">
+    <div class="winner-card">
+      <div class="winner-title" id="winner-text">🎉 勝利！</div>
+      <p style="color: #aaa; margin: 0;">ゲームが終了しました</p>
+      
+      <div class="modal-actions">
+        <button class="btn-action btn-restart" onclick="restartGame()">🔄 もう一度遊ぶ (Restart)</button>
+        <a href="{% url 'index' %}" class="btn-action btn-exit">🚪 終了 (ルーム作成へ)</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let gameState = {
+      board_size: {{ room.board_size }},
+      current_turn: {{ room.current_turn }},
+      winner: {{ room.winner|default:"null" }},
+      p1_pos: {{ room.p1_pos|safe }},
+      p2_pos: {{ room.p2_pos|safe }},
+      p1_fences_left: {{ room.p1_fences_left }},
+      p2_fences_left: {{ room.p2_fences_left }},
+      placed_fences: {{ room.placed_fences|safe }}
+    };
+
+    let currentMode = 'move';
+    let previewFence = null;
+    let isAnimating = false; // アニメーション中の連打防止フラグ
+    const roomId = '{{ room.id }}';
+
+    function setMode(mode) {
+      if (gameState.winner || isAnimating) return;
+      currentMode = mode;
+      cancelPreview();
+      updateModeButtons();
+      renderBoard();
+    }
+
+    function updateModeButtons() {
+      ['p1', 'p2'].forEach(prefix => {
+        document.querySelectorAll(`#${prefix}-mode-bar .btn-mode`).forEach(b => b.classList.remove('active'));
+        if (currentMode === 'move') document.getElementById(`${prefix}-btn-move`).classList.add('active');
+        if (currentMode === 'fence_h') document.getElementById(`${prefix}-btn-h`).classList.add('active');
+        if (currentMode === 'fence_v') document.getElementById(`${prefix}-btn-v`).classList.add('active');
+      });
+    }
+
+    function getValidMoves() {
+      if (currentMode !== 'move' || gameState.winner || isAnimating) return [];
+      const currentPos = (gameState.current_turn === 1) ? gameState.p1_pos : gameState.p2_pos;
+      const enemyPos = (gameState.current_turn === 1) ? gameState.p2_pos : gameState.p1_pos;
+      const valid = [];
+
+      const dirs = [
+        { dx: 0, dy: -1 },
+        { dx: 0, dy: 1 },
+        { dx: -1, dy: 0 },
+        { dx: 1, dy: 0 }
+      ];
+
+      for (const d of dirs) {
+        const nx = currentPos.x + d.dx;
+        const ny = currentPos.y + d.dy;
+
+        if (nx >= 0 && nx < gameState.board_size && ny >= 0 && ny < gameState.board_size) {
+          if (!isMoveBlocked(currentPos.x, currentPos.y, nx, ny)) {
+            if (nx === enemyPos.x && ny === enemyPos.y) {
+              const jumpX = nx + d.dx;
+              const jumpY = ny + d.dy;
+              if (jumpX >= 0 && jumpX < gameState.board_size && jumpY >= 0 && jumpY < gameState.board_size) {
+                if (!isMoveBlocked(nx, ny, jumpX, jumpY)) {
+                  valid.push({ x: jumpX, y: jumpY });
+                }
+              }
+            } else {
+              valid.push({ x: nx, y: ny });
+            }
+          }
+        }
+      }
+      return valid;
+    }
+
+    function isMoveBlocked(x1, y1, x2, y2) {
+      if (x1 === x2) {
+        const minY = Math.min(y1, y2);
+        return gameState.placed_fences.some(f => f.orientation === 'H' && f.y === minY && (f.x === x1 || f.x === x1 - 1));
+      } else if (y1 === y2) {
+        const minX = Math.min(x1, x2);
+        return gameState.placed_fences.some(f => f.orientation === 'V' && f.x === minX && (f.y === y1 || f.y === y1 - 1));
+      }
+      return false;
+    }
+
+    function renderBoard() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      const N = gameState.board_size;
+      const gridTotal = N * 2 - 1;
+
+      let template = '';
+      for (let i = 0; i < gridTotal; i++) {
+        template += (i % 2 === 0) ? '1fr ' : '8px ';
+      }
+      board.style.gridTemplateColumns = template;
+      board.style.gridTemplateRows = template;
+
+      const validMoves = getValidMoves();
+
+      for (let r = 0; r < gridTotal; r++) {
+        for (let c = 0; c < gridTotal; c++) {
+          const div = document.createElement('div');
+
+          if (r % 2 === 0 && c % 2 === 0) {
+            const cx = c / 2, cy = r / 2;
+            div.className = 'cell';
+            div.id = `cell-${cx}-${cy}`;
+
+            if (gameState.p1_pos.x === cx && gameState.p1_pos.y === cy) {
+              div.innerHTML = '<div class="pawn p1" id="pawn-p1"></div>';
+            } else if (gameState.p2_pos.x === cx && gameState.p2_pos.y === cy) {
+              div.innerHTML = '<div class="pawn p2" id="pawn-p2"></div>';
+            }
+
+            const isMovable = validMoves.some(m => m.x === cx && m.y === cy);
+            if (isMovable) {
+              div.classList.add('movable');
+              div.onclick = () => handleMoveWithAnimation(cx, cy);
+            }
+          } else if (r % 2 === 1 && c % 2 === 0) {
+            div.className = 'groove-h';
+            const fx = c / 2, fy = (r - 1) / 2;
+            applyFenceStyles(div, fx, fy, 'H');
+            div.onclick = () => onGrooveClick(fx, fy, 'H');
+          } else if (r % 2 === 0 && c % 2 === 1) {
+            div.className = 'groove-v';
+            const fx = (c - 1) / 2, fy = r / 2;
+            applyFenceStyles(div, fx, fy, 'V');
+            div.onclick = () => onGrooveClick(fx, fy, 'V');
+          } else {
+            div.className = 'intersection';
+            const fx = (c - 1) / 2, fy = (r - 1) / 2;
+            applyFenceStyles(div, fx, fy, 'H');
+            applyFenceStyles(div, fx, fy, 'V');
+            div.onclick = () => {
+              if (currentMode === 'fence_h') onGrooveClick(fx, fy, 'H');
+              if (currentMode === 'fence_v') onGrooveClick(fx, fy, 'V');
+            };
+          }
+          board.appendChild(div);
+        }
+      }
+
+      // バナー更新
+      document.getElementById('p1-fences').innerText = gameState.p1_fences_left;
+      document.getElementById('p2-fences').innerText = gameState.p2_fences_left;
+
+      const p1Turn = gameState.current_turn === 1;
+      document.getElementById('p1-section').classList.toggle('inactive', !p1Turn || !!gameState.winner);
+      document.getElementById('p2-section').classList.toggle('inactive', p1Turn || !!gameState.winner);
+      document.getElementById('p1-banner').classList.toggle('active', p1Turn);
+      document.getElementById('p2-banner').classList.toggle('active', !p1Turn);
+
+      const modal = document.getElementById('winner-modal');
+      if (gameState.winner) {
+        showWinnerModal(gameState.winner);
+      } else {
+        modal.style.display = 'none';
+      }
+    }
+
+    function showWinnerModal(winner) {
+      const modal = document.getElementById('winner-modal');
+      const text = document.getElementById('winner-text');
+      const color = winner === 1 ? '#ef4444' : '#3b82f6';
+      const label = winner === 1 ? 'Player 1 (赤)' : 'Player 2 (青)';
+      text.innerHTML = `🎉 <span style="color: ${color}">${label}</span> の勝利！`;
+      modal.style.display = 'flex';
+    }
+
+    function applyFenceStyles(el, fx, fy, orient) {
+      for (const f of gameState.placed_fences) {
+        if (f.orientation === orient) {
+          const match = (orient === 'H' && f.y === fy && (f.x === fx || f.x === fx - 1)) ||
+                        (orient === 'V' && f.x === fx && (f.y === fy || f.y === fy - 1));
+          if (match) {
+            el.classList.add(f.player === 2 ? 'fence-p2' : 'fence-p1');
+          }
+        }
+      }
+
+      if (previewFence && previewFence.orientation === orient) {
+        const isPrev = (orient === 'H' && previewFence.y === fy && (previewFence.x === fx || previewFence.x === fx - 1)) ||
+                       (orient === 'V' && previewFence.x === fx && (previewFence.y === fy || previewFence.y === fy - 1));
+        if (isPrev) {
+          el.classList.add('fence-preview');
+        }
+      }
+    }
+
+    function onGrooveClick(fx, fy, orient) {
+      if (gameState.winner || isAnimating) return;
+      if (currentMode !== 'fence_h' && currentMode !== 'fence_v') return;
+      if (orient === 'H' && currentMode !== 'fence_h') return;
+      if (orient === 'V' && currentMode !== 'fence_v') return;
+
+      if (fx >= gameState.board_size - 1) fx = gameState.board_size - 2;
+      if (fy >= gameState.board_size - 1) fy = gameState.board_size - 2;
+
+      previewFence = { x: fx, y: fy, orientation: orient };
+      
+      const activeConfirmBar = (gameState.current_turn === 1) 
+        ? document.getElementById('p1-confirm-bar') 
+        : document.getElementById('p2-confirm-bar');
+      
+      activeConfirmBar.style.display = 'flex';
+      renderBoard();
+    }
+
+    function cancelPreview() {
+      previewFence = null;
+      document.getElementById('p1-confirm-bar').style.display = 'none';
+      document.getElementById('p2-confirm-bar').style.display = 'none';
+      renderBoard();
+    }
+
+    async function confirmFence() {
+      if (!previewFence || isAnimating) return;
+      await sendFence(previewFence.x, previewFence.y, previewFence.orientation);
+      cancelPreview();
+    }
+
+    // ★ 0.5秒のコマ移動アニメーション処理 ★
+    async function handleMoveWithAnimation(targetX, targetY) {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      const currentTurn = gameState.current_turn;
+      const currentPos = (currentTurn === 1) ? gameState.p1_pos : gameState.p2_pos;
+      const pawnEl = document.getElementById(currentTurn === 1 ? 'pawn-p1' : 'pawn-p2');
+      const fromCell = document.getElementById(`cell-${currentPos.x}-${currentPos.y}`);
+      const toCell = document.getElementById(`cell-${targetX}-${targetY}`);
+
+      if (pawnEl && fromCell && toCell) {
+        // 移動前後のセル座標の差分を計算
+        const fromRect = fromCell.getBoundingClientRect();
+        const toRect = toCell.getBoundingClientRect();
+        const deltaX = toRect.left - fromRect.left;
+        const deltaY = toRect.top - fromRect.top;
+
+        // 2マスジャンプ（飛び越え）の場合は少し拡大して浮き上がる演出
+        const isJump = (Math.abs(targetX - currentPos.x) === 2 || Math.abs(targetY - currentPos.y) === 2);
+        const scale = isJump ? ' scale(1.35)' : '';
+
+        pawnEl.style.transform = `translate(${deltaX}px, ${deltaY}px)${scale}`;
+      }
+
+      // APIリクエストとアニメーション（0.5秒）を並行実行
+      const [data] = await Promise.all([
+        sendMoveApi(targetX, targetY),
+        new Promise(resolve => setTimeout(resolve, 500))
+      ]);
+
+      isAnimating = false;
+
+      if (data && data.success) {
+        gameState = data.room;
+        currentMode = 'move';
+        updateModeButtons();
+        renderBoard();
+      } else if (data && data.error) {
+        alert(data.error);
+        renderBoard();
+      }
+    }
+
+    async function sendMoveApi(x, y) {
+      try {
+        const res = await fetch(`/quoridor/api/room/${roomId}/move/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ x, y })
+        });
+        return await res.json();
+      } catch (err) {
+        return { success: false, error: '通信エラーが発生しました' };
+      }
+    }
+
+    async function sendFence(x, y, orientation) {
+      const res = await fetch(`/quoridor/api/room/${roomId}/fence/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ x, y, orientation })
+      });
+      const data = await res.json();
+      if (data.success) {
+        gameState = data.room;
+        currentMode = 'move';
+        updateModeButtons();
+        renderBoard();
+      } else {
+        alert(data.error);
+      }
+    }
+
+    async function restartGame() {
+      const res = await fetch(`/quoridor/api/room/${roomId}/reset/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success) {
+        gameState = data.room;
+        currentMode = 'move';
+        cancelPreview();
+        updateModeButtons();
+        renderBoard();
+      } else {
+        alert(data.error);
+      }
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
