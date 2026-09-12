@@ -140,3 +140,12 @@ class OperationLog(models.Model):
         
         if old_ids:
             OperationLog.objects.filter(id__in=list(old_ids)).delete()
+
+class DailyPowerConsumption(models.Model):
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name="power_records")
+    date = models.DateField(verbose_name="記録日")
+    power_kwh = models.FloatField(verbose_name="消費電力量(kWh)")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("device", "date")

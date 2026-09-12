@@ -119,6 +119,10 @@
 
             <div class="header-right">
                 <!-- 時計・日付エリア -->
+                 <div class="battery-status" id="battery-status">
+                    <span class="battery-icon" id="battery-icon">🔋</span>
+                    <span class="battery-level" id="battery-level">--%</span>
+                </div>
                 <div class="clock-area">
                     <div class="clock" id="clock">--:--</div>
                     <div class="date" id="date-display">--月--日（-）</div>
@@ -528,11 +532,11 @@
                                 </div>
                             </div>
                             <!-- 電源トグルスイッチ -->
-                            <div class="power-switch off" id="plug-power-switch">
+                            <!--<div class="power-switch off" id="plug-power-switch">
                                 <span class="power-label" id="plug-power-label">ON</span>
                                 <span class="switch-knob"></span>
-                            </div>
-                        </div>
+                            </div> -->
+                        </div> 
 
                         <div class="plug-content">
                             <!-- 左側：プラグアイコン ＆ リアルタイム電力 -->
@@ -1182,9 +1186,9 @@
             const card = document.querySelector(`[data-device-id="${deviceId}"]`);
             if (!card) return;
 
-            // ユーザーが直近で操作したデバイスは古いステータスによる上書きをスキップ
+            // ユーザーが直近で操作したデバイスは上書きをスキップ（巻き戻り防止）
             if (isDeviceProtected(deviceId)) {
-                console.log(`[${deviceId}] は直近で操作されたためUI上書きをスキップ (保護中)`);
+                console.log(`[${deviceId}] は操作直後のためUI上書きをスキップ (保護中)`);
                 return;
             }
 
@@ -1194,30 +1198,66 @@
             }
             const status = res.body;
 
-            // 電源状態の反映
+            // ─────────────────────────────────────────
+            // 1. 電源トグル・ソケット発光アイコンの同期
+            // ─────────────────────────────────────────
             const powerState = status.power;
             const powerSwitch = card.querySelector('.power-switch');
             const powerLabel = card.querySelector('.power-label');
+            const socketVisual = card.querySelector('#plug-socket-visual');
 
-            if (powerSwitch && powerState) {
+            if (powerState) {
                 const isOn = powerState.toUpperCase() === 'ON';
-                powerSwitch.classList.toggle('on', isOn);
-                powerSwitch.classList.toggle('off', !isOn);
 
+                if (powerSwitch) {
+                    powerSwitch.classList.toggle('on', isOn);
+                    powerSwitch.classList.toggle('off', !isOn);
+                }
                 if (powerLabel) {
                     powerLabel.textContent = isOn ? 'ON' : 'OFF';
                 }
-            }
-
-            // 明るさスライダー
-            if (status.brightness !== undefined) {
-                const brightSlider = card.querySelector('.slider-brightness, #slider-brightness');
-                if (brightSlider) {
-                    brightSlider.value = status.brightness;
+                // コンセントソケットの通電エフェクト (active クラス)
+                if (socketVisual) {
+                    socketVisual.classList.toggle('active', isOn);
                 }
             }
 
-            // 温度
+            // ─────────────────────────────────────────
+            // 2. 現在の消費電力（W）の反映
+            // ※ SwitchBot API では電力値が weight キーで返却されます
+            // ─────────────────────────────────────────
+            if (status.weight !== undefined) {
+                const currentWattsEl = card.querySelector('#current-watts');
+                if (currentWattsEl) {
+                    // 小数第1位まで（または四捨五入）表示
+                    const watts = Math.round(status.weight * 10) / 10;
+                    currentWattsEl.innerHTML = `${watts}<span>W</span>`;
+                }
+            }
+
+            // ─────────────────────────────────────────
+            // 3. 今日の使用量（Wh -> kWh）の反映
+            // ─────────────────────────────────────────
+            if (status.electricityOfDay !== undefined) {
+                const todayKwhEl = card.querySelector('#today-kwh');
+                if (todayKwhEl) {
+                    // 1000Wh = 1kWh に換算（小数第2位）
+                    const kwh = (status.electricityOfDay / 1000).toFixed(2);
+                    todayKwhEl.innerHTML = `${kwh} <span>kWh</span>`;
+                }
+            }
+
+            // ─────────────────────────────────────────
+            // 4. 明るさスライダー（照明用）
+            // ─────────────────────────────────────────
+            if (status.brightness !== undefined) {
+                const brightSlider = card.querySelector('.slider-brightness, #slider-brightness');
+                if (brightSlider) brightSlider.value = status.brightness;
+            }
+
+            // ─────────────────────────────────────────
+            // 5. 温度（エアコン用）
+            // ─────────────────────────────────────────
             if (status.temperature !== undefined) {
                 const tempSlider = card.querySelector('.slider-temp, #slider-temp');
                 const tempDisplay = card.querySelector('.temp-display');
@@ -1296,6 +1336,54 @@
         console.log('ページロード: 初期状態を同期中...');
         await syncWithLock();
     });
+    // --- バッテリー残量取得 & 表示更新 ---
+function updateBatteryStatus() {
+    const batteryWrap = document.getElementById('battery-status');
+    const levelEl = document.getElementById('battery-level');
+    const iconEl = document.getElementById('battery-icon');
+    if (!batteryWrap || !levelEl) return;
+
+    let level = null;
+    let isCharging = false;
+
+    // 1. Fully Kiosk Browser の JS インターフェース
+    if (typeof fully !== 'undefined') {
+        level = fully.getBatteryLevel(); // 0〜100 の整数値
+        isCharging = fully.isPlugged();  // true: 充電中
+    }
+
+    if (level !== null) {
+        renderBattery(level, isCharging);
+    } else if (navigator.getBattery) {
+        // 2. フォールバック（Chrome等 PCブラウザテスト用）
+        navigator.getBattery().then(battery => {
+            renderBattery(Math.round(battery.level * 100), battery.charging);
+        });
+    }
+
+    function renderBattery(pct, charging) {
+        levelEl.textContent = `${pct}%`;
+
+        if (charging) {
+            iconEl.textContent = '⚡';
+            batteryWrap.classList.add('charging');
+            batteryWrap.classList.remove('low');
+        } else {
+            batteryWrap.classList.remove('charging');
+            if (pct <= 20) {
+                iconEl.textContent = '🪫';
+                batteryWrap.classList.add('low');
+            } else {
+                iconEl.textContent = '🔋';
+                batteryWrap.classList.remove('low');
+            }
+        }
+    }
+}
+
+// 初回実行 ＆ 30秒ごとに自動更新
+updateBatteryStatus();
+setInterval(updateBatteryStatus, 30 * 1000);
 </script>
 
 </body>

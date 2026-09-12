@@ -31,6 +31,36 @@ def get_switchbot_headers():
         "Content-Type": "application/json; charset=utf8",
     }
 
+def get_device_status(device_id):
+    """
+    指定した device_id の最新ステータスを取得する
+    戻り値例:
+    {
+        "statusCode": 100,
+        "body": {
+            "deviceId": "AC276E42B5AE",
+            "deviceType": "Plug Mini (JP)",
+            "power": "ON",
+            "voltage": 100.5,
+            "weight": 45.2,          # 現在の消費電力 (W)
+            "electricityOfDay": 250, # 当日の積算消費電力量 (Wh)
+            "electricCurrent": 0.45
+        },
+        "message": "success"
+    }
+    """
+    url = f"https://api.switch-bot.com/v1.1/devices/{device_id}/status"
+    try:
+        headers = get_switchbot_headers()
+        response = requests.get(url, headers=headers, timeout=6)
+        return response.json()
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "message": f"Request Failed: {str(e)}",
+            "body": {}
+        }
+
 def send_switchbot_command(device_id: str, command: str, parameter: str = "default", command_type: str = "command"):
     url = f"https://api.switch-bot.com/v1.1/devices/{device_id}/commands"
     headers = get_switchbot_headers()
