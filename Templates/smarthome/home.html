@@ -731,7 +731,7 @@
 
 
 <script>
-    // モードの変換マップ
+    // モード・風量の変換マップ
     const MODE_MAP = {
         '自動': 1,
         '冷房': 2,
@@ -739,7 +739,7 @@
         '除湿': 3,
         '送風': 4,
         '暖房': 5
-                    };
+    };
     const FAN_MAP = {
         '自動': 1,
         '微風': 2,
@@ -747,9 +747,29 @@
         '中': 3,
         '強': 4
     };
-    //時刻&天気更新
+
+    // 操作直後のデバイスを一時的に sync から保護するマップ (deviceId -> 有効期限タイムスタンプ)
+    const pendingDeviceProtections = new Map();
+
+    function protectDeviceUI(deviceId, durationMs = 4500) {
+        if (!deviceId) return;
+        pendingDeviceProtections.set(deviceId, Date.now() + durationMs);
+    }
+
+    function isDeviceProtected(deviceId) {
+        const expireTime = pendingDeviceProtections.get(deviceId);
+        if (!expireTime) return false;
+        if (Date.now() > expireTime) {
+            pendingDeviceProtections.delete(deviceId);
+            return false;
+        }
+        return true;
+    }
+
+    // ─────────────────────────────────────────
+    // 1. 時刻 & 天気更新（江東区）
+    // ─────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-        // --- 1. 時計・日付のリアルタイム更新 ---
         const clockEl = document.getElementById('clock');
         const dateEl = document.getElementById('date-display');
         const days = ['日', '月', '火', '水', '木', '金', '土'];
@@ -769,27 +789,22 @@
             }
         }
 
-        // 1秒ごとに時計を更新
         updateClock();
         setInterval(updateClock, 1000);
 
-
-        // --- 2. 東京都江東区の天気・気温取得 (Open-Meteo API) ---
-        // 江東区の緯度・経度 (北緯 35.6728, 東経 139.8174)
         const LAT = 35.6728;
         const LON = 139.8174;
         const tempEl = document.getElementById('weather-temp');
         const iconEl = document.getElementById('weather-icon');
 
-        // WMO気象コードに応じたアイコン変換
         function getWeatherIcon(code) {
-            if (code === 0) return '☀️'; // 快晴
-            if ([1, 2].includes(code)) return '🌤'; // 晴れ・一部曇り
-            if (code === 3) return '☁️'; // 曇り
-            if ([45, 48].includes(code)) return '🌫'; // 霧
-            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return '🌧'; // 雨
-            if ([71, 73, 75, 85, 86].includes(code)) return '❄️'; // 雪
-            if ([95, 96, 99].includes(code)) return '⚡'; // 雷雨
+            if (code === 0) return '☀️';
+            if ([1, 2].includes(code)) return '🌤';
+            if (code === 3) return '☁️';
+            if ([45, 48].includes(code)) return '🌫';
+            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return '🌧';
+            if ([71, 73, 75, 85, 86].includes(code)) return '❄️';
+            if ([95, 96, 99].includes(code)) return '⚡';
             return '☁️';
         }
 
@@ -801,27 +816,26 @@
                 const data = await response.json();
 
                 if (data.current) {
-                    // 気温の反映 (四捨五入して整数表示、または小数点第1位)
                     const temp = Math.round(data.current.temperature_2m);
                     if (tempEl) tempEl.textContent = `${temp}°C`;
 
-                    // 天気アイコンの反映
                     const code = data.current.weather_code;
                     if (iconEl) iconEl.textContent = getWeatherIcon(code);
                 }
             } catch (error) {
                 console.error('江東区の天気取得エラー:', error);
-                tempEl.textContent = `ERR°C`
+                if (tempEl) tempEl.textContent = 'ERR°C';
             }
         }
 
-        // 初回取得 ＆ 15分ごとに自動更新
         fetchKotoWeather();
         setInterval(fetchKotoWeather, 15 * 60 * 1000);
     });
-    // エアコン
+
+    // ─────────────────────────────────────────
+    // 2. エアコン個別操作
+    // ─────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-        // 状態管理
         let currentTemp = 24;
         let modeIndex = 0;
         let fanIndex = 0;
@@ -836,7 +850,6 @@
 
         const fanSpeeds = ['自動', '弱', '中', '強'];
 
-        // 要素取得
         const tempDisplay = document.getElementById('temp-display');
         const btnTempMinus = document.getElementById('btn-temp-minus');
         const btnTempPlus = document.getElementById('btn-temp-plus');
@@ -848,80 +861,72 @@
         const btnFan = document.getElementById('btn-fan');
         const fanValue = document.getElementById('fan-value');
 
-        // 温度変更（16°C 〜 30°C）
-        btnTempMinus.addEventListener('click', () => {
+        btnTempMinus?.addEventListener('click', () => {
             if (currentTemp > 16) {
                 currentTemp--;
-                tempDisplay.innerHTML = `${currentTemp}<span>°C</span>`;
+                if (tempDisplay) tempDisplay.innerHTML = `${currentTemp}<span>°C</span>`;
             }
         });
 
-        btnTempPlus.addEventListener('click', () => {
+        btnTempPlus?.addEventListener('click', () => {
             if (currentTemp < 30) {
                 currentTemp++;
-                tempDisplay.innerHTML = `${currentTemp}<span>°C</span>`;
+                if (tempDisplay) tempDisplay.innerHTML = `${currentTemp}<span>°C</span>`;
             }
         });
 
-        // 運転モード切り替え（クリックでループ）
-        btnMode.addEventListener('click', () => {
+        btnMode?.addEventListener('click', () => {
             modeIndex = (modeIndex + 1) % modes.length;
-            modeValue.textContent = modes[modeIndex].label;
-            modeIcon.textContent = modes[modeIndex].icon;
+            if (modeValue) modeValue.textContent = modes[modeIndex].label;
+            if (modeIcon) modeIcon.textContent = modes[modeIndex].icon;
         });
 
-        // 風量切り替え（クリックでループ）
-        btnFan.addEventListener('click', () => {
+        btnFan?.addEventListener('click', () => {
             fanIndex = (fanIndex + 1) % fanSpeeds.length;
-            fanValue.textContent = fanSpeeds[fanIndex];
+            if (fanValue) fanValue.textContent = fanSpeeds[fanIndex];
         });
     });
 
-    //テレビ
+    // ─────────────────────────────────────────
+    // 3. テレビ個別操作
+    // ─────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
         const keypadToggleBtn = document.getElementById('btn-toggle-keypad');
         const keypadCloseBtn = document.getElementById('btn-close-keypad');
         const channelOverlay = document.getElementById('channel-overlay');
 
-        // チャンネル直接選局オーバーレイの表示・非表示
-        keypadToggleBtn.addEventListener('click', () => {
-            channelOverlay.classList.remove('hidden');
+        keypadToggleBtn?.addEventListener('click', () => {
+            channelOverlay?.classList.remove('hidden');
         });
 
-        keypadCloseBtn.addEventListener('click', () => {
-            channelOverlay.classList.add('hidden');
+        keypadCloseBtn?.addEventListener('click', () => {
+            channelOverlay?.classList.add('hidden');
         });
 
-        // 全てのIRキーボタンにイベント設定
         document.querySelectorAll('[data-key]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const key = btn.getAttribute('data-key');
-                handleCommand(key);
+                if (typeof handleCommand === 'function') {
+                    handleCommand(key);
+                }
 
-                // 数字キーを押した後は自動でモーダルを閉じる
-                if (key.startsWith('ch-')) {
-                    channelOverlay.classList.add('hidden');
+                if (key && key.startsWith('ch-')) {
+                    channelOverlay?.classList.add('hidden');
                 }
             });
         });
     });
-    //ライト
-    
-    //ライト詳細
+
+    // ─────────────────────────────────────────
+    // 4. ライト詳細操作
+    // ─────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-        // CSRFトークンを取得
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-        // 操作対象カード要素とデバイスIDの取得
-        const lightCard = document.querySelector('.card-light_detail');
-        const deviceId = lightCard ? lightCard.dataset.deviceId : null;
-        
         const DEFAULT_CONFIG = {
             brightness: 80,
             temp: 4000,
             color: '#FFBE53'
         };
 
-        // 要素取得
         const sliderBrightness = document.getElementById('slider-brightness');
         const valBrightness = document.getElementById('val-brightness');
         const sliderTemp = document.getElementById('slider-temp');
@@ -931,49 +936,42 @@
         const currentColorDot = document.getElementById('current-color-dot');
         const btnReset = document.getElementById('btn-light-reset');
 
-        // モーダル関連要素
         const paletteOverlay = document.getElementById('rgb-palette-overlay');
         const btnOpenPalette = document.getElementById('btn-open-palette');
         const btnClosePalette = document.getElementById('btn-close-palette');
         const nativePicker = document.getElementById('native-color-picker');
         const hexInput = document.getElementById('hex-input');
 
-        // パレットの開閉
-        btnOpenPalette.addEventListener('click', () => {
-            paletteOverlay.classList.remove('hidden');
+        btnOpenPalette?.addEventListener('click', () => {
+            paletteOverlay?.classList.remove('hidden');
         });
 
-        btnClosePalette.addEventListener('click', () => {
-            paletteOverlay.classList.add('hidden');
+        btnClosePalette?.addEventListener('click', () => {
+            paletteOverlay?.classList.add('hidden');
         });
 
-        // 明るさ変更
-        sliderBrightness.addEventListener('input', (e) => {
+        sliderBrightness?.addEventListener('input', (e) => {
             const val = e.target.value;
-            valBrightness.textContent = `${val}%`;
-            bulbGlow.style.opacity = Math.max(val / 100, 0.2);
+            if (valBrightness) valBrightness.textContent = `${val}%`;
+            if (bulbGlow) bulbGlow.style.opacity = Math.max(val / 100, 0.2);
         });
 
-        // 色温度変更
-        sliderTemp.addEventListener('input', (e) => {
-            valTemp.textContent = `${e.target.value}K`;
+        sliderTemp?.addEventListener('input', (e) => {
+            if (valTemp) valTemp.textContent = `${e.target.value}K`;
         });
 
-        // プリセット & パレットセルクリック時
         document.querySelectorAll('.preset-dot, .palette-cell').forEach(btn => {
             btn.addEventListener('click', () => {
                 const color = btn.getAttribute('data-color');
-                applyColor(color);
-                });
+                if (color) applyColor(color);
             });
+        });
 
-        // ネイティブカラーピッカー変更時
-        nativePicker.addEventListener('input', (e) => {
+        nativePicker?.addEventListener('input', (e) => {
             applyColor(e.target.value);
         });
 
-        // HEX手入力
-        hexInput.addEventListener('change', (e) => {
+        hexInput?.addEventListener('change', (e) => {
             let val = e.target.value.trim();
             if (!val.startsWith('#')) val = '#' + val;
             if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
@@ -981,34 +979,35 @@
             }
         });
 
-        // リセット
-        btnReset.addEventListener('click', () => {
-            sliderBrightness.value = DEFAULT_CONFIG.brightness;
-            valBrightness.textContent = `${DEFAULT_CONFIG.brightness}%`;
-            bulbGlow.style.opacity = DEFAULT_CONFIG.brightness / 100;
+        btnReset?.addEventListener('click', () => {
+            if (sliderBrightness) sliderBrightness.value = DEFAULT_CONFIG.brightness;
+            if (valBrightness) valBrightness.textContent = `${DEFAULT_CONFIG.brightness}%`;
+            if (bulbGlow) bulbGlow.style.opacity = DEFAULT_CONFIG.brightness / 100;
 
-            sliderTemp.value = DEFAULT_CONFIG.temp;
-            valTemp.textContent = `${DEFAULT_CONFIG.temp}K`;
+            if (sliderTemp) sliderTemp.value = DEFAULT_CONFIG.temp;
+            if (valTemp) valTemp.textContent = `${DEFAULT_CONFIG.temp}K`;
 
             applyColor(DEFAULT_CONFIG.color);
         });
 
-        // 色反映関数
         function applyColor(color) {
-            currentColorDot.style.backgroundColor = color;
-            nativePicker.value = color;
-            hexInput.value = color.toUpperCase();
+            if (currentColorDot) currentColorDot.style.backgroundColor = color;
+            if (nativePicker) nativePicker.value = color;
+            if (hexInput) hexInput.value = color.toUpperCase();
 
-            bulbGlow.style.boxShadow = `0 0 20px ${color}`;
-            bulbGlow.style.background = `radial-gradient(circle, ${color}55 0%, rgba(17, 29, 45, 0) 70%)`;
+            if (bulbGlow) {
+                bulbGlow.style.boxShadow = `0 0 20px ${color}`;
+                bulbGlow.style.background = `radial-gradient(circle, ${color}55 0%, rgba(17, 29, 45, 0) 70%)`;
+            }
         }
     });
-    //パソコン
-        document.addEventListener('DOMContentLoaded', () => {
-        // 現在のPC状態（true: 起動中, false: 停止中）
+
+    // ─────────────────────────────────────────
+    // 5. パソコン操作
+    // ─────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
         let isPcOn = false;
 
-        // DOM要素
         const glow = document.getElementById('pc-glow');
         const dot = document.getElementById('pc-status-dot');
         const statusText = document.getElementById('pc-status-text');
@@ -1022,59 +1021,53 @@
         const btnCancel = document.getElementById('btn-cancel-shutdown');
         const btnExec = document.getElementById('btn-exec-shutdown');
 
-        // 外部（API/WebSocket/リクエスト）からステータスを受信した際の描画更新
         window.updatePcState = (online) => {
             isPcOn = online;
             if (online) {
-                glow.className = 'pc-halo on';
-                dot.className = 'status-dot on';
-                statusText.textContent = '起動中 (ONLINE)';
-                statusLabel.textContent = 'ON';
-                switchElement.classList.add('active');
+                if (glow) glow.className = 'pc-halo on';
+                if (dot) dot.className = 'status-dot on';
+                if (statusText) statusText.textContent = '起動中 (ONLINE)';
+                if (statusLabel) statusLabel.textContent = 'ON';
+                switchElement?.classList.add('active');
             } else {
-                glow.className = 'pc-halo off';
-                dot.className = 'status-dot off';
-                statusText.textContent = '電源 OFF';
-                statusLabel.textContent = 'OFF';
-                switchElement.classList.remove('active');
+                if (glow) glow.className = 'pc-halo off';
+                if (dot) dot.className = 'status-dot off';
+                if (statusText) statusText.textContent = '電源 OFF';
+                if (statusLabel) statusLabel.textContent = 'OFF';
+                switchElement?.classList.remove('active');
             }
         };
 
-        // 起動ボタン押下 (WoL送信)
-        btnBoot.addEventListener('click', () => {
+        btnBoot?.addEventListener('click', () => {
             console.log('Sending WoL (Wake on LAN) Magic Packet...');
-            // ここに起動APIリクエスト（例: fetch('/api/pc/boot/')）
         });
 
-        // シャットダウンボタン押下時 → モーダルを開く
-        btnShutdown.addEventListener('click', () => {
-            overlay.classList.remove('hidden');
+        btnShutdown?.addEventListener('click', () => {
+            overlay?.classList.remove('hidden');
         });
 
-        // ヘッダーの電源トグルを押したときの挙動
-        switchElement.addEventListener('click', () => {
+        switchElement?.addEventListener('click', () => {
             if (isPcOn) {
-                overlay.classList.remove('hidden');
+                overlay?.classList.remove('hidden');
             } else {
                 console.log('Sending WoL via switch...');
             }
         });
 
-        // モーダル：キャンセル
-        btnCancel.addEventListener('click', () => {
-            overlay.classList.add('hidden');
+        btnCancel?.addEventListener('click', () => {
+            overlay?.classList.add('hidden');
         });
 
-        // モーダル：確定シャットダウン
-        btnExec.addEventListener('click', () => {
-            overlay.classList.add('hidden');
+        btnExec?.addEventListener('click', () => {
+            overlay?.classList.add('hidden');
             console.log('Sending Shutdown Command (RPC / SSH / Agent)...');
-            // ここにシャットダウンAPIリクエスト（例: fetch('/api/pc/shutdown/')）
         });
     });
-    //onoffスイッチ
+
+    // ─────────────────────────────────────────
+    // 6. ON/OFF トグルスイッチ（即時クラス切り替え）
+    // ─────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-        // ページ内のすべての .power-switch のクリックを監視
         document.addEventListener('click', (e) => {
             const sw = e.target.closest('.power-switch');
             if (!sw) return;
@@ -1083,13 +1076,11 @@
             const isCurrentlyOn = sw.classList.contains('on');
 
             if (isCurrentlyOn) {
-                // ON -> OFF
                 sw.classList.remove('on');
                 sw.classList.add('off');
                 sw.dataset.commandName = "OFF";
                 if (label) label.textContent = 'OFF';
             } else {
-                // OFF -> ON
                 sw.classList.remove('off');
                 sw.classList.add('on');
                 sw.dataset.commandName = "ON";
@@ -1098,11 +1089,10 @@
         });
     });
 
-    //送信ハンドル
+    // ─────────────────────────────────────────
+    // 7. 送信ハンドル & クリック監視（楽観的更新 + 保護ガード）
+    // ─────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-
-        // コマンド送信共通関数
         window.sendDeviceAction = async function(deviceId, commandName, parameter = null) {
             if (!deviceId || !commandName) {
                 console.warn('パラメータが不足しています:', { deviceId, commandName });
@@ -1111,7 +1101,6 @@
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value 
                  || document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
 
-            // FormData を作成
             const formData = new FormData();
             formData.append('device_id', deviceId);
             formData.append('command_name', commandName);
@@ -1129,11 +1118,10 @@
                 });
                 
                 const data = await response.json();
-                console.log(data)
+                console.log('送信結果:', data);
                 if (data.status !== 'success') {
                     console.error('送信エラー:', data.message);
-                }
-                else if(data.result.message == 'unknown command'){
+                } else if (data.result && data.result.message === 'unknown command') {
                     console.error('送信エラー:', data.result.message);
                 }
             } catch (error) {
@@ -1141,72 +1129,73 @@
             }
         };
 
-        // 全てのクリック操作を一括監視
-        document.addEventListener('click', (e) => {
-            console.log("ボタンが押されたよ")
+        // 全ボタンクリックの一括ハンドラ
+        document.addEventListener('click', async (e) => {
             const btn = e.target.closest('[data-command-name]');
-            if (!btn) {syncAllDevices(); return};
-            console.log("処理開始",btn);
+            if (!btn) return;
+
             const card = btn.closest('[data-device-id]');
             const deviceId = card ? card.dataset.deviceId : null;
             let commandName = btn.dataset.commandName;
             let parameter = null;
-            setTimeout(() => {
-                syncAllDevices();
-            }, 1000);
-            
-            console.log(card.dataset.deviceType);
-            if(commandName == "bright-set"){
-                parameter = btn.closest("#slider-brightness").value             
+
+            // 操作したデバイスを4.5秒間同期から保護（古い状態で上書きされるのを防止）
+            if (deviceId) {
+                protectDeviceUI(deviceId, 4500);
             }
-            else if(commandName == "temperature-set"){
-                parameter = btn.closest("#slider-temp").value             
-            }
-            else if(["AirC_temp_display", "AirC_temp_down", "AirC_temp_up", "AirC_fan", "AirC_mode"].includes(commandName) || card.dataset.deviceType === "aircon"){
+
+            if (commandName === "bright-set") {
+                parameter = btn.closest("#slider-brightness")?.value;
+            } else if (commandName === "temperature-set") {
+                parameter = btn.closest("#slider-temp")?.value;
+            } else if (["AirC_temp_display", "AirC_temp_down", "AirC_temp_up", "AirC_fan", "AirC_mode"].includes(commandName) || card?.dataset.deviceType === "aircon") {
                 const powerSwitch = card ? card.querySelector('.power-switch') : null;
-                // 状態（"on" か "off"）の取得
                 const status = powerSwitch?.classList.contains('on') ? 'on' : 'off';
                 const tempElem = card ? card.querySelector('.temperature') : null;
-                // "24°C" から数字のみを取り出して 24 (Number) に変換
                 const temp = tempElem ? parseInt(tempElem.textContent.replace(/[^\d]/g, ''), 10) : null;
-                const modeText = card ? card.querySelector('.status-value').textContent : null;
-                // 番号に変換（該当がない場合はデフォルトで 2: 冷房 などを設定）
+                const modeText = card ? card.querySelector('.status-value')?.textContent : null;
                 const modeNumber = MODE_MAP[modeText] ?? 2;
                 const fanText = card ? card.querySelector('.fan_value')?.textContent.trim() : null;
-                const fanNumber = FAN_MAP[fanText] ?? 1; // デフォルト: 1 (自動)
-                console.log(temp,modeNumber,fanNumber,status);
-                commandName = "AirC_set_all"
-                parameter = `${temp},${modeNumber},${fanNumber},${status}`;
+                const fanNumber = FAN_MAP[fanText] ?? 1;
                 
+                commandName = "AirC_set_all";
+                parameter = `${temp},${modeNumber},${fanNumber},${status}`;
             }
-            else{
-                console.log("else");
-            }
+
             if (deviceId && commandName) {
-                window.sendDeviceAction(deviceId, commandName, parameter);
-                console.log(deviceId);
+                // 送信実行
+                await window.sendDeviceAction(deviceId, commandName, parameter);
+
+                // クラウド反映タイムラグ（約2.5秒）を待ってから全体整合性を確認
+                setTimeout(() => {
+                    syncAllDevices();
+                }, 2500);
             }
         });
     });
-    function updateUIFromStatusData(data) { //ステータス反映
-        // data の全キー（deviceId）をループ処理
-        Object.entries(data).forEach(([deviceId, res]) => {
-            // 1. deviceId に一致するカード要素を取得
-            const card = document.querySelector(`[data-device-id="${deviceId}"]`);
-            if (!card) {return};
 
-            // 2. APIレスポンスの成功判定
+    // ─────────────────────────────────────────
+    // 8. 状態反映関数（保護中デバイスの巻き戻りをスキップ）
+    // ─────────────────────────────────────────
+    function updateUIFromStatusData(data) {
+        Object.entries(data).forEach(([deviceId, res]) => {
+            const card = document.querySelector(`[data-device-id="${deviceId}"]`);
+            if (!card) return;
+
+            // ユーザーが直近で操作したデバイスは古いステータスによる上書きをスキップ
+            if (isDeviceProtected(deviceId)) {
+                console.log(`[${deviceId}] は直近で操作されたためUI上書きをスキップ (保護中)`);
+                return;
+            }
+
             if (res.statusCode !== 100 || !res.body) {
                 console.warn(`[${deviceId}] ステータス取得エラー:`, res.message);
-                // 必要に応じてカードをオフライン表示などにする
-                // card.classList.add('offline');
                 return;
             }
             const status = res.body;
 
-            // 3. 電源状態（power）の反映
-            // SwitchBot の power は 'ON' / 'OFF' または ON/OFF プロパティが存在する
-            const powerState = status.power; // 例: 'ON' または 'OFF'
+            // 電源状態の反映
+            const powerState = status.power;
             const powerSwitch = card.querySelector('.power-switch');
             const powerLabel = card.querySelector('.power-label');
 
@@ -1220,7 +1209,7 @@
                 }
             }
 
-            // 4. 明るさスライダー（brightness）の反映
+            // 明るさスライダー
             if (status.brightness !== undefined) {
                 const brightSlider = card.querySelector('.slider-brightness, #slider-brightness');
                 if (brightSlider) {
@@ -1228,7 +1217,7 @@
                 }
             }
 
-            // 5. 温度（temperature）などの反映
+            // 温度
             if (status.temperature !== undefined) {
                 const tempSlider = card.querySelector('.slider-temp, #slider-temp');
                 const tempDisplay = card.querySelector('.temp-display');
@@ -1237,101 +1226,76 @@
             }
         });
     }
-    // 1回のリクエストで画面全体のステータスを一括更新
+
+    // ─────────────────────────────────────────
+    // 9. 一括ステータス同期 & 放置復帰時ロック
+    // ─────────────────────────────────────────
     async function syncAllDevices() {
-        try{
+        try {
             const res = await fetch('/smarthome/api/devices/status/all/');
             const data = await res.json();
-            console.log(data.devices);
-            updateUIFromStatusData(data.devices || data)
-        }catch(err){
-            console.error('一括ステータス取得失敗：',err);
-        }
-        // data.devices = { "deviceId_1": {...}, "deviceId_2": {...} }
-        // それぞれのカードのUIを反映
-        //smarthome/:1 The Cross-Origin-Opener-Policy header has been ignored, because the URL's origin was untrustworthy. It was defined either in the final response or a redirect. Please deliver the response using the HTTPS protocol. You can also use the 'localhost' origin instead. See https://www.w3.org/TR/powerful-features/#potentially-trustworthy-origin and https://html.spec.whatwg.org/#the-cross-origin-opener-policy-header.
-    }
-
-    //3分間待機時最新状態表示 & 初回更新
-    document.addEventListener('DOMContentLoaded', async () => {
-    const IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3分（ミリ秒）
-    const MIN_LOCK_DISPLAY_MS = 600;       // チラつき防止の最低表示時間（0.6秒）
-    
-    let lastActivityTime = Date.now();
-    let isSyncing = false;
-
-    const lockOverlay = document.getElementById('lock-overlay');
-
-    // 操作ロック/アンロック制御
-    function setLocked(locked) {
-        isSyncing = locked;
-        if (lockOverlay) {
-            lockOverlay.style.display = locked ? 'flex' : 'none';
-        }
-    }
-
-    // 最新状態の取得・画面更新
-    async function syncAllDevices() {
-        try {
-            const response = await fetch('/smarthome/api/devices/status/all/');
-            const json = await response.json();
-            if (typeof window.updateUIFromStatusData === 'function') {
-                window.updateUIFromStatusData(json.devices || json);
-            }
+            updateUIFromStatusData(data.devices || data);
         } catch (err) {
-            console.error('ステータス同期エラー:', err);
+            console.error('一括ステータス取得失敗:', err);
         }
     }
 
-    // ロックをかけて同期する共通関数（最低表示時間つき）
-    async function syncWithLock() {
-        setLocked(true);
-        try {
-            await Promise.all([
-                syncAllDevices(),
-                new Promise(resolve => setTimeout(resolve, MIN_LOCK_DISPLAY_MS))
-            ]);
-        } finally {
-            setLocked(false);
-            lastActivityTime = Date.now(); // 最終操作時刻を更新
+    document.addEventListener('DOMContentLoaded', async () => {
+        const IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3分放置
+        const MIN_LOCK_DISPLAY_MS = 600;       // チラつき防止（0.6秒）
+        
+        let lastActivityTime = Date.now();
+        let isSyncing = false;
+
+        const lockOverlay = document.getElementById('lock-overlay');
+
+        function setLocked(locked) {
+            isSyncing = locked;
+            if (lockOverlay) {
+                lockOverlay.style.display = locked ? 'flex' : 'none';
+            }
         }
-    }
 
-    // ─────────────────────────────────────────
-    // 1. ユーザー操作の監視（3分放置後の復帰検知）
-    // ─────────────────────────────────────────
-    ['click', 'touchstart'].forEach(eventType => {
-        document.addEventListener(eventType, async (e) => {
-            // 同期中は全タップをブロック
-            if (isSyncing) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                return;
+        async function syncWithLock() {
+            setLocked(true);
+            try {
+                await Promise.all([
+                    syncAllDevices(),
+                    new Promise(resolve => setTimeout(resolve, MIN_LOCK_DISPLAY_MS))
+                ]);
+            } finally {
+                setLocked(false);
+                lastActivityTime = Date.now();
             }
+        }
 
-            const now = Date.now();
-            // 3分以上放置されていた場合
-            if (now - lastActivityTime >= IDLE_TIMEOUT_MS) {
-                // 本来のボタン操作をキャンセルして同期を実行
-                e.preventDefault();
-                e.stopImmediatePropagation();
+        // 3分放置後の復帰検知
+        ['click', 'touchstart'].forEach(eventType => {
+            document.addEventListener(eventType, async (e) => {
+                if (isSyncing) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return;
+                }
 
-                console.log('3分間放置後の復帰検知: 操作をブロックして同期開始');
-                await syncWithLock();
-                return;
-            }
+                const now = Date.now();
+                if (now - lastActivityTime >= IDLE_TIMEOUT_MS) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
 
-            // 通常操作時は時刻を更新
-            lastActivityTime = now;
-        }, true); // true: キャプチャフェーズで最優先実行
+                    console.log('3分間放置後の復帰検知: 操作をブロックして同期開始');
+                    await syncWithLock();
+                    return;
+                }
+
+                lastActivityTime = now;
+            }, true);
+        });
+
+        // ページロード時の初期同期
+        console.log('ページロード: 初期状態を同期中...');
+        await syncWithLock();
     });
-
-    // ─────────────────────────────────────────
-    // 2. ページロード時の初回同期実行
-    // ─────────────────────────────────────────
-    console.log('ページロード: 初期状態を同期中...');
-    await syncWithLock();
-});
 </script>
 
 </body>

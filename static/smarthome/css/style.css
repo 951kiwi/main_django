@@ -1052,8 +1052,8 @@ body {
 }
 
 .light-pwr-btn {
-    padding: 3px 10px;
-    font-size: clamp(10px, 2cqw, 12px);
+    padding: 10px 15px;
+    font-size: clamp(16px, 4cqw, 22px);
     font-weight: bold;
     border-radius: 6px;
     border: 1px solid #30445e;
