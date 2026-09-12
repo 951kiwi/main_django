@@ -1384,6 +1384,44 @@ function updateBatteryStatus() {
 // 初回実行 ＆ 30秒ごとに自動更新
 updateBatteryStatus();
 setInterval(updateBatteryStatus, 30 * 1000);
+
+// ─────────────────────────────────────────
+// Fully Kiosk: 接近検知・画面点灯時の自動更新（5分ルール）
+// ─────────────────────────────────────────
+const MOTION_SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5分（ミリ秒）
+let lastSyncCompletedTime = Date.now(); // 最後に同期が完了した時刻
+
+// syncWithLock の完了時に時刻を記録するようにラップ/更新
+const originalSyncWithLock = syncWithLock;
+syncWithLock = async function() {
+    await originalSyncWithLock();
+    lastSyncCompletedTime = Date.now();
+};
+
+// 接近検知・復帰時のハンドラー関数
+async function handleProximityOrWakeup() {
+    const elapsed = Date.now() - lastSyncCompletedTime;
+    console.log(`[Fully Kiosk] 接近・復帰検知 (前回同期から: ${Math.round(elapsed / 1000)}秒経過)`);
+
+    // 5分（300,000ミリ秒）以上経過している場合のみデータ再読み込み
+    if (elapsed >= MOTION_SYNC_INTERVAL_MS) {
+        console.log('5分以上経過しているため最新データを同期します...');
+        await syncWithLock();
+    } else {
+        console.log('5分以内のため同期をスキップします');
+    }
+}
+
+// Fully Kiosk Browser が呼び出すグローバルコールバックを登録
+// ① 画面が点灯したとき (Screen On)
+window.onFullyScreenOn = function() {
+    handleProximityOrWakeup();
+};
+
+// ② カメラ動体検知がトリガーされたとき (Motion Detected)
+window.onFullyMotionDetected = function() {
+    handleProximityOrWakeup();
+};
 </script>
 
 </body>
