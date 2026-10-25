@@ -65,7 +65,7 @@ function commitFormulaBar(){
    delete ws[selectedAddress].w;
  }
  const td=document.querySelector('[data-cell="'+selectedAddress+'"]');
- if(td)td.textContent=escapeHtml(String(displayCell(ws[selectedAddress])));
+ if(td)td.textContent=String(displayCell(ws[selectedAddress]));
  document.getElementById("cell-kind").textContent=ws[selectedAddress]&&ws[selectedAddress].f!==undefined?"数式":"値";
 }
 formulaInput.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();commitFormulaBar();const cells=Array.from(document.querySelectorAll("[data-cell]"));const index=cells.findIndex(td=>td.dataset.cell===selectedAddress);if(cells[index+1])selectCell(cells[index+1].dataset.cell);}});
