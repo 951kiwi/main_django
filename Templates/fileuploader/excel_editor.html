@@ -37,6 +37,7 @@ function renderSheet(){
  document.querySelectorAll("[data-cell]").forEach(td=>{
   td.addEventListener("click",()=>selectCell(td.dataset.cell));
   td.addEventListener("dblclick",()=>{formulaInput.focus();formulaInput.select();});
+  td.addEventListener("paste",ev=>{ev.preventDefault();const text=(ev.clipboardData||window.clipboardData).getData("text");if(text){formulaInput.value=text.split(/\\r?\\n/)[0].split("\\t")[0];commitFormulaBar();recalculateAll();renderSheet();}});
   td.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key==="F2"){ev.preventDefault();formulaInput.focus();formulaInput.select();}});
  });
  selectCell(selectedAddress && ws[selectedAddress] ? selectedAddress : XLSX.utils.encode_cell(range.s));
@@ -44,7 +45,7 @@ function renderSheet(){
 function displayCell(cell){if(!cell)return "";if(cell.f!==undefined)return cell.v??"";return cell.w!==undefined?cell.w:(cell.v??"");}
 function selectCell(addr){
  const ws=workbook.Sheets[activeSheetName];selectedAddress=addr;
- const cell=ws[addr];document.getElementById("cell-address").textContent=addr;
+ const cell=ws[addr];document.getElementById("cell-address").textContent=activeSheetName+"!"+addr;
  document.getElementById("cell-kind").textContent=cell&&cell.f!==undefined?"数式":"値";
  formulaInput.value=cell?(cell.f!==undefined?"="+cell.f:(cell.v??"")):"";
  document.querySelectorAll("[data-cell]").forEach(td=>td.style.outline=td.dataset.cell===addr?"2px solid #2385ff":"");
@@ -64,14 +65,82 @@ function commitFormulaBar(){
    delete ws[selectedAddress].f;
    delete ws[selectedAddress].w;
  }
+ recalculateAll();
  const td=document.querySelector('[data-cell="'+selectedAddress+'"]');
  if(td)td.textContent=String(displayCell(ws[selectedAddress]));
  document.getElementById("cell-kind").textContent=ws[selectedAddress]&&ws[selectedAddress].f!==undefined?"数式":"値";
 }
 formulaInput.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();commitFormulaBar();const cells=Array.from(document.querySelectorAll("[data-cell]"));const index=cells.findIndex(td=>td.dataset.cell===selectedAddress);if(cells[index+1])selectCell(cells[index+1].dataset.cell);}});
 formulaInput.addEventListener("blur",commitFormulaBar);
+function recalculateAll(){
+ const visiting=new Set(),done=new Set();
+ function getCell(sheetName,addr){
+  const key=sheetName+"!"+addr,ws=workbook.Sheets[sheetName],cell=ws&&ws[addr];
+  if(!cell)return 0;
+  if(cell.f===undefined)return cell.v===undefined?0:cell.v;
+  if(done.has(key))return cell.v??0;
+  if(visiting.has(key))throw Error("数式の循環参照があります: "+key);
+  visiting.add(key);
+  try{cell.v=evaluateFormula(cell.f,sheetName,getCell);cell.t=typeof cell.v==="number"?"n":"s";done.add(key);return cell.v;}
+  finally{visiting.delete(key);}
+ }
+ for(const sheetName of workbook.SheetNames){
+  const ws=workbook.Sheets[sheetName];
+  for(const addr of Object.keys(ws).filter(k=>!k.startsWith("!"))){
+   if(ws[addr]&&ws[addr].f!==undefined)getCell(sheetName,addr);
+  }
+ }
+}
+function evaluateFormula(source,currentSheet,getCell){
+ const tokens=[];let i=0;
+ while(i<source.length){
+  const rest=source.slice(i);
+  const wsref=rest.match(/^(?:'((?:[^']|'')+)'|([A-Za-z_][A-Za-z0-9_ ]*))!\\$?([A-Z]{1,3})\\$?(\\d+)/);
+  if(wsref){tokens.push({type:"ref",sheet:(wsref[1]||wsref[2]).replace(/''/g,"'").trim(),addr:wsref[3]+wsref[4]});i+=wsref[0].length;continue;}
+  const ref=rest.match(/^\\$?([A-Z]{1,3})\\$?(\\d+)/);
+  if(ref){tokens.push({type:"ref",sheet:currentSheet,addr:ref[1]+ref[2]});i+=ref[0].length;continue;}
+  const number=rest.match(/^(?:\\d+(?:\\.\\d*)?|\\.\\d+)/);
+  if(number){tokens.push({type:"number",value:Number(number[0])});i+=number[0].length;continue;}
+  const ident=rest.match(/^[A-Za-z_][A-Za-z0-9_]*/);
+  if(ident){tokens.push({type:"ident",value:ident[0].toUpperCase()});i+=ident[0].length;continue;}
+  const ch=source[i];
+  if("+-*/(),:".includes(ch)){tokens.push({type:ch});i++;continue;}
+  if(/\\s/.test(ch)){i++;continue;}
+  throw Error("未対応の数式文字: "+ch);
+ }
+ let pos=0;
+ function peek(type){return tokens[pos]&&tokens[pos].type===type;}
+ function eat(type){if(!peek(type))throw Error("数式の書式が正しくありません");return tokens[pos++];}
+ function primary(){
+  if(peek("number"))return eat("number").value;
+  if(peek("+")){eat("+");return +primary();}
+  if(peek("-")){eat("-");return -primary();}
+  if(peek("(")){eat("(");const v=expression();eat(")");return v;}
+  if(peek("ref")){
+   const first=eat("ref"),range=[];
+   if(peek(":")){eat(":");const last=eat("ref");if(first.sheet!==last.sheet)throw Error("範囲の両端は同じシートにしてください");const a=XLSX.utils.decode_cell(first.addr),b=XLSX.utils.decode_cell(last.addr);for(let r=Math.min(a.r,b.r);r<=Math.max(a.r,b.r);r++)for(let col=Math.min(a.c,b.c);col<=Math.max(a.c,b.c);col++)range.push(getCell(first.sheet,XLSX.utils.encode_cell({r,c:col}));return {range};}
+   return getCell(first.sheet,first.addr);
+  }
+  if(peek("ident")){
+   const name=eat("ident").value;eat("(");const args=[];
+   if(!peek(")")){do{args.push(expression());if(!peek(","))break;eat(",");}while(true);}
+   eat(")");
+   const vals=args.flatMap(a=>a&&a.range?a.range:[a]).map(v=>typeof v==="number"?v:(v==null||v===""?0:Number(v))).filter(v=>Number.isFinite(v));
+   if(name==="SUM")return vals.reduce((a,b)=>a+b,0);
+   if(name==="AVERAGE"||name==="AVG"){if(!vals.length)throw Error("AVERAGEの対象に数値がありません");return vals.reduce((a,b)=>a+b,0)/vals.length;}
+   throw Error("対応していない関数: "+name+"（SUM / AVERAGEのみ対応）");
+  }
+  throw Error("数式を解析できません");
+ }
+ function term(){let v=primary();while(peek("*")||peek("/")){const op=tokens[pos++].type,b=primary();v=op==="*"?Number(v)*Number(b):Number(v)/Number(b);}return v;}
+ function expression(){let v=term();while(peek("+")||peek("-")){const op=tokens[pos++].type,b=term();v=op==="+"?Number(v)+Number(b):Number(v)-Number(b);}return v;}
+ const result=expression();if(pos!==tokens.length)throw Error("数式の末尾に未対応の記述があります");return result;
+}
 function readGrid(){
  commitFormulaBar();
+ try{recalculateAll();statusEl.textContent="計算を更新しました。";}
+ catch(e){statusEl.textContent="計算エラー: "+e.message;}
+
  const ws=workbook.Sheets[activeSheetName || document.getElementById("sheet").value];
  const cells=Object.keys(ws).filter(k=>!k.startsWith("!"));if(cells.length){const p=cells.map(a=>XLSX.utils.decode_cell(a));ws["!ref"]=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(...p.map(x=>x.r)),c:Math.max(...p.map(x=>x.c))}});}
 }
