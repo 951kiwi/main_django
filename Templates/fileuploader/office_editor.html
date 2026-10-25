@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ item.original_name }} - オンライン編集</title>
+<style>body{margin:0;background:#0b1220;color:#e8eef8;font:15px system-ui}header{padding:12px 18px;background:#111c2f;display:flex;gap:16px;justify-content:space-between}a{color:#9acaff}#editor{height:calc(100vh - 52px)}</style>
+<script src="{{ server_url }}/web-apps/apps/api/documents/api.js"></script></head>
+<body><header><a href="{% url 'fileuploader:manager' %}">← ファイル一覧</a><span>{{ item.original_name }}</span></header>
+<div id="editor"></div>
+<script>
+const config = {{ config_json|safe }};
+new DocsAPI.DocEditor("editor", config);
+</script></body></html>
