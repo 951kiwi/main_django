@@ -6,7 +6,8 @@
 - Folder upload preserving browser-provided relative paths.
 - Authenticated PDF/image preview; private files are stored outside `MEDIA_ROOT`.
 - Other allowed files are downloadable.
-- Optional ONLYOFFICE Docs editor integration for DOCX/XLSX/PPTX.
+- Basic in-browser XLSX editing via SheetJS CDN; saves the workbook back to private storage.
+- Optional ONLYOFFICE Docs editor integration for DOCX/PPTX.
 
 ## Install / update
 Run from the project directory:
@@ -20,6 +21,11 @@ No change to `main/urls.py` is needed; the existing `/fileuploader/` include alr
 
 ## Upload size
 Default limit is 100 MiB per file. Override in settings.py with `FILEUPLOADER_MAX_UPLOAD_BYTES`.
+
+## Simple Excel editor
+Open an `.xlsx` file and choose **Excel編集**. It uses SheetJS from a CDN, so no Python package, database migration, Docker, or separate office server is needed.
+
+This is a lightweight cell-value editor, not a full Excel replacement. Formatting, charts, merged cells, advanced formulas, macros, and other workbook features may not round-trip exactly. Keep a backup of important workbooks before saving. Internet access is required to load the SheetJS script.
 
 ## ONLYOFFICE
 Set these environment variables (for example in the local .env, never commit secrets):
