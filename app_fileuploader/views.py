@@ -17,7 +17,7 @@ ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", 
 MAX_UPLOAD_BYTES = int(getattr(settings, "FILEUPLOADER_MAX_UPLOAD_BYTES", 100 * 1024 * 1024))
 
 def _safe_relative_path(raw_path, fallback_name):
-    raw_path = (raw_path or fallback_name or "").replace("\\\\", "/")
+    raw_path = (raw_path or fallback_name or "").replace("\\", "/")
     path = PurePosixPath(raw_path)
     parts = [part for part in path.parts if part not in ("", ".", "/")]
     if not parts or any(part == ".." for part in parts):
