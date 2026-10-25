@@ -140,7 +140,10 @@ def excel_save(request, file_id):
         return JsonResponse({"ok": False, "error": "ファイルサイズが上限を超えています。"}, status=400)
     if not uploaded.name.lower().endswith(".xlsx"):
         return JsonResponse({"ok": False, "error": ".xlsx ファイルを送信してください。"}, status=400)
+    old_name = item.file.name
     item.file.save(os.path.basename(item.relative_path), uploaded, save=False)
+    if old_name and old_name != item.file.name:
+        item.file.storage.delete(old_name)
     item.save()
     return JsonResponse({"ok": True, "message": "Excelを保存しました。"})
 
