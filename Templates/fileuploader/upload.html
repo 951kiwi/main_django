@@ -1,15 +1,2 @@
-<!-- templates/upload.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>ファイルアップロード</title>
-</head>
-<body>
-    <h1>ファイルアップロードフォーム</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">アップロード</button>
-    </form>
-</body>
-</html>
+{% comment %}旧URL用の互換テンプレート{% endcomment %}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>ファイル管理</title></head><body><p><a href="{% url 'fileuploader:manager' %}">新しいファイル管理画面を開く</a></p></body></html>
