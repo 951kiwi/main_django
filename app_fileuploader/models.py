@@ -3,8 +3,9 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 
-PRIVATE_DOCUMENT_ROOT = Path(settings.BASE_DIR) / "private_documents"
-private_document_storage = FileSystemStorage(location=str(PRIVATE_DOCUMENT_ROOT))
+# Keep file uploads in the same media tree used by the rest of the project.
+FILEUPLOAD_ROOT = Path(settings.MEDIA_ROOT) / "fileuploads"
+fileupload_storage = FileSystemStorage(location=str(FILEUPLOAD_ROOT))
 
 class UploadedFile(models.Model):
     """Legacy model retained for migration compatibility."""
@@ -17,7 +18,7 @@ class UploadedFile(models.Model):
 class DocumentFile(models.Model):
     original_name = models.CharField("ファイル名", max_length=255)
     relative_path = models.CharField("相対パス", max_length=1024, db_index=True)
-    file = models.FileField("保存ファイル", storage=private_document_storage, upload_to="documents/")
+    file = models.FileField("保存ファイル", storage=fileupload_storage, upload_to="documents/")
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="managed_documents", verbose_name="アップロードユーザー")
     uploaded_at = models.DateTimeField("アップロード日時", auto_now_add=True)
     updated_at = models.DateTimeField("更新日時", auto_now=True)
