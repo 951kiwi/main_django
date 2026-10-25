@@ -4,9 +4,9 @@
 - Existing Django login required for manager, upload, preview, download, delete, and editor pages.
 - Per-user file lists and ownership checks.
 - Folder upload preserving browser-provided relative paths.
-- Authenticated PDF/image preview; private files are stored outside `MEDIA_ROOT`.
+- Authenticated PDF/image preview; managed files are stored under `MEDIA_ROOT/fileuploads/` like the rest of the project's media files.
 - Other allowed files are downloadable.
-- Basic in-browser XLSX editing via SheetJS CDN; saves the workbook back to private storage.
+- Basic in-browser XLSX editing via SheetJS CDN; saves the workbook under `MEDIA_ROOT/fileuploads/`. The formula bar shows a cell's formula (when present) or value.
 - Optional ONLYOFFICE Docs editor integration for DOCX/PPTX.
 
 ## Install / update
@@ -25,7 +25,7 @@ Default limit is 100 MiB per file. Override in settings.py with `FILEUPLOADER_MA
 ## Simple Excel editor
 Open an `.xlsx` file and choose **Excel編集**. It uses SheetJS from a CDN, so no Python package, database migration, Docker, or separate office server is needed.
 
-This is a lightweight cell-value editor, not a full Excel replacement. Formatting, charts, merged cells, advanced formulas, macros, and other workbook features may not round-trip exactly. Keep a backup of important workbooks before saving. Internet access is required to load the SheetJS script.
+This is a lightweight editor, not a full Excel replacement. Formula text is retained and shown in the formula bar, but formulas are not recalculated in the browser; Excel recalculates them when the workbook is opened. Formatting, charts, merged cells, macros, and other advanced workbook features may not round-trip exactly. Keep a backup of important workbooks before saving. Internet access is required to load the SheetJS script.
 
 ## ONLYOFFICE
 Set these environment variables (for example in the local .env, never commit secrets):
