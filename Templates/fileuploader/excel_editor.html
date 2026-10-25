@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Excel編集 - {{ item.original_name }}</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#111c2f;--line:#263650;--text:#e8eef8;--muted:#9aabc4;--accent:#5ca8ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif}
+header{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:18px;margin:0;overflow-wrap:anywhere}a{color:#9acaff}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:14px 20px;background:var(--panel)}
+button,select{border:0;border-radius:8px;padding:9px 12px;background:var(--accent);color:#061326;font-weight:700;cursor:pointer}.muted{color:var(--muted);font-size:12px}
+#grid-wrap{overflow:auto;height:calc(100vh - 180px);padding:12px}table{border-collapse:collapse;background:#fff;color:#111}th,td{border:1px solid #d2d8e1;min-width:100px;height:30px;padding:4px 7px;white-space:pre-wrap}th{background:#e9eef5;position:sticky;top:0;z-index:1}td{min-width:110px;max-width:320px;outline:none}td:focus{box-shadow:inset 0 0 0 2px #2385ff}.rowhead{background:#e9eef5;min-width:38px;text-align:center;position:sticky;left:0}
+#status{padding:0 20px 12px;white-space:pre-wrap}
+</style></head><body>
+<header><h1>📊 {{ item.original_name }}</h1><a href="{% url 'fileuploader:manager' %}">← ファイル一覧に戻る</a></header>
+<div class="toolbar"><label>シート <select id="sheet"></select></label><button id="save" type="button">Excelに保存</button><span class="muted">セルをクリックして直接編集できます。重要なファイルはバックアップを推奨します。</span></div>
+<div id="grid-wrap"><p>Excelを読み込んでいます…</p></div><div id="status" class="muted" role="status"></div>
+<script>
+const contentUrl="{{ content_url|escapejs }}", saveUrl="{{ save_url|escapejs }}", csrfToken="{{ csrf_token }}";
+const statusEl=document.getElementById("status");let workbook;
+function colName(n){let s="";while(n>=0){s=String.fromCharCode(n%26+65)+s;n=Math.floor(n/26)-1;}return s;}
+function escapeHtml(s){return s.replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));}
+function renderSheet(){
+ const ws=workbook.Sheets[document.getElementById("sheet").value];
+ const range=ws["!ref"]?XLSX.utils.decode_range(ws["!ref"]):{s:{r:0,c:0},e:{r:19,c:9}};
+ range.e.r=Math.min(Math.max(range.e.r,range.s.r+19),999);range.e.c=Math.min(Math.max(range.e.c,range.s.c+9),99);
+ let html="<table><thead><tr><th></th>";for(let c=range.s.c;c<=range.e.c;c++)html+="<th>"+colName(c)+"</th>";html+="</tr></thead><tbody>";
+ for(let r=range.s.r;r<=range.e.r;r++){html+='<tr><th class="rowhead">'+(r+1)+'</th>';
+  for(let c=range.s.c;c<=range.e.c;c++){const addr=XLSX.utils.encode_cell({r,c}),cell=ws[addr],value=cell?(cell.w!==undefined?cell.w:(cell.v??"")):"";html+='<td contenteditable="true" data-cell="'+addr+'">'+escapeHtml(String(value))+'</td>';}
+  html+="</tr>";}
+ document.getElementById("grid-wrap").innerHTML=html+"</tbody></table>";
+}
+function readGrid(){
+ const ws=workbook.Sheets[document.getElementById("sheet").value];
+ document.querySelectorAll("[data-cell]").forEach(td=>{const addr=td.dataset.cell,value=td.textContent;if(value===""){delete ws[addr];return;}const old=ws[addr]||{},n=Number(value);ws[addr]=(value.trim()!==""&&Number.isFinite(n))?{...old,t:"n",v:n}:{...old,t:"s",v:value};});
+ const cells=Object.keys(ws).filter(k=>!k.startsWith("!"));if(cells.length){const p=cells.map(a=>XLSX.utils.decode_cell(a));ws["!ref"]=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(...p.map(x=>x.r)),c:Math.max(...p.map(x=>x.c))}});}
+}
+async function load(){try{const r=await fetch(contentUrl);if(!r.ok)throw Error("ファイルを読み込めませんでした。");workbook=XLSX.read(await r.arrayBuffer(),{type:"array",cellDates:true});const s=document.getElementById("sheet");workbook.SheetNames.forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o);});renderSheet();s.addEventListener("change",()=>{readGrid();renderSheet();});statusEl.textContent="読み込み完了。セルをクリックして編集してください。";}catch(e){document.getElementById("grid-wrap").textContent=e.message||"読み込みに失敗しました。";}}
+document.getElementById("save").addEventListener("click",async()=>{if(!workbook)return;readGrid();statusEl.textContent="保存中…";try{const blob=new Blob([XLSX.write(workbook,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});const data=new FormData();data.append("workbook",blob,"edited.xlsx");const r=await fetch(saveUrl,{method:"POST",body:data,headers:{"X-CSRFToken":csrfToken}});const result=await r.json();if(!r.ok||!result.ok)throw Error(result.error||"保存に失敗しました。");statusEl.textContent="保存しました。";}catch(e){statusEl.textContent=e.message||"保存に失敗しました。";}});
+load();
+</script></body></html>
