@@ -72,7 +72,7 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
   chosen.forEach(file => { data.append("files", file); data.append("relative_paths", file.webkitRelativePath || file.name); });
   statusEl.textContent = "アップロード中…";
   try {
-    const response = await fetch("{% url 'fileuploader:upload' %}", {method:"POST", body:data, headers:{"X-CSRFToken":getCookie("csrftoken")}});
+    const response = await fetch("{% url 'fileuploader:upload' %}", {method:"POST", body:data, headers:{"X-CSRFToken":csrf}});
     const result = await response.json();
     statusEl.textContent = (result.uploaded?.length ? result.uploaded.length + "件アップロードしました。\n" : "") + (result.errors || []).join("\n");
     if (response.ok && result.uploaded?.length) location.reload();
@@ -81,7 +81,7 @@ document.getElementById("uploadBtn").addEventListener("click", async () => {
 document.querySelectorAll("[data-delete]").forEach(button => button.addEventListener("click", async () => {
   if (!confirm("このファイルを削除しますか？")) return;
   const response = await fetch("{% url 'fileuploader:delete' 0 %}".replace("/0/delete/", "/" + button.dataset.delete + "/delete/"), {
-    method:"POST", headers:{"X-CSRFToken":getCookie("csrftoken")}
+    method:"POST", headers:{"X-CSRFToken":csrf}
   });
   if (response.ok) location.reload(); else alert("削除できませんでした。");
 }));
