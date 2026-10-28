@@ -45,7 +45,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 10p
 <td>{{ item.updated_at|date:"Y/m/d H:i" }}</td>
 <td><div class="file-actions">
 {% if item.is_image or item.is_pdf %}<a href="{% url 'fileuploader:file_content' item.id %}" target="_blank" rel="noopener">プレビュー</a>{% endif %}
-{% if item.is_office_document %}<a href="{% url 'fileuploader:office_editor' item.id %}">編集</a>{% endif %}
+{% if item.extension == ".xlsx" %}<a href="{% url 'fileuploader:excel_editor' item.id %}">Excel編集</a>{% endif %}
+{% if item.is_office_document and item.extension != ".xlsx" %}<a href="{% url 'fileuploader:office_editor' item.id %}">編集</a>{% endif %}
 <a href="{% url 'fileuploader:download' item.id %}">ダウンロード</a>
 <button class="danger" type="button" data-delete="{{ item.id }}">削除</button>
 </div></td>
@@ -56,7 +57,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 10p
 </section>
 <section class="panel">
 <h3>対応形式</h3>
-<p class="muted">プレビュー: PDF・画像。ダウンロード: その他の許可形式。Word / Excel / PowerPoint（DOCX / XLSX / PPTX）のブラウザ編集には別途 ONLYOFFICE Docs の設定が必要です。</p>
+<p class="muted">プレビュー: PDF・画像。Excel（.xlsx）は簡易ブラウザ編集と保存に対応。Word / PowerPoint（DOCX / PPTX）の編集には別途 ONLYOFFICE Docs の設定が必要です。簡易編集では書式・グラフ・高度な数式などの完全な互換性はありません。</p>
 </section>
 </main>
 <script>

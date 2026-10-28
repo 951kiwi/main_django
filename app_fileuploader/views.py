@@ -117,6 +117,38 @@ def delete_file(request, file_id):
 
 @login_required
 @require_GET
+def excel_editor(request, file_id):
+    item = _owned_file(request, file_id)
+    if item.extension != ".xlsx":
+        raise Http404("この編集画面は .xlsx ファイル専用です。")
+    return render(request, "fileuploader/excel_editor.html", {
+        "item": item,
+        "content_url": reverse("fileuploader:file_content", args=[item.pk]),
+        "save_url": reverse("fileuploader:excel_save", args=[item.pk]),
+    })
+
+@login_required
+@require_POST
+def excel_save(request, file_id):
+    item = _owned_file(request, file_id)
+    if item.extension != ".xlsx":
+        raise Http404("この編集画面は .xlsx ファイル専用です。")
+    uploaded = request.FILES.get("workbook")
+    if not uploaded:
+        return JsonResponse({"ok": False, "error": "保存するExcelファイルがありません。"}, status=400)
+    if uploaded.size > MAX_UPLOAD_BYTES:
+        return JsonResponse({"ok": False, "error": "ファイルサイズが上限を超えています。"}, status=400)
+    if not uploaded.name.lower().endswith(".xlsx"):
+        return JsonResponse({"ok": False, "error": ".xlsx ファイルを送信してください。"}, status=400)
+    old_name = item.file.name
+    item.file.save(os.path.basename(item.relative_path), uploaded, save=False)
+    if old_name and old_name != item.file.name:
+        item.file.storage.delete(old_name)
+    item.save()
+    return JsonResponse({"ok": True, "message": "Excelを保存しました。"})
+
+@login_required
+@require_GET
 def office_editor(request, file_id):
     item = _owned_file(request, file_id)
     if not item.is_office_document:

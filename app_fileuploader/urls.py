@@ -9,6 +9,8 @@ urlpatterns = [
     path("file/<int:file_id>/download/", views.download_file, name="download"),
     path("file/<int:file_id>/delete/", views.delete_file, name="delete"),
     path("file/<int:file_id>/edit/", views.office_editor, name="office_editor"),
+    path("file/<int:file_id>/excel/", views.excel_editor, name="excel_editor"),
+    path("file/<int:file_id>/excel/save/", views.excel_save, name="excel_save"),
     path("file/<int:file_id>/onlyoffice-callback/", views.onlyoffice_callback, name="onlyoffice_callback"),
     path("upload_success/", views.file_manager, name="upload_success"),
 ]
