@@ -847,9 +847,10 @@
       
       window.showMotionDetected = function() {
         const indicator = document.getElementById('motion-indicator');
-
+        window.updateFullyDebug?.('② motion-indicator 確認222');
         if (!indicator) {
             console.error('motion-indicator が見つかりません');
+            window.updateFullyDebug?.('② motion-indicator が見つかりません');
             return;
         }
 
