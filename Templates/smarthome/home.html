@@ -846,27 +846,19 @@
       // ─────────────────────────────────────────
       
       window.showMotionDetected = function() {
-        const indicator = document.getElementById('motion-indicator');
-        window.updateFullyDebug?.('② motion-indicator 確認222');
-        if (!indicator) {
-            console.error('motion-indicator が見つかりません');
-            window.updateFullyDebug?.('② motion-indicator が見つかりません');
-            return;
-        }
+            const indicator = document.getElementById('motion-indicator');
 
-        indicator.classList.add('active');
+            if (!indicator) return;
 
-        // アニメーションを再スタート
-        void indicator.offsetWidth;
-        document.getElementById('motion-indicator').textContent = "a";
+            indicator.classList.remove('active');
+            void indicator.offsetWidth;
+            indicator.classList.add('active');
 
-        console.log('動体検知アイコン:', indicator.className);
+            clearTimeout(window.motionIndicatorTimer);
 
-        clearTimeout(window.motionIndicatorTimer);
-
-        window.motionIndicatorTimer = setTimeout(() => {
-            document.getElementById('motion-indicator').textContent = "b";
-        }, 5000);
+            window.motionIndicatorTimer = setTimeout(() => {
+                indicator.classList.remove('active');
+            }, 5000);
         };
       
       
