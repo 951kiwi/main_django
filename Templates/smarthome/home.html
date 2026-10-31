@@ -2,122 +2,112 @@
 
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Smart Home</title>
 
-    <link rel="stylesheet"
-          href="{% static 'smarthome/css/style.css' %}">
-</head>
+    <link rel="stylesheet" href="{% static 'smarthome/css/style.css' %}" />
+  </head>
 
-<body>
-<!-- CSRFトークンを非同期送信用に保持 -->
+  <body>
+    <!-- CSRFトークンを非同期送信用に保持 -->
     <form style="display: none;">
-        {% csrf_token %}
+      {% csrf_token %}
     </form>
-<!-- 操作不能用オーバーレイ -->
-<div id="lock-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center; cursor: wait; backdrop-filter: blur(2px);">
-    <div style="background: #ffffff; color: #333333; padding: 36px 48px; border-radius: 16px; font-size: 1.25rem; font-weight: 600; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); text-align: center; min-width: 280px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+    <!-- 操作不能用オーバーレイ -->
+    <div id="lock-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center; cursor: wait; backdrop-filter: blur(2px);">
+      <div style="background: #ffffff; color: #333333; padding: 36px 48px; border-radius: 16px; font-size: 1.25rem; font-weight: 600; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); text-align: center; min-width: 280px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
         <!-- ローディングスピナー（CSSアニメーション） -->
         <div style="width: 36px; height: 36px; border: 4px solid #e0e0e0; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
         <span>最新状態を同期中...</span>
+      </div>
     </div>
-</div>
 
-<style>
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-</style>
-<div class="app">
-
-    <!-- =========================
+    <style>
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <div class="app">
+      <!--  =========================
          サイドバー
-    ========================== -->
+    ==========================  -->
 
-    <aside class="sidebar">
-
+      <aside class="sidebar">
         <div class="logo-area">
-            <div class="logo-icon">⌂</div>
+          <div class="logo-icon">⌂</div>
 
-            <div>
-                <div class="logo-title">Smart Home</div>
-                <div class="logo-subtitle">Dashboard</div>
-            </div>
+          <div>
+            <div class="logo-title">Smart Home</div>
+            <div class="logo-subtitle">Dashboard</div>
+          </div>
         </div>
 
-
         <nav class="menu">
+          <a class="menu-item active" href="#">
+            <span class="menu-icon">⌂</span>
+            <span>ホーム</span>
+          </a>
 
-            <a class="menu-item active" href="#">
-                <span class="menu-icon">⌂</span>
-                <span>ホーム</span>
-            </a>
+          <a class="menu-item" href="#">
+            <span class="menu-icon">▦</span>
+            <span>デバイス</span>
+          </a>
 
-            <a class="menu-item" href="#">
-                <span class="menu-icon">▦</span>
-                <span>デバイス</span>
-            </a>
+          <a class="menu-item" href="#">
+            <span class="menu-icon">▱</span>
+            <span>シーン</span>
+          </a>
 
-            <a class="menu-item" href="#">
-                <span class="menu-icon">▱</span>
-                <span>シーン</span>
-            </a>
+          <a class="menu-item" href="#">
+            <span class="menu-icon">◔</span>
+            <span>履歴</span>
+          </a>
 
-            <a class="menu-item" href="#">
-                <span class="menu-icon">◔</span>
-                <span>履歴</span>
-            </a>
-
-            <a class="menu-item" href="#">
-                <span class="menu-icon">⚙</span>
-                <span>設定</span>
-            </a>
-
+          <a class="menu-item" href="#">
+            <span class="menu-icon">⚙</span>
+            <span>設定</span>
+          </a>
         </nav>
-
 
         <!-- 外出モード -->
 
         <div class="away-box">
+          <div class="away-header">
+            <span class="away-icon">⬟</span>
 
-            <div class="away-header">
-                <span class="away-icon">⬟</span>
+            <span class="away-title">外出モード</span>
 
-                <span class="away-title">
-                    外出モード
-                </span>
+            <span class="mini-switch">
+              <span>OFF</span>
+              <span class="mini-knob"></span>
+            </span>
+          </div>
 
-                <span class="mini-switch">
-                    <span>OFF</span>
-                    <span class="mini-knob"></span>
-                </span>
-            </div>
-
-            <div class="away-description">
-                すべてのデバイスは<br>
-                通常モードです
-            </div>
-
+          <div class="away-description">
+            すべてのデバイスは<br />
+            通常モードです
+          </div>
         </div>
+      </aside>
 
-    </aside>
-
-
-    <!-- =========================
+      <!--  =========================
          メイン
-    ========================== -->
+    ==========================  -->
 
-    <main class="main">
+      <main class="main">
         <!-- ヘッダー -->
         <header class="header">
-            <div></div>
-            <div id="fully-debug" style="
+          <div></div>
+          <div id="fully-debug" style="
                 position: fixed;
                 bottom: 10px;
                 left: 10px;
@@ -130,2111 +120,1686 @@
                 border-radius: 8px;
                 max-width: 90%;
                 white-space: pre-wrap;
-            ">
-                Fully Kiosk 読み込み確認中...
+            ">Fully Kiosk 読み込み確認中...</div>
+          <div class="header-right">
+            <!-- 動き検知 -->
+            <div id="motion-indicator" class="motion-indicator">
+              <i class="bi bi-person-fill"></i>
             </div>
-            <div class="header-right">
-                <!-- 動き検知 -->
-                <div id="motion-indicator" class="motion-indicator">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <!-- 時計・日付エリア -->
-                 <div class="battery-status" id="battery-status">
-                    <span class="battery-icon" id="battery-icon">🔋</span>
-                    <span class="battery-level" id="battery-level">--%</span>
-                </div>
-                <div class="clock-area">
-                    <div class="clock" id="clock">--:--</div>
-                    <div class="date" id="date-display">--月--日（-）</div>
-                </div>
+            <!-- 時計・日付エリア -->
+            <div class="battery-status" id="battery-status">
+              <span class="battery-icon" id="battery-icon">🔋</span>
+              <span class="battery-level" id="battery-level">--%</span>
+            </div>
+            <div class="clock-area">
+              <div class="clock" id="clock">--:--</div>
+              <div class="date" id="date-display">--月--日（-）</div>
+            </div>
 
-                <!-- 天気エリア -->
-                <div class="weather">
-                    <div class="weather-icon" id="weather-icon">☁</div>
-                    <div>
-                        <div class="weather-temperature" id="weather-temp">--°C</div>
-                        <div class="weather-location">江東区</div>
-                    </div>
-                </div>
+            <!-- 天気エリア -->
+            <div class="weather">
+              <div class="weather-icon" id="weather-icon">☁</div>
+              <div>
+                <div class="weather-temperature" id="weather-temp">--°C</div>
+                <div class="weather-location">江東区</div>
+              </div>
             </div>
+          </div>
         </header>
 
-
-        <!-- =========================
+        <!--  =========================
              デバイスグリッド
-        ========================== -->
+        ==========================  -->
 
         <section class="dashboard-grid">
-
-            {% for remote in remotes %}
-
-                <div
-                    class="device-card {{ remote.type }}-card"
-                    data-device-id="{{ remote.device_id }}"
-                    data-device-type="{{ remote.type }}"
-                    style="
+          {% for remote in remotes %}
+            <div class="device-card {{ remote.type }}-card" data-device-id="{{ remote.device_id }}" data-device-type="{{ remote.type }}" style="
                         grid-column: {{ remote.x|add:1 }}
                             / span {{ remote.width }};
 
                         grid-row: {{ remote.y|add:1 }}
                             / span {{ remote.height }};
-                    "
-                >
-                    <!-- ライトカード (IRリモコン仕様) -->
-                    {% if remote.type == "light" %}
+                    ">
+              <!-- ライトカード (IRリモコン仕様) -->
+              {% if remote.type == 'light' %}
+                <div class="card-header">
+                  <div class="device-title">
+                    <div class="device-icon light">💡</div>
+                    <div>
+                      <div class="title">{{ remote.title }}</div>
+                      <div class="subtitle">{{ remote.sub_title }}</div>
+                    </div>
+                  </div>
+                  <!-- IR仕様のため個別のON/OFFプッシュキー -->
+                  <div class="light-power-group">
+                    <button type="button" class="light-pwr-btn on" data-command-name="ON">ON</button>
+                    <button type="button" class="light-pwr-btn off" data-command-name="OFF">OFF</button>
+                  </div>
+                </div>
 
-                        <div class="card-header">
-                            <div class="device-title">
-                                <div class="device-icon light">💡</div>
-                                <div>
-                                    <div class="title">{{ remote.title }}</div>
-                                    <div class="subtitle">{{ remote.sub_title }}</div>
-                                </div>
-                            </div>
-                            <!-- IR仕様のため個別のON/OFFプッシュキー -->
-                            <div class="light-power-group">
-                                <button type="button" class="light-pwr-btn on" data-command-name="ON">ON</button>
-                                <button type="button" class="light-pwr-btn off" data-command-name="OFF">OFF</button>
-                            </div>
+                <div class="light-content">
+                  <!-- 左側：調光・調色ステップキー (十字型/グリッド配置) -->
+                  <div class="light-adjust-section">
+                    <div class="adjust-grid">
+                      <button type="button" class="light-btn adjust-btn up" data-command-name="bright-up" title="明るく">
+                        <span class="icon">▲</span>
+                        <span class="lbl">明るく</span>
+                      </button>
+                      <button type="button" class="light-btn adjust-btn left" data-command-name="temperature-worm" title="暖かく">
+                        <span class="icon">◀</span>
+                        <span class="lbl">暖色</span>
+                      </button>
+                      <div class="adjust-center">
+                        <span class="bulb-symbol">🔆</span>
+                      </div>
+                      <button type="button" class="light-btn adjust-btn right" data-command-name="temperature-cold" title="冷たく">
+                        <span class="icon">▶</span>
+                        <span class="lbl">寒色</span>
+                      </button>
+                      <button type="button" class="light-btn adjust-btn down" data-command-name="bright-down" title="暗く">
+                        <span class="icon">▼</span>
+                        <span class="lbl">暗く</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 右側：シーン・タイマー機能 -->
+                  <div class="light-sub-section">
+                    <div class="sub-action-group">
+                      <span class="action-label">プリセット / タイマー</span>
+                      <button type="button" class="light-btn feature-btn" data-command-name="other\scene">
+                        <span class="btn-icon">🎨</span>
+                        <span>シーン切替</span>
+                      </button>
+                      <button type="button" class="light-btn feature-btn" data-command-name="other\night-light">
+                        <span class="btn-icon">🌙</span>
+                        <span>常夜灯</span>
+                      </button>
+                      <button type="button" class="light-btn feature-btn timer" data-command-name="other\timer-30">
+                        <span class="btn-icon">⏱</span>
+                        <span>30分切</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              {% elif remote.type == 'light_detail' %}
+                <!-- 詳細ライトカード (電球中央配置レイアウト) -->
+                <div class="card-header">
+                  <div class="device-title">
+                    <div class="device-icon light">💡</div>
+                    <div>
+                      <div class="title">{{ remote.title }}</div>
+                      <div class="subtitle">{{ remote.sub_title }}</div>
+                    </div>
+                  </div>
+                  <div class="power-switch off" id="detail-light-power">
+                    <span class="power-label" id="detail-power-label" data-command-name="ON">OFF</span>
+                    <span class="switch-knob"></span>
+                  </div>
+                </div>
+
+                <div class="detail-light-center-layout">
+                  <!-- 上段ツールバー：プリセット / 色変更詳細 / リセット -->
+                  <div class="light-top-bar">
+                    <button type="button" class="color-detail-btn" id="btn-open-palette" title="RGB詳細パレットを開く">
+                      <span class="color-indicator" id="current-color-dot"></span>
+                      <span>色詳細 ▾</span>
+                    </button>
+
+                    <button type="button" class="reset-btn" id="btn-light-reset" title="初期状態に戻す"><span>↺ リセット</span></button>
+                  </div>
+
+                  <!-- 中央：メイン電球プレビュー（状態の中心） -->
+                  <div class="light-center-visual">
+                    <div class="bulb-halo" id="bulb-glow">
+                      <span class="bulb-icon">💡</span>
+                    </div>
+                  </div>
+
+                  <!-- 下段：明るさ & 色温度スライダー -->
+                  <div class="light-bottom-sliders">
+                    <div class="slider-group">
+                      <div class="slider-header">
+                        <span class="slider-label">明るさ</span>
+                        <span class="slider-val" id="val-brightness">80%</span>
+                      </div>
+                      <div class="slider-track-wrap">
+                        <span class="slider-icon">🌑</span>
+                        <input type="range" min="1" max="100" value="80" class="light-slider brightness-slider" id="slider-brightness" data-command-name="bright-set" />
+                        <span class="slider-icon">☀️</span>
+                      </div>
+                    </div>
+
+                    <div class="slider-group">
+                      <div class="slider-header">
+                        <span class="slider-label">色温度</span>
+                        <span class="slider-val" id="val-temp">4000K</span>
+                      </div>
+                      <div class="slider-track-wrap">
+                        <span class="slider-icon">🧡</span>
+                        <input type="range" min="2700" max="6500" step="100" value="4000" class="light-slider temp-slider" id="slider-temp" data-command-name="temperature-set" />
+                        <span class="slider-icon">💙</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- RGB詳細カラーパレット（オーバーレイ） -->
+                  <div class="rgb-palette-overlay hidden" id="rgb-palette-overlay">
+                    <div class="palette-header">
+                      <span>RGB カラー詳細選択</span>
+                      <button type="button" class="close-palette" id="btn-close-palette">✕</button>
+                    </div>
+                    <div class="palette-body">
+                      <input type="color" id="native-color-picker" value="#ffbe53" />
+                      <div class="custom-palette-grid">
+                        <button type="button" class="palette-cell" style="background:#ff4d4f" data-color="#ff4d4f"></button>
+                        <button type="button" class="palette-cell" style="background:#ff7a45" data-color="#ff7a45"></button>
+                        <button type="button" class="palette-cell" style="background:#ffa940" data-color="#ffa940"></button>
+                        <button type="button" class="palette-cell" style="background:#ffec3d" data-color="#ffec3d"></button>
+                        <button type="button" class="palette-cell" style="background:#73d13d" data-color="#73d13d"></button>
+                        <button type="button" class="palette-cell" style="background:#36cfc9" data-color="#36cfc9"></button>
+                        <button type="button" class="palette-cell" style="background:#4096ff" data-color="#4096ff"></button>
+                        <button type="button" class="palette-cell" style="background:#597ef7" data-color="#597ef7"></button>
+                        <button type="button" class="palette-cell" style="background:#9254de" data-color="#9254de"></button>
+                        <button type="button" class="palette-cell" style="background:#f759ab" data-color="#f759ab"></button>
+                      </div>
+                      <div class="palette-footer">
+                        <div class="hex-input-wrap">
+                          <span class="hex-label">HEX:</span>
+                          <input type="text" id="hex-input" value="#FFBE53" maxlength="7" />
                         </div>
+                        <label class="native-picker-trigger" for="native-color-picker">ホイール 🎨</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% elif remote.type == 'aircon' %}
+                <!-- エアコンカード -->
 
-                        <div class="light-content">
-                            <!-- 左側：調光・調色ステップキー (十字型/グリッド配置) -->
-                            <div class="light-adjust-section">
-                                <div class="adjust-grid">
-                                    <button type="button" class="light-btn adjust-btn up" data-command-name="bright-up" title="明るく">
-                                        <span class="icon">▲</span>
-                                        <span class="lbl">明るく</span>
-                                    </button>
-                                    <button type="button" class="light-btn adjust-btn left" data-command-name="temperature-worm" title="暖かく">
-                                        <span class="icon">◀</span>
-                                        <span class="lbl">暖色</span>
-                                    </button>
-                                    <div class="adjust-center">
-                                        <span class="bulb-symbol">🔆</span>
-                                    </div>
-                                    <button type="button" class="light-btn adjust-btn right" data-command-name="temperature-cold" title="冷たく">
-                                        <span class="icon">▶</span>
-                                        <span class="lbl">寒色</span>
-                                    </button>
-                                    <button type="button" class="light-btn adjust-btn down" data-command-name="bright-down" title="暗く">
-                                        <span class="icon">▼</span>
-                                        <span class="lbl">暗く</span>
-                                    </button>
-                                </div>
-                            </div>
+                <div class="card-header">
+                  <div class="device-title">
+                    <div class="device-icon snow">❄</div>
+                    <div>
+                      <div class="title">{{ remote.title }}</div>
+                      <div class="subtitle">{{ remote.sub_title }}</div>
+                    </div>
+                  </div>
+                  <div class="power-switch off">
+                    <span class="power-label">OFF</span>
+                    <span class="switch-knob"></span>
+                  </div>
+                </div>
+                <div class="aircon-content">
+                  <!-- 温度ダイヤル & プラス/マイナスボタン -->
+                  <div class="temperature-dial">
+                    <div class="dial-inner">
+                      <div class="temperature" id="temp-display" data-command-name="AirC_temp_display">
+                        24<span>°C</span>
+                      </div>
+                      <div class="setting-label">設定温度</div>
+                    </div>
+                    <button type="button" class="temp-btn minus" id="btn-temp-minus" aria-label="温度を下げる" data-command-name="AirC_temp_down">−</button>
+                    <button type="button" class="temp-btn plus" id="btn-temp-plus" aria-label="温度を上げる" data-command-name="AirC_temp_up">+</button>
+                  </div>
 
-                            <!-- 右側：シーン・タイマー機能 -->
-                            <div class="light-sub-section">
-                                <div class="sub-action-group">
-                                    <span class="action-label">プリセット / タイマー</span>
-                                    <button type="button" class="light-btn feature-btn" data-command-name="other\scene">
-                                        <span class="btn-icon">🎨</span>
-                                        <span>シーン切替</span>
-                                    </button>
-                                    <button type="button" class="light-btn feature-btn" data-command-name="other\night-light">
-                                        <span class="btn-icon">🌙</span>
-                                        <span>常夜灯</span>
-                                    </button>
-                                    <button type="button" class="light-btn feature-btn timer" data-command-name="other\timer-30">
-                                        <span class="btn-icon">⏱</span>
-                                        <span>30分切</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif remote.type == "light_detail" %}
-                        <!-- 詳細ライトカード (電球中央配置レイアウト) -->
-                        <div class="card-header">
-                            <div class="device-title">
-                                <div class="device-icon light">💡</div>
-                                <div>
-                                    <div class="title">{{ remote.title }}</div>
-                                    <div class="subtitle">{{ remote.sub_title }}</div>
-                                </div>
-                            </div>
-                            <div class="power-switch off" id="detail-light-power">
-                                <span class="power-label" id="detail-power-label" data-command-name="ON">OFF</span>
-                                <span class="switch-knob"></span>
-                            </div>
-                        </div>
+                  <!-- ステータス・操作エリア -->
+                  <div class="aircon-status">
+                    <!-- 運転モード切り替えボタン -->
+                    <button type="button" class="status-item clickable" id="btn-mode" data-command-name="AirC_mode">
+                      <div class="status-icon" id="mode-icon">❄</div>
+                      <div class="status-details">
+                        <div class="status-value" id="mode-value">冷房</div>
+                        <div class="status-label">運転モード</div>
+                      </div>
+                    </button>
 
-                        <div class="detail-light-center-layout">
-                            <!-- 上段ツールバー：プリセット / 色変更詳細 / リセット -->
-                            <div class="light-top-bar">
-                                <button type="button" class="color-detail-btn" id="btn-open-palette" title="RGB詳細パレットを開く">
-                                    <span class="color-indicator" id="current-color-dot"></span>
-                                    <span>色詳細 ▾</span>
-                                </button>
+                    <!-- 風量切り替えボタン -->
+                    <button type="button" class="status-item clickable" id="btn-fan" data-command-name="AirC_fan">
+                      <div class="status-icon">💨</div>
+                      <div class="status-details">
+                        <div class="status-value" id="fan-value">自動</div>
+                        <div class="status-label">風量</div>
+                      </div>
+                    </button>
 
-                                <button type="button" class="reset-btn" id="btn-light-reset" title="初期状態に戻す">
-                                    <span>↺ リセット</span>
-                                </button>
-                            </div>
+                    <!-- 室温表示（固定表示） -->
+                    <div class="status-item">
+                      <div class="status-icon">🌡</div>
+                      <div class="status-details">
+                        <div class="status-value">26°C</div>
+                        <div class="status-label">室温</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% elif remote.type == 'tv' %}
+                <!-- テレビカード (フル機能IRリモコン) -->
+                <div class="card-header">
+                  <div class="device-title">
+                    <div class="device-icon tv">📺</div>
+                    <div>
+                      <div class="title">{{ remote.title }}</div>
+                      <div class="subtitle">{{ remote.sub_title }}</div>
+                    </div>
+                  </div>
+                  <div class="power-switch off" id="tv-power">
+                    <span class="power-label" id="tv-power-label">ON</span>
+                    <span class="switch-knob"></span>
+                  </div>
+                </div>
 
-                            <!-- 中央：メイン電球プレビュー（状態の中心） -->
-                            <div class="light-center-visual">
-                                <div class="bulb-halo" id="bulb-glow">
-                                    <span class="bulb-icon">💡</span>
-                                </div>
-                            </div>
+                <div class="tv-content">
+                  <!-- 左側：十字キー & ナビゲーション -->
+                  <div class="tv-nav-section">
+                    <div class="dpad">
+                      <button type="button" class="dpad-btn up" data-command-name="tv_up" aria-label="上">▲</button>
+                      <button type="button" class="dpad-btn left" data-command-name="tv_left" aria-label="左">◀</button>
+                      <button type="button" class="dpad-btn ok" data-command-name="tv_enter">決定</button>
+                      <button type="button" class="dpad-btn right" data-command-name="tv_right" aria-label="右">▶</button>
+                      <button type="button" class="dpad-btn down" data-command-name="tv_down" aria-label="下">▼</button>
+                    </div>
+                    <div class="nav-sub-btns">
+                      <button type="button" class="tv-btn small" data-command-name="tv_tv">TV</button>
+                      <button type="button" class="tv-btn small" data-command-name="tv_back">戻る</button>
+                    </div>
+                  </div>
 
-                            <!-- 下段：明るさ & 色温度スライダー -->
-                            <div class="light-bottom-sliders">
-                                <div class="slider-group">
-                                    <div class="slider-header">
-                                        <span class="slider-label">明るさ</span>
-                                        <span class="slider-val" id="val-brightness" >80%</span>
-                                    </div>
-                                    <div class="slider-track-wrap">
-                                        <span class="slider-icon">🌑</span>
-                                        <input type="range" min="1" max="100" value="80" class="light-slider brightness-slider" id="slider-brightness" data-command-name="bright-set">
-                                        <span class="slider-icon">☀️</span>
-                                    </div>
-                                </div>
+                  <!-- 右側：基本操作 & 特殊メニュー -->
+                  <div class="tv-controls-section">
+                    <!-- 音量 & チャンネル操作 -->
+                    <div class="rocker-group">
+                      <div class="rocker">
+                        <button type="button" class="tv-btn step-btn" data-command-name="tv_vol-up">＋</button>
+                        <span class="rocker-label">音量</span>
+                        <button type="button" class="tv-btn step-btn" data-command-name="tv_vol-down">ー</button>
+                      </div>
+                      <div class="rocker">
+                        <button type="button" class="tv-btn step-btn" data-command-name="tv_ch-up">▲</button>
+                        <span class="rocker-label">選局</span>
+                        <button type="button" class="tv-btn step-btn" data-command-name="tv_ch-down">▼</button>
+                      </div>
+                    </div>
 
-                                <div class="slider-group">
-                                    <div class="slider-header">
-                                        <span class="slider-label">色温度</span>
-                                        <span class="slider-val" id="val-temp">4000K</span>
-                                    </div>
-                                    <div class="slider-track-wrap">
-                                        <span class="slider-icon">🧡</span>
-                                        <input type="range" min="2700" max="6500" step="100" value="4000" class="light-slider temp-slider" id="slider-temp" data-command-name="temperature-set">
-                                        <span class="slider-icon">💙</span>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- チャンネル数字キー展開ボタン -->
+                    <button type="button" class="tv-btn primary-btn" id="btn-toggle-keypad">チャンネル 1〜9 ▾</button>
 
-                            <!-- RGB詳細カラーパレット（オーバーレイ） -->
-                            <div class="rgb-palette-overlay hidden" id="rgb-palette-overlay">
-                                <div class="palette-header">
-                                    <span>RGB カラー詳細選択</span>
-                                    <button type="button" class="close-palette" id="btn-close-palette">✕</button>
-                                </div>
-                                <div class="palette-body">
-                                    <input type="color" id="native-color-picker" value="#ffbe53">
-                                    <div class="custom-palette-grid">
-                                        <button type="button" class="palette-cell" style="background:#ff4d4f" data-color="#ff4d4f"></button>
-                                        <button type="button" class="palette-cell" style="background:#ff7a45" data-color="#ff7a45"></button>
-                                        <button type="button" class="palette-cell" style="background:#ffa940" data-color="#ffa940"></button>
-                                        <button type="button" class="palette-cell" style="background:#ffec3d" data-color="#ffec3d"></button>
-                                        <button type="button" class="palette-cell" style="background:#73d13d" data-color="#73d13d"></button>
-                                        <button type="button" class="palette-cell" style="background:#36cfc9" data-color="#36cfc9"></button>
-                                        <button type="button" class="palette-cell" style="background:#4096ff" data-color="#4096ff"></button>
-                                        <button type="button" class="palette-cell" style="background:#597ef7" data-color="#597ef7"></button>
-                                        <button type="button" class="palette-cell" style="background:#9254de" data-color="#9254de"></button>
-                                        <button type="button" class="palette-cell" style="background:#f759ab" data-color="#f759ab"></button>
-                                    </div>
-                                    <div class="palette-footer">
-                                        <div class="hex-input-wrap">
-                                            <span class="hex-label">HEX:</span>
-                                            <input type="text" id="hex-input" value="#FFBE53" maxlength="7">
-                                        </div>
-                                        <label class="native-picker-trigger" for="native-color-picker">
-                                            ホイール 🎨
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- 番組表・録画系ボタン -->
+                    <div class="rec-buttons">
+                      <button type="button" class="tv-btn sub" data-command-name="tv_epg">番組表</button>
+                      <button type="button" class="tv-btn sub" data-command-name="tv_rec-reserve">録画予約</button>
+                      <button type="button" class="tv-btn sub" data-command-name="tv_rec-list">録画一覧</button>
+                    </div>
+                  </div>
 
-                    {% elif remote.type == "aircon" %}
+                  <!-- 1〜9 チャンネル数字キーポップアップ -->
+                  <div class="channel-overlay hidden" id="channel-overlay">
+                    <div class="channel-overlay-header">
+                      <span>チャンネル直接選局</span>
+                      <button type="button" class="close-overlay" id="btn-close-keypad">✕</button>
+                    </div>
+                    <div class="channel-grid">
+                      <button type="button" class="num-btn" data-command-name="tv_ch-1">1</button>
+                      <button type="button" class="num-btn" data-command-name="tv_ch-2">2</button>
+                      <button type="button" class="num-btn" data-command-name="tv_ch-3">3</button>
+                      <button type="button" class="num-btn" data-command-name="tv_ch-4">4</button>
+                      <button type="button" class="num-btn" data-command-name="tv_ch-5">5</button>
+                      <button type="button" class="num-btn" data-command-name="tv_ch-6">6</button>
+                      <button type="button" class="num-btn" data-command-name="tv_ch-7">7</button>
+                      <button type="button" class="num-btn" data-command-name="tv_ch-8">8</button>
+                      <button type="button" class="num-btn" data-command-name="tv_ch-9">9</button>
+                    </div>
+                  </div>
+                </div>
+              {% elif remote.type == 'PC' %}
+                <!-- パソコンカード -->
+                <div class="card-header">
+                  <div class="device-title">
+                    <div class="device-icon pc">💻</div>
+                    <div>
+                      <div class="title">{{ remote.title }}</div>
+                      <div class="subtitle">{{ remote.sub_title }}</div>
+                    </div>
+                  </div>
+                  <!-- リアルタイム同期用ステータストグル -->
+                  <div class="power-switch pc-switch off" id="pc-power-switch">
+                    <span class="power-label" id="pc-status-label">OFF</span>
+                    <span class="switch-knob"></span>
+                  </div>
+                </div>
 
-                        <!-- エアコンカード -->
+                <div class="pc-content">
+                  <!-- 左側：PCビジュアル ＆ ステータスバッジ -->
+                  <div class="pc-visual-wrap">
+                    <div class="pc-halo off" id="pc-glow">
+                      <span class="pc-display-icon">🖥️</span>
+                    </div>
+                    <div class="pc-status-indicator">
+                      <span class="status-dot off" id="pc-status-dot"></span>
+                      <span class="status-text" id="pc-status-text">電源 OFF</span>
+                    </div>
+                  </div>
 
-                        <div class="card-header">
-                            <div class="device-title">
-                                <div class="device-icon snow">
-                                    ❄
-                                </div>
-                                <div>
-                                    <div class="title">
-                                        {{ remote.title }}
-                                    </div>
-                                    <div class="subtitle">
-                                        {{ remote.sub_title }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="power-switch off">
-                                <span class="power-label">OFF</span>
-                                <span class="switch-knob"></span>
-                            </div>
-                        </div><div class="aircon-content">
-                        <!-- 温度ダイヤル & プラス/マイナスボタン -->
-                        <div class="temperature-dial">
-                            <div class="dial-inner">
-                                <div class="temperature" id="temp-display" data-command-name="AirC_temp_display">24<span>°C</span></div>
-                                <div class="setting-label">設定温度</div>
-                            </div>
-                            <button type="button" class="temp-btn minus" id="btn-temp-minus" aria-label="温度を下げる" data-command-name="AirC_temp_down">−</button>
-                            <button type="button" class="temp-btn plus" id="btn-temp-plus" aria-label="温度を上げる" data-command-name="AirC_temp_up">+</button>
-                        </div>
+                  <!-- 右側：電源操作アクション -->
+                  <div class="pc-action-wrap">
+                    <div class="pc-btn-group">
+                      <button type="button" class="pc-btn boot-btn" id="btn-pc-boot">
+                        <span class="btn-icon">⚡</span>
+                        <span>起動 (WoL)</span>
+                      </button>
+                      <button type="button" class="pc-btn shutdown-btn" id="btn-pc-shutdown">
+                        <span class="btn-icon">⏻</span>
+                        <span>シャットダウン</span>
+                      </button>
+                    </div>
+                  </div>
 
-                        <!-- ステータス・操作エリア -->
-                        <div class="aircon-status">
-                            <!-- 運転モード切り替えボタン -->
-                            <button type="button" class="status-item clickable" id="btn-mode" data-command-name="AirC_mode">
-                                <div class="status-icon" id="mode-icon">❄</div>
-                                <div class="status-details">
-                                    <div class="status-value" id="mode-value">冷房</div>
-                                    <div class="status-label">運転モード</div>
-                                </div>
-                            </button>
-
-                            <!-- 風量切り替えボタン -->
-                            <button type="button" class="status-item clickable" id="btn-fan" data-command-name="AirC_fan">
-                                <div class="status-icon">💨</div>
-                                <div class="status-details">
-                                    <div class="status-value" id="fan-value">自動</div>
-                                    <div class="status-label">風量</div>
-                                </div>
-                            </button>
-
-                            <!-- 室温表示（固定表示） -->
-                            <div class="status-item">
-                                <div class="status-icon">🌡</div>
-                                <div class="status-details">
-                                    <div class="status-value">26°C</div>
-                                    <div class="status-label">室温</div>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-
-
-                    {% elif remote.type == "tv" %}
-
-                        <!-- テレビカード (フル機能IRリモコン) -->
-                        <div class="card-header">
-                            <div class="device-title">
-                                <div class="device-icon tv">📺</div>
-                                <div>
-                                    <div class="title">{{ remote.title }}</div>
-                                    <div class="subtitle">{{ remote.sub_title }}</div>
-                                </div>
-                            </div>
-                            <div class="power-switch off" id="tv-power">
-                                <span class="power-label" id="tv-power-label">ON</span>
-                                <span class="switch-knob"></span>
-                            </div>
-                        </div>
-
-                        <div class="tv-content">
-                            <!-- 左側：十字キー & ナビゲーション -->
-                            <div class="tv-nav-section">
-                                <div class="dpad">
-                                    <button type="button" class="dpad-btn up" data-command-name="tv_up" aria-label="上">▲</button>
-                                    <button type="button" class="dpad-btn left" data-command-name="tv_left" aria-label="左">◀</button>
-                                    <button type="button" class="dpad-btn ok" data-command-name="tv_enter">決定</button>
-                                    <button type="button" class="dpad-btn right" data-command-name="tv_right" aria-label="右">▶</button>
-                                    <button type="button" class="dpad-btn down" data-command-name="tv_down" aria-label="下">▼</button>
-                                </div>
-                                <div class="nav-sub-btns">
-                                    <button type="button" class="tv-btn small" data-command-name="tv_tv">TV</button>
-                                    <button type="button" class="tv-btn small" data-command-name="tv_back">戻る</button>
-                                </div>
-                            </div>
-
-                            <!-- 右側：基本操作 & 特殊メニュー -->
-                            <div class="tv-controls-section">
-                                <!-- 音量 & チャンネル操作 -->
-                                <div class="rocker-group">
-                                    <div class="rocker">
-                                        <button type="button" class="tv-btn step-btn" data-command-name="tv_vol-up">＋</button>
-                                        <span class="rocker-label">音量</span>
-                                        <button type="button" class="tv-btn step-btn" data-command-name="tv_vol-down">ー</button>
-                                    </div>
-                                    <div class="rocker">
-                                        <button type="button" class="tv-btn step-btn" data-command-name="tv_ch-up">▲</button>
-                                        <span class="rocker-label">選局</span>
-                                        <button type="button" class="tv-btn step-btn" data-command-name="tv_ch-down">▼</button>
-                                    </div>
-                                </div>
-
-                                <!-- チャンネル数字キー展開ボタン -->
-                                <button type="button" class="tv-btn primary-btn" id="btn-toggle-keypad">
-                                    チャンネル 1〜9 ▾
-                                </button>
-
-                                <!-- 番組表・録画系ボタン -->
-                                <div class="rec-buttons">
-                                    <button type="button" class="tv-btn sub" data-command-name="tv_epg">番組表</button>
-                                    <button type="button" class="tv-btn sub" data-command-name="tv_rec-reserve">録画予約</button>
-                                    <button type="button" class="tv-btn sub" data-command-name="tv_rec-list">録画一覧</button>
-                                </div>
-                            </div>
-
-                            <!-- 1〜9 チャンネル数字キーポップアップ -->
-                            <div class="channel-overlay hidden" id="channel-overlay">
-                                <div class="channel-overlay-header">
-                                    <span>チャンネル直接選局</span>
-                                    <button type="button" class="close-overlay" id="btn-close-keypad">✕</button>
-                                </div>
-                                <div class="channel-grid">
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-1">1</button>
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-2">2</button>
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-3">3</button>
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-4">4</button>
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-5">5</button>
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-6">6</button>
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-7">7</button>
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-8">8</button>
-                                    <button type="button" class="num-btn" data-command-name="tv_ch-9">9</button>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif remote.type == "PC" %}
-                        <!-- パソコンカード -->
-                        <div class="card-header">
-                            <div class="device-title">
-                                <div class="device-icon pc">💻</div>
-                                <div>
-                                    <div class="title">{{ remote.title }}</div>
-                                    <div class="subtitle">{{ remote.sub_title }}</div>
-                                </div>
-                            </div>
-                            <!-- リアルタイム同期用ステータストグル -->
-                            <div class="power-switch pc-switch off" id="pc-power-switch">
-                                <span class="power-label" id="pc-status-label">OFF</span>
-                                <span class="switch-knob"></span>
-                            </div>
-                        </div>
-
-                        <div class="pc-content">
-                            <!-- 左側：PCビジュアル ＆ ステータスバッジ -->
-                            <div class="pc-visual-wrap">
-                                <div class="pc-halo off" id="pc-glow">
-                                    <span class="pc-display-icon">🖥️</span>
-                                </div>
-                                <div class="pc-status-indicator">
-                                    <span class="status-dot off" id="pc-status-dot"></span>
-                                    <span class="status-text" id="pc-status-text">電源 OFF</span>
-                                </div>
-                            </div>
-
-                            <!-- 右側：電源操作アクション -->
-                            <div class="pc-action-wrap">
-                                <div class="pc-btn-group">
-                                    <button type="button" class="pc-btn boot-btn" id="btn-pc-boot">
-                                        <span class="btn-icon">⚡</span>
-                                        <span>起動 (WoL)</span>
-                                    </button>
-                                    <button type="button" class="pc-btn shutdown-btn" id="btn-pc-shutdown">
-                                        <span class="btn-icon">⏻</span>
-                                        <span>シャットダウン</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- シャットダウン確認モーダル -->
-                            <div class="pc-confirm-overlay hidden" id="pc-confirm-overlay">
-                                <div class="confirm-box">
-                                    <div class="confirm-icon">⚠️</div>
-                                    <div class="confirm-title">シャットダウン確認</div>
-                                    <p class="confirm-desc">パソコンの電源を完全に切りますか？<br>未保存の作業内容は失われます。</p>
-                                    <div class="confirm-buttons">
-                                        <button type="button" class="confirm-btn cancel" id="btn-cancel-shutdown">キャンセル</button>
-                                        <button type="button" class="confirm-btn exec" id="btn-exec-shutdown">シャットダウン</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% elif remote.type == "concent" %}
-                        <!-- プラグミニ / コンセントカード -->
-                        <div class="card-header">
-                            <div class="device-title">
-                                <div class="device-icon outlet">🔌</div>
-                                <div>
-                                    <div class="title">{{ remote.title }}</div>
-                                    <div class="subtitle">{{ remote.sub_title }}</div>
-                                </div>
-                            </div>
-                            <!-- 電源トグルスイッチ -->
-                            <!--<div class="power-switch off" id="plug-power-switch">
+                  <!-- シャットダウン確認モーダル -->
+                  <div class="pc-confirm-overlay hidden" id="pc-confirm-overlay">
+                    <div class="confirm-box">
+                      <div class="confirm-icon">⚠️</div>
+                      <div class="confirm-title">シャットダウン確認</div>
+                      <p class="confirm-desc">
+                        パソコンの電源を完全に切りますか？<br />未保存の作業内容は失われます。
+                      </p>
+                      <div class="confirm-buttons">
+                        <button type="button" class="confirm-btn cancel" id="btn-cancel-shutdown">キャンセル</button>
+                        <button type="button" class="confirm-btn exec" id="btn-exec-shutdown">シャットダウン</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% elif remote.type == 'concent' %}
+                <!-- プラグミニ / コンセントカード -->
+                <div class="card-header">
+                  <div class="device-title">
+                    <div class="device-icon outlet">🔌</div>
+                    <div>
+                      <div class="title">{{ remote.title }}</div>
+                      <div class="subtitle">{{ remote.sub_title }}</div>
+                    </div>
+                  </div>
+                  <!-- 電源トグルスイッチ -->
+                  <!-- <div class="power-switch off" id="plug-power-switch">
                                 <span class="power-label" id="plug-power-label">ON</span>
                                 <span class="switch-knob"></span>
-                            </div> -->
-                        </div> 
-
-                        <div class="plug-content">
-                            <!-- 左側：プラグアイコン ＆ リアルタイム電力 -->
-                            <div class="plug-status-section">
-                                <div class="plug-socket-icon active" id="plug-socket-visual">
-                                    <div class="socket-holes">
-                                        <span class="hole"></span>
-                                        <span class="hole"></span>
-                                    </div>
-                                </div>
-                                <div class="power-stat-group">
-                                    <div class="power-stat-label">現在の電力</div>
-                                    <div class="power-stat-val" id="current-watts">15<span>W</span></div>
-                                </div>
-                            </div>
-
-                            <!-- 右側：積算電力 ＆ 簡易リアルタイム波形 -->
-                            <div class="plug-graph-section">
-                                <div class="today-usage-row">
-                                    <span class="usage-label">今日の使用量</span>
-                                    <span class="usage-val" id="today-kwh">0.32 <span>kWh</span></span>
-                                </div>
-
-                                <!-- リアルタイム電力波形SVG -->
-                                <div class="plug-wave-container">
-                                    <svg class="plug-wave-svg" viewBox="0 0 120 40" preserveAspectRatio="none">
-                                        <defs>
-                                            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#008cff" stop-opacity="0.45" />
-                                                <stop offset="100%" stop-color="#008cff" stop-opacity="0.0" />
-                                            </linearGradient>
-                                        </defs>
-                                        <path class="wave-area" d="M 0 35 Q 20 15, 40 28 T 80 18 T 120 22 L 120 40 L 0 40 Z" />
-                                        <path class="wave-line" d="M 0 35 Q 20 15, 40 28 T 80 18 T 120 22" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    {% else %}
-
-                        <!-- 通常リモコン -->
-
-                        <div class="card-header">
-
-                            <div class="device-title">
-
-                                <div class="device-icon">
-                                    🎛
-                                </div>
-
-                                <div>
-                                    <div class="title">
-                                        {{ remote.title }}
-                                    </div>
-
-                                    <div class="subtitle">
-                                        {{ remote.sub_title }}
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                {% endif %}
-
+                            </div>  -->
                 </div>
 
-            {% empty %}
+                <div class="plug-content">
+                  <!-- 左側：プラグアイコン ＆ リアルタイム電力 -->
+                  <div class="plug-status-section">
+                    <div class="plug-socket-icon active" id="plug-socket-visual">
+                      <div class="socket-holes">
+                        <span class="hole"></span>
+                        <span class="hole"></span>
+                      </div>
+                    </div>
+                    <div class="power-stat-group">
+                      <div class="power-stat-label">現在の電力</div>
+                      <div class="power-stat-val" id="current-watts">
+                        15<span>W</span>
+                      </div>
+                    </div>
+                  </div>
 
-                <div class="no-devices">
-                    デバイスが登録されていません
+                  <!-- 右側：積算電力 ＆ 簡易リアルタイム波形 -->
+                  <div class="plug-graph-section">
+                    <div class="today-usage-row">
+                      <span class="usage-label">今日の使用量</span>
+                      <span class="usage-val" id="today-kwh">0.32 <span>kWh</span></span>
+                    </div>
+
+                    <!-- リアルタイム電力波形SVG -->
+                    <div class="plug-wave-container">
+                      <svg class="plug-wave-svg" viewBox="0 0 120 40" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#008cff" stop-opacity="0.45" />
+                            <stop offset="100%" stop-color="#008cff" stop-opacity="0.0" />
+                          </linearGradient>
+                        </defs>
+                        <path class="wave-area" d="M 0 35 Q 20 15, 40 28 T 80 18 T 120 22 L 120 40 L 0 40 Z" />
+                        <path class="wave-line" d="M 0 35 Q 20 15, 40 28 T 80 18 T 120 22" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
+              {% else %}
+                <!-- 通常リモコン -->
 
-            {% endfor %}
-            <!-- =====================
+                <div class="card-header">
+                  <div class="device-title">
+                    <div class="device-icon">🎛</div>
+
+                    <div>
+                      <div class="title">{{ remote.title }}</div>
+
+                      <div class="subtitle">{{ remote.sub_title }}</div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% empty %}
+            <div class="no-devices">デバイスが登録されていません</div>
+          {% endfor %}
+          <!--  =====================
                  電力
-            ====================== -->
+            ======================  -->
 
-            <div class="energy-card" style="grid-column: 1 / span 10;
+          <div class="energy-card" style="grid-column: 1 / span 10;
              grid-row: 11 / span 2;">
+            <div class="energy-main">
+              <div class="energy-title">⚡ 今日の電力使用量</div>
 
-                <div class="energy-main">
-
-                    <div class="energy-title">
-                        ⚡ 今日の電力使用量
-                    </div>
-
-                    <div class="energy-number">
-                        {{ today_power }}
-                        <span>kWh</span>
-                    </div>
-
-                </div>
-
-
-                <div class="energy-chart">
-
-                    <div class="bar b1"></div>
-                    <div class="bar b2"></div>
-                    <div class="bar b3"></div>
-                    <div class="bar b4"></div>
-                    <div class="bar b5"></div>
-                    <div class="bar b6"></div>
-                    <div class="bar b7"></div>
-                    <div class="bar b8"></div>
-                    <div class="bar b9"></div>
-                    <div class="bar b10"></div>
-                    <div class="bar b11"></div>
-                    <div class="bar b12"></div>
-
-                    <div class="chart-label">
-                        0時　4時　8時　12時　16時　20時　24時
-                    </div>
-
-                </div>
-
-
-                <div class="month-energy">
-
-                    <div class="month-title">
-                        今月の使用量
-                    </div>
-
-                    <div class="month-number">
-                        {{ month_power }}
-                        <span>kWh</span>
-                    </div>
-
-                    <div class="month-target">
-                        目標 {{ month_target }} kWh
-                    </div>
-
-                    <div class="target-bar">
-                        <div class="target-value"></div>
-                    </div>
-
-                </div>
-
+              <div class="energy-number">
+                {{ today_power }}
+                <span>kWh</span>
+              </div>
             </div>
 
+            <div class="energy-chart">
+              <div class="bar b1"></div>
+              <div class="bar b2"></div>
+              <div class="bar b3"></div>
+              <div class="bar b4"></div>
+              <div class="bar b5"></div>
+              <div class="bar b6"></div>
+              <div class="bar b7"></div>
+              <div class="bar b8"></div>
+              <div class="bar b9"></div>
+              <div class="bar b10"></div>
+              <div class="bar b11"></div>
+              <div class="bar b12"></div>
 
-            <!-- =====================
+              <div class="chart-label">0時 4時 8時 12時 16時 20時 24時</div>
+            </div>
+
+            <div class="month-energy">
+              <div class="month-title">今月の使用量</div>
+
+              <div class="month-number">
+                {{ month_power }}
+                <span>kWh</span>
+              </div>
+
+              <div class="month-target">目標 {{ month_target }} kWh</div>
+
+              <div class="target-bar">
+                <div class="target-value"></div>
+              </div>
+            </div>
+          </div>
+
+          <!--  =====================
                  シーンボタン
-            ====================== -->
+            ======================  -->
 
-            <div class="scene-buttons"style="
+          <div class="scene-buttons" style="
              grid-column: 11 / span 6;
              grid-row: 11 / span 2;    ">
+            <button class="scene-button away">
+              <div class="scene-icon">▣</div>
 
-                <button class="scene-button away">
+              <div>外出モード</div>
+            </button>
 
-                    <div class="scene-icon">
-                        ▣
-                    </div>
+            <button class="scene-button all-light">
+              <div class="scene-icon">💡</div>
 
-                    <div>
-                        外出モード
-                    </div>
+              <div>全消灯</div>
+            </button>
 
-                </button>
+            <button class="scene-button all-off">
+              <div class="scene-icon">◉</div>
 
-
-                <button class="scene-button all-light">
-
-                    <div class="scene-icon">
-                        💡
-                    </div>
-
-                    <div>
-                        全消灯
-                    </div>
-
-                </button>
-
-
-                <button class="scene-button all-off">
-
-                    <div class="scene-icon">
-                        ◉
-                    </div>
-
-                    <div>
-                        全機器OFF
-                    </div>
-
-                </button>
-
-            </div>
-
+              <div>全機器OFF</div>
+            </button>
+          </div>
         </section>
+      </main>
+    </div>
 
-    </main>
-
-</div>
-
-
-<script>
-// ============================================================
-// SmartHome JavaScript
-// ============================================================
-
-
-// ─────────────────────────────────────────
-// 0. 共通設定・変数
-// ─────────────────────────────────────────
-
-// モード・風量の変換マップ
-const MODE_MAP = {
-    '自動': 1,
-    '冷房': 2,
-    'ドライ': 3,
-    '除湿': 3,
-    '送風': 4,
-    '暖房': 5
-};
-
-const FAN_MAP = {
-    '自動': 1,
-    '微風': 2,
-    '弱': 2,
-    '中': 3,
-    '強': 4
-};
-
-// 操作直後のデバイスを一時的に同期から保護する
-// deviceId -> 有効期限タイムスタンプ
-const pendingDeviceProtections = new Map();
-
-function protectDeviceUI(deviceId, durationMs = 4500) {
-    if (!deviceId) return;
-
-    pendingDeviceProtections.set(
-        deviceId,
-        Date.now() + durationMs
-    );
-}
-
-function isDeviceProtected(deviceId) {
-    const expireTime = pendingDeviceProtections.get(deviceId);
-
-    if (!expireTime) return false;
-
-    if (Date.now() > expireTime) {
-        pendingDeviceProtections.delete(deviceId);
-        return false;
-    }
-
-    return true;
-}
-
-
-// ─────────────────────────────────────────
-// 0-1. 共通ロック管理
-// ─────────────────────────────────────────
-
-const LockManager = (() => {
-
-    const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
-    const MIN_LOCK_DISPLAY_MS = 600;
-
-    let lastActivityTime = Date.now();
-    let isLocked = false;
-    let lockPromise = null;
-
-    function getOverlay() {
-        return document.getElementById('lock-overlay');
-    }
-
-    // ロック表示・解除
-    function setLocked(locked) {
-        isLocked = locked;
-
-        const overlay = getOverlay();
-
-        if (overlay) {
-            overlay.style.display = locked ? 'flex' : 'none';
+    <script>
+      // ============================================================
+      // SmartHome JavaScript
+      // ============================================================
+      
+      // ─────────────────────────────────────────
+      // 0. 共通設定・変数
+      // ─────────────────────────────────────────
+      
+      // モード・風量の変換マップ
+      const MODE_MAP = {
+        自動: 1,
+        冷房: 2,
+        ドライ: 3,
+        除湿: 3,
+        送風: 4,
+        暖房: 5
+      }
+      
+      const FAN_MAP = {
+        自動: 1,
+        微風: 2,
+        弱: 2,
+        中: 3,
+        強: 4
+      }
+      
+      // 操作直後のデバイスを一時的に同期から保護する
+      // deviceId -> 有効期限タイムスタンプ
+      const pendingDeviceProtections = new Map()
+      
+      function protectDeviceUI(deviceId, durationMs = 4500) {
+        if (!deviceId) return
+      
+        pendingDeviceProtections.set(deviceId, Date.now() + durationMs)
+      }
+      
+      function isDeviceProtected(deviceId) {
+        const expireTime = pendingDeviceProtections.get(deviceId)
+      
+        if (!expireTime) return false
+      
+        if (Date.now() > expireTime) {
+          pendingDeviceProtections.delete(deviceId)
+          return false
         }
-
-        console.log(
-            `[LockManager] ${locked ? 'LOCK' : 'UNLOCK'}`
-        );
-
-        window.updateFullyDebug?.(
-            locked ? '画面ロック中' : '画面ロック解除'
-        );
-    }
-
-    // ロックだけを行う。家電同期は実行しない。
-    async function lockOnly(reason = '不明') {
-
-        // 既にロック処理中なら同じ処理を待つ
-        if (lockPromise) {
-            console.log('[LockManager] ロック処理中のため重複実行をスキップ');
-            return lockPromise;
-        }
-
-        lockPromise = (async () => {
-
-            console.log(`[LockManager] ロック開始: ${reason}`);
-
-            setLocked(true);
-
-            try {
-                await new Promise(resolve => {
-                    setTimeout(resolve, MIN_LOCK_DISPLAY_MS);
-                });
-
-            } finally {
-
-                setLocked(false);
-
-                // ロック解除時に放置時間をリセット
-                lastActivityTime = Date.now();
-
-                console.log('[LockManager] ロック処理完了');
-            }
-
-        })();
-
-        try {
-            await lockPromise;
-        } finally {
-            lockPromise = null;
-        }
-    }
-
-    // 最後の操作から5分経過しているか確認
-    function isIdle() {
-        return Date.now() - lastActivityTime >= IDLE_TIMEOUT_MS;
-    }
-
-    // 操作時刻を更新
-    function markActivity() {
-        lastActivityTime = Date.now();
-    }
-
-    // ロック中かどうか
-    function isCurrentlyLocked() {
-        return isLocked;
-    }
-
-    // 放置時間を取得
-    function getIdleTime() {
-        return Date.now() - lastActivityTime;
-    }
-
-    // 画面点灯・動体検知時の処理
-    async function handleWakeup(reason = 'Fully Kiosk') {
-
-        const elapsed = getIdleTime();
-
-        console.log(
-            `[LockManager] ${reason}: 放置時間 ${Math.floor(elapsed / 1000)}秒`
-        );
-
-        if (elapsed >= IDLE_TIMEOUT_MS) {
-
-            console.log('[LockManager] 5分経過。ロック処理を開始');
-
-            await lockOnly(reason);
-
-        } else {
-
-            console.log('[LockManager] 5分未満のためスキップ');
-
-        }
-    }
-
-    return {
-        lockOnly,
-        handleWakeup,
-        markActivity,
-        isIdle,
-        isCurrentlyLocked,
-        getIdleTime
-    };
-
-})();
-
-
-// 既存コード・Fully Kioskから呼び出せるように公開
-window.syncWithLock = LockManager.lockOnly;
-window.handleProximityOrWakeup = LockManager.handleWakeup;
-
-
-// ─────────────────────────────────────────
-// 0-2. Fully Kiosk デバッグ表示
-// ─────────────────────────────────────────
-
-window.updateFullyDebug = function(message) {
-
-    const debug = document.getElementById('fully-debug');
-
-    if (!debug) {
-        console.error('[Fully Debug] 表示欄が見つかりません');
-        return;
-    }
-
-    const time = new Date().toLocaleTimeString('ja-JP');
-
-    debug.textContent =
-        `Fully Kiosk Debug\n` +
-        `時刻: ${time}\n` +
-        `${message}`;
-};
-
-
-// ─────────────────────────────────────────
-// 0-3. 動体検知アイコン
-// ─────────────────────────────────────────
-
-const motionIndicator = document.getElementById('motion-indicator');
-
-function showMotionDetected() {
-
-    motionIndicator?.classList.add('active');
-
-    clearTimeout(window.motionIndicatorTimer);
-
-    window.motionIndicatorTimer = setTimeout(() => {
-
-        motionIndicator?.classList.remove('active');
-
-    }, 5000);
-}
-
-window.showMotionDetected = showMotionDetected;
-
-
-// ─────────────────────────────────────────
-// 1. 時刻 & 天気更新（江東区）
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    const clockEl = document.getElementById('clock');
-    const dateEl = document.getElementById('date-display');
-
-    const days = ['日', '月', '火', '水', '木', '金', '土'];
-
-    function updateClock() {
-
-        const now = new Date();
-
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-
-        if (clockEl) {
-            clockEl.textContent = `${hours}:${minutes}`;
-        }
-
-        if (dateEl) {
-
-            const month = now.getMonth() + 1;
-            const date = now.getDate();
-            const dayName = days[now.getDay()];
-
-            dateEl.textContent =
-                `${month}月${date}日（${dayName}）`;
-        }
-    }
-
-    updateClock();
-    setInterval(updateClock, 1000);
-
-
-    // 江東区の座標
-    const LAT = 35.6728;
-    const LON = 139.8174;
-
-    const tempEl = document.getElementById('weather-temp');
-    const iconEl = document.getElementById('weather-icon');
-
-    function getWeatherIcon(code) {
-
-        if (code === 0) return '☀️';
-        if ([1, 2].includes(code)) return '🌤';
-        if (code === 3) return '☁️';
-        if ([45, 48].includes(code)) return '🌫';
-
-        if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
-            return '🌧';
-        }
-
-        if ([71, 73, 75, 85, 86].includes(code)) {
-            return '❄️';
-        }
-
-        if ([95, 96, 99].includes(code)) {
-            return '⚡';
-        }
-
-        return '☁️';
-    }
-
-    async function fetchKotoWeather() {
-
-        const url =
-            `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&timezone=Asia%2FTokyo`;
-
-        try {
-
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.current) {
-
-                const temp = Math.round(
-                    data.current.temperature_2m
-                );
-
-                if (tempEl) {
-                    tempEl.textContent = `${temp}°C`;
-                }
-
-                const code = data.current.weather_code;
-
-                if (iconEl) {
-                    iconEl.textContent = getWeatherIcon(code);
-                }
-            }
-
-        } catch (error) {
-
-            console.error('江東区の天気取得エラー:', error);
-
-            if (tempEl) {
-                tempEl.textContent = 'ERR°C';
-            }
-        }
-    }
-
-    fetchKotoWeather();
-
-    setInterval(fetchKotoWeather, 15 * 60 * 1000);
-
-});
-
-
-// ─────────────────────────────────────────
-// 2. エアコン個別操作
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    let currentTemp = 24;
-    let modeIndex = 0;
-    let fanIndex = 0;
-
-    const modes = [
-        { label: '冷房', icon: '❄' },
-        { label: '暖房', icon: '☀️' },
-        { label: '除湿', icon: '💧' },
-        { label: '送風', icon: '🍃' },
-        { label: '自動', icon: '🌡️' }
-    ];
-
-    const fanSpeeds = ['自動', '弱', '中', '強'];
-
-    const tempDisplay = document.getElementById('temp-display');
-
-    const btnTempMinus = document.getElementById('btn-temp-minus');
-    const btnTempPlus = document.getElementById('btn-temp-plus');
-
-    const btnMode = document.getElementById('btn-mode');
-    const modeValue = document.getElementById('mode-value');
-    const modeIcon = document.getElementById('mode-icon');
-
-    const btnFan = document.getElementById('btn-fan');
-    const fanValue = document.getElementById('fan-value');
-
-
-    btnTempMinus?.addEventListener('click', () => {
-
-        if (currentTemp > 16) {
-
-            currentTemp--;
-
-            if (tempDisplay) {
-                tempDisplay.innerHTML =
-                    `${currentTemp}<span>°C</span>`;
-            }
-        }
-    });
-
-
-    btnTempPlus?.addEventListener('click', () => {
-
-        if (currentTemp < 30) {
-
-            currentTemp++;
-
-            if (tempDisplay) {
-                tempDisplay.innerHTML =
-                    `${currentTemp}<span>°C</span>`;
-            }
-        }
-    });
-
-
-    btnMode?.addEventListener('click', () => {
-
-        modeIndex = (modeIndex + 1) % modes.length;
-
-        if (modeValue) {
-            modeValue.textContent = modes[modeIndex].label;
-        }
-
-        if (modeIcon) {
-            modeIcon.textContent = modes[modeIndex].icon;
-        }
-    });
-
-
-    btnFan?.addEventListener('click', () => {
-
-        fanIndex = (fanIndex + 1) % fanSpeeds.length;
-
-        if (fanValue) {
-            fanValue.textContent = fanSpeeds[fanIndex];
-        }
-    });
-
-});
-
-
-// ─────────────────────────────────────────
-// 3. テレビ個別操作
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    const keypadToggleBtn =
-        document.getElementById('btn-toggle-keypad');
-
-    const keypadCloseBtn =
-        document.getElementById('btn-close-keypad');
-
-    const channelOverlay =
-        document.getElementById('channel-overlay');
-
-
-    keypadToggleBtn?.addEventListener('click', () => {
-        channelOverlay?.classList.remove('hidden');
-    });
-
-
-    keypadCloseBtn?.addEventListener('click', () => {
-        channelOverlay?.classList.add('hidden');
-    });
-
-
-    document.querySelectorAll('[data-key]').forEach(btn => {
-
-        btn.addEventListener('click', () => {
-
-            const key = btn.getAttribute('data-key');
-
-            if (typeof handleCommand === 'function') {
-                handleCommand(key);
-            }
-
-            if (key && key.startsWith('ch-')) {
-                channelOverlay?.classList.add('hidden');
-            }
-        });
-    });
-
-});
-
-
-// ─────────────────────────────────────────
-// 4. ライト詳細操作
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    const DEFAULT_CONFIG = {
-        brightness: 80,
-        temp: 4000,
-        color: '#FFBE53'
-    };
-
-    const sliderBrightness =
-        document.getElementById('slider-brightness');
-
-    const valBrightness =
-        document.getElementById('val-brightness');
-
-    const sliderTemp =
-        document.getElementById('slider-temp');
-
-    const valTemp =
-        document.getElementById('val-temp');
-
-    const bulbGlow =
-        document.getElementById('bulb-glow');
-
-    const currentColorDot =
-        document.getElementById('current-color-dot');
-
-    const btnReset =
-        document.getElementById('btn-light-reset');
-
-    const paletteOverlay =
-        document.getElementById('rgb-palette-overlay');
-
-    const btnOpenPalette =
-        document.getElementById('btn-open-palette');
-
-    const btnClosePalette =
-        document.getElementById('btn-close-palette');
-
-    const nativePicker =
-        document.getElementById('native-color-picker');
-
-    const hexInput =
-        document.getElementById('hex-input');
-
-
-    btnOpenPalette?.addEventListener('click', () => {
-        paletteOverlay?.classList.remove('hidden');
-    });
-
-
-    btnClosePalette?.addEventListener('click', () => {
-        paletteOverlay?.classList.add('hidden');
-    });
-
-
-    sliderBrightness?.addEventListener('input', (e) => {
-
-        const val = e.target.value;
-
-        if (valBrightness) {
-            valBrightness.textContent = `${val}%`;
-        }
-
-        if (bulbGlow) {
-            bulbGlow.style.opacity = Math.max(val / 100, 0.2);
-        }
-    });
-
-
-    sliderTemp?.addEventListener('input', (e) => {
-
-        if (valTemp) {
-            valTemp.textContent = `${e.target.value}K`;
-        }
-    });
-
-
-    document.querySelectorAll('.preset-dot, .palette-cell')
-        .forEach(btn => {
-
-            btn.addEventListener('click', () => {
-
-                const color = btn.getAttribute('data-color');
-
-                if (color) {
-                    applyColor(color);
-                }
-            });
-        });
-
-
-    nativePicker?.addEventListener('input', (e) => {
-        applyColor(e.target.value);
-    });
-
-
-    hexInput?.addEventListener('change', (e) => {
-
-        let val = e.target.value.trim();
-
-        if (!val.startsWith('#')) {
-            val = '#' + val;
-        }
-
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-            applyColor(val);
-        }
-    });
-
-
-    btnReset?.addEventListener('click', () => {
-
-        if (sliderBrightness) {
-            sliderBrightness.value = DEFAULT_CONFIG.brightness;
-        }
-
-        if (valBrightness) {
-            valBrightness.textContent =
-                `${DEFAULT_CONFIG.brightness}%`;
-        }
-
-        if (bulbGlow) {
-            bulbGlow.style.opacity =
-                DEFAULT_CONFIG.brightness / 100;
-        }
-
-        if (sliderTemp) {
-            sliderTemp.value = DEFAULT_CONFIG.temp;
-        }
-
-        if (valTemp) {
-            valTemp.textContent = `${DEFAULT_CONFIG.temp}K`;
-        }
-
-        applyColor(DEFAULT_CONFIG.color);
-    });
-
-
-    function applyColor(color) {
-
-        if (currentColorDot) {
-            currentColorDot.style.backgroundColor = color;
-        }
-
-        if (nativePicker) {
-            nativePicker.value = color;
-        }
-
-        if (hexInput) {
-            hexInput.value = color.toUpperCase();
-        }
-
-        if (bulbGlow) {
-
-            bulbGlow.style.boxShadow = `0 0 20px ${color}`;
-
-            bulbGlow.style.background =
-                `radial-gradient(circle, ${color}55 0%, rgba(17, 29, 45, 0) 70%)`;
-        }
-    }
-
-});
-
-
-// ─────────────────────────────────────────
-// 5. パソコン操作
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    let isPcOn = false;
-
-    const glow = document.getElementById('pc-glow');
-    const dot = document.getElementById('pc-status-dot');
-
-    const statusText =
-        document.getElementById('pc-status-text');
-
-    const statusLabel =
-        document.getElementById('pc-status-label');
-
-    const switchElement =
-        document.getElementById('pc-power-switch');
-
-    const btnBoot =
-        document.getElementById('btn-pc-boot');
-
-    const btnShutdown =
-        document.getElementById('btn-pc-shutdown');
-
-    const overlay =
-        document.getElementById('pc-confirm-overlay');
-
-    const btnCancel =
-        document.getElementById('btn-cancel-shutdown');
-
-    const btnExec =
-        document.getElementById('btn-exec-shutdown');
-
-
-    window.updatePcState = (online) => {
-
-        isPcOn = online;
-
-        if (online) {
-
-            if (glow) glow.className = 'pc-halo on';
-            if (dot) dot.className = 'status-dot on';
-
-            if (statusText) {
-                statusText.textContent = '起動中 (ONLINE)';
-            }
-
-            if (statusLabel) {
-                statusLabel.textContent = 'ON';
-            }
-
-            switchElement?.classList.add('active');
-
-        } else {
-
-            if (glow) glow.className = 'pc-halo off';
-            if (dot) dot.className = 'status-dot off';
-
-            if (statusText) {
-                statusText.textContent = '電源 OFF';
-            }
-
-            if (statusLabel) {
-                statusLabel.textContent = 'OFF';
-            }
-
-            switchElement?.classList.remove('active');
-        }
-    };
-
-
-    btnBoot?.addEventListener('click', () => {
-        console.log('Sending WoL (Wake on LAN) Magic Packet...');
-    });
-
-
-    btnShutdown?.addEventListener('click', () => {
-        overlay?.classList.remove('hidden');
-    });
-
-
-    switchElement?.addEventListener('click', () => {
-
-        if (isPcOn) {
-            overlay?.classList.remove('hidden');
-        } else {
-            console.log('Sending WoL via switch...');
-        }
-    });
-
-
-    btnCancel?.addEventListener('click', () => {
-        overlay?.classList.add('hidden');
-    });
-
-
-    btnExec?.addEventListener('click', () => {
-
-        overlay?.classList.add('hidden');
-
-        console.log('Sending Shutdown Command (RPC / SSH / Agent)...');
-    });
-
-});
-
-
-// ─────────────────────────────────────────
-// 6. ON/OFF トグルスイッチ
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    document.addEventListener('click', (e) => {
-
-        const sw = e.target.closest('.power-switch');
-
-        if (!sw) return;
-
-        const label = sw.querySelector('.power-label');
-
-        const isCurrentlyOn = sw.classList.contains('on');
-
-        if (isCurrentlyOn) {
-
-            sw.classList.remove('on');
-            sw.classList.add('off');
-
-            sw.dataset.commandName = "OFF";
-
-            if (label) {
-                label.textContent = 'OFF';
-            }
-
-        } else {
-
-            sw.classList.remove('off');
-            sw.classList.add('on');
-
-            sw.dataset.commandName = "ON";
-
-            if (label) {
-                label.textContent = 'ON';
-            }
-        }
-    });
-
-});
-
-
-// ─────────────────────────────────────────
-// 7. 送信ハンドル & クリック監視
-//    楽観的更新 + 保護ガード
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    window.sendDeviceAction = async function(
-        deviceId,
-        commandName,
-        parameter = null
-    ) {
-
-        if (!deviceId || !commandName) {
-
-            console.warn(
-                'パラメータが不足しています:',
-                { deviceId, commandName }
-            );
-
+      
+        return true
+      }
+      window.showMotionDetected = function() {
+        const indicator = document.getElementById('motion-indicator');
+
+        if (!indicator) {
+            console.error('motion-indicator が見つかりません');
             return;
         }
 
-        const csrfToken =
-            document.querySelector('[name=csrfmiddlewaretoken]')?.value
-            || document.cookie.split('; ')
-                .find(row => row.startsWith('csrftoken='))
-                ?.split('=')[1];
+        indicator.classList.remove('active');
 
+        // アニメーションを再スタート
+        void indicator.offsetWidth;
 
-        const formData = new FormData();
+        indicator.classList.add('active');
 
-        formData.append('device_id', deviceId);
-        formData.append('command_name', commandName);
+        console.log('動体検知アイコン:', indicator.className);
 
-        if (parameter) {
-            formData.append('parameter', parameter);
-        }
+        clearTimeout(window.motionIndicatorTimer);
 
-
-        try {
-
-            const response = await fetch('', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            console.log('送信結果:', data);
-
-            if (data.status !== 'success') {
-                console.error('送信エラー:', data.message);
-
-            } else if (
-                data.result &&
-                data.result.message === 'unknown command'
-            ) {
-                console.error(
-                    '送信エラー:',
-                    data.result.message
-                );
-            }
-
-        } catch (error) {
-
-            console.error('通信エラー:', error);
-        }
+        window.motionIndicatorTimer = setTimeout(() => {
+            indicator.classList.remove('active');
+        }, 5000);
     };
-
-
-    // 全ボタンクリックの一括ハンドラ
-    document.addEventListener('click', async (e) => {
-
-        const btn = e.target.closest('[data-command-name]');
-
-        if (!btn) return;
-
-        const card = btn.closest('[data-device-id]');
-
-        const deviceId =
-            card ? card.dataset.deviceId : null;
-
-        let commandName = btn.dataset.commandName;
-        let parameter = null;
-
-
-        // 操作したデバイスを4.5秒間同期から保護
-        if (deviceId) {
-            protectDeviceUI(deviceId, 4500);
+      
+      // ─────────────────────────────────────────
+      // 0-1. 共通ロック管理
+      // ─────────────────────────────────────────
+      
+      const LockManager = (() => {
+        const IDLE_TIMEOUT_MS = 5 * 60 * 1000
+        const MIN_LOCK_DISPLAY_MS = 600
+      
+        let lastActivityTime = Date.now()
+        let isLocked = false
+        let lockPromise = null
+      
+        function getOverlay() {
+          return document.getElementById('lock-overlay')
         }
-
-
-        if (commandName === "bright-set") {
-
-            parameter =
-                btn.closest("#slider-brightness")?.value;
-
-        } else if (commandName === "temperature-set") {
-
-            parameter =
-                btn.closest("#slider-temp")?.value;
-
-        } else if (
-            [
-                "AirC_temp_display",
-                "AirC_temp_down",
-                "AirC_temp_up",
-                "AirC_fan",
-                "AirC_mode"
-            ].includes(commandName)
-            || card?.dataset.deviceType === "aircon"
-        ) {
-
-            const powerSwitch =
-                card ? card.querySelector('.power-switch') : null;
-
-            const status =
-                powerSwitch?.classList.contains('on')
-                    ? 'on'
-                    : 'off';
-
-            const tempElem =
-                card ? card.querySelector('.temperature') : null;
-
-            const temp = tempElem
-                ? parseInt(
-                    tempElem.textContent.replace(/[^\d]/g, ''),
-                    10
-                )
-                : null;
-
-            const modeText =
-                card ? card.querySelector('.status-value')?.textContent : null;
-
-            const modeNumber = MODE_MAP[modeText] ?? 2;
-
-            const fanText =
-                card ? card.querySelector('.fan_value')?.textContent.trim() : null;
-
-            const fanNumber = FAN_MAP[fanText] ?? 1;
-
-            commandName = "AirC_set_all";
-
-            parameter =
-                `${temp},${modeNumber},${fanNumber},${status}`;
+      
+        // ロック表示・解除
+        function setLocked(locked) {
+          isLocked = locked
+      
+          const overlay = getOverlay()
+      
+          if (overlay) {
+            overlay.style.display = locked ? 'flex' : 'none'
+          }
+      
+          console.log(`[LockManager] ${locked ? 'LOCK' : 'UNLOCK'}`)
+      
+          window.updateFullyDebug?.(locked ? '画面ロック中' : '画面ロック解除')
         }
-
-
-        if (deviceId && commandName) {
-
+      
+        // ロックだけを行う。家電同期は実行しない。
+        async function lockOnly(reason = '不明') {
+          // 既にロック処理中なら同じ処理を待つ
+          if (lockPromise) {
+            console.log('[LockManager] ロック処理中のため重複実行をスキップ')
+            return lockPromise
+          }
+      
+          lockPromise = (async () => {
+            console.log(`[LockManager] ロック開始: ${reason}`)
+      
+            setLocked(true)
+      
+            try {
+              await new Promise((resolve) => {
+                setTimeout(resolve, MIN_LOCK_DISPLAY_MS)
+              })
+            } finally {
+              setLocked(false)
+      
+              // ロック解除時に放置時間をリセット
+              lastActivityTime = Date.now()
+      
+              console.log('[LockManager] ロック処理完了')
+            }
+          })()
+      
+          try {
+            await lockPromise
+          } finally {
+            lockPromise = null
+          }
+        }
+      
+        // 最後の操作から5分経過しているか確認
+        function isIdle() {
+          return Date.now() - lastActivityTime >= IDLE_TIMEOUT_MS
+        }
+      
+        // 操作時刻を更新
+        function markActivity() {
+          lastActivityTime = Date.now()
+        }
+      
+        // ロック中かどうか
+        function isCurrentlyLocked() {
+          return isLocked
+        }
+      
+        // 放置時間を取得
+        function getIdleTime() {
+          return Date.now() - lastActivityTime
+        }
+      
+        // 画面点灯・動体検知時の処理
+        async function handleWakeup(reason = 'Fully Kiosk') {
+          const elapsed = getIdleTime()
+      
+          console.log(`[LockManager] ${reason}: 放置時間 ${Math.floor(elapsed / 1000)}秒`)
+      
+          if (elapsed >= IDLE_TIMEOUT_MS) {
+            console.log('[LockManager] 5分経過。ロック処理を開始')
+      
+            await lockOnly(reason)
+          } else {
+            console.log('[LockManager] 5分未満のためスキップ')
+          }
+        }
+      
+        return {
+          lockOnly,
+          handleWakeup,
+          markActivity,
+          isIdle,
+          isCurrentlyLocked,
+          getIdleTime
+        }
+      })()
+      
+      // 既存コード・Fully Kioskから呼び出せるように公開
+      window.syncWithLock = LockManager.lockOnly
+      window.handleProximityOrWakeup = LockManager.handleWakeup
+      
+      // ─────────────────────────────────────────
+      // 0-2. Fully Kiosk デバッグ表示
+      // ─────────────────────────────────────────
+      
+      window.updateFullyDebug = function (message) {
+        const debug = document.getElementById('fully-debug')
+      
+        if (!debug) {
+          console.error('[Fully Debug] 表示欄が見つかりません')
+          return
+        }
+      
+        const time = new Date().toLocaleTimeString('ja-JP')
+      
+        debug.textContent = `Fully Kiosk Debug\n` + `時刻: ${time}\n` + `${message}`
+      }
+      
+      // ─────────────────────────────────────────
+      // 0-3. 動体検知アイコン
+      // ─────────────────────────────────────────
+      
+      const motionIndicator = document.getElementById('motion-indicator')
+      
+      function showMotionDetected() {
+        motionIndicator?.classList.add('active')
+      
+        clearTimeout(window.motionIndicatorTimer)
+      
+        window.motionIndicatorTimer = setTimeout(() => {
+          motionIndicator?.classList.remove('active')
+        }, 5000)
+      }
+      
+      window.showMotionDetected = showMotionDetected
+      
+      // ─────────────────────────────────────────
+      // 1. 時刻 & 天気更新（江東区）
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        const clockEl = document.getElementById('clock')
+        const dateEl = document.getElementById('date-display')
+      
+        const days = ['日', '月', '火', '水', '木', '金', '土']
+      
+        function updateClock() {
+          const now = new Date()
+      
+          const hours = String(now.getHours()).padStart(2, '0')
+          const minutes = String(now.getMinutes()).padStart(2, '0')
+      
+          if (clockEl) {
+            clockEl.textContent = `${hours}:${minutes}`
+          }
+      
+          if (dateEl) {
+            const month = now.getMonth() + 1
+            const date = now.getDate()
+            const dayName = days[now.getDay()]
+      
+            dateEl.textContent = `${month}月${date}日（${dayName}）`
+          }
+        }
+      
+        updateClock()
+        setInterval(updateClock, 1000)
+      
+        // 江東区の座標
+        const LAT = 35.6728
+        const LON = 139.8174
+      
+        const tempEl = document.getElementById('weather-temp')
+        const iconEl = document.getElementById('weather-icon')
+      
+        function getWeatherIcon(code) {
+          if (code === 0) return '☀️'
+          if ([1, 2].includes(code)) return '🌤'
+          if (code === 3) return '☁️'
+          if ([45, 48].includes(code)) return '🌫'
+      
+          if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) {
+            return '🌧'
+          }
+      
+          if ([71, 73, 75, 85, 86].includes(code)) {
+            return '❄️'
+          }
+      
+          if ([95, 96, 99].includes(code)) {
+            return '⚡'
+          }
+      
+          return '☁️'
+        }
+      
+        async function fetchKotoWeather() {
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&timezone=Asia%2FTokyo`
+      
+          try {
+            const response = await fetch(url)
+      
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`)
+            }
+      
+            const data = await response.json()
+      
+            if (data.current) {
+              const temp = Math.round(data.current.temperature_2m)
+      
+              if (tempEl) {
+                tempEl.textContent = `${temp}°C`
+              }
+      
+              const code = data.current.weather_code
+      
+              if (iconEl) {
+                iconEl.textContent = getWeatherIcon(code)
+              }
+            }
+          } catch (error) {
+            console.error('江東区の天気取得エラー:', error)
+      
+            if (tempEl) {
+              tempEl.textContent = 'ERR°C'
+            }
+          }
+        }
+      
+        fetchKotoWeather()
+      
+        setInterval(fetchKotoWeather, 15 * 60 * 1000)
+      })
+      
+      // ─────────────────────────────────────────
+      // 2. エアコン個別操作
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        let currentTemp = 24
+        let modeIndex = 0
+        let fanIndex = 0
+      
+        const modes = [
+          { label: '冷房', icon: '❄' },
+          { label: '暖房', icon: '☀️' },
+          { label: '除湿', icon: '💧' },
+          { label: '送風', icon: '🍃' },
+          { label: '自動', icon: '🌡️' }
+        ]
+      
+        const fanSpeeds = ['自動', '弱', '中', '強']
+      
+        const tempDisplay = document.getElementById('temp-display')
+      
+        const btnTempMinus = document.getElementById('btn-temp-minus')
+        const btnTempPlus = document.getElementById('btn-temp-plus')
+      
+        const btnMode = document.getElementById('btn-mode')
+        const modeValue = document.getElementById('mode-value')
+        const modeIcon = document.getElementById('mode-icon')
+      
+        const btnFan = document.getElementById('btn-fan')
+        const fanValue = document.getElementById('fan-value')
+      
+        btnTempMinus?.addEventListener('click', () => {
+          if (currentTemp > 16) {
+            currentTemp--
+      
+            if (tempDisplay) {
+              tempDisplay.innerHTML = `${currentTemp}<span>°C</span>`
+            }
+          }
+        })
+      
+        btnTempPlus?.addEventListener('click', () => {
+          if (currentTemp < 30) {
+            currentTemp++
+      
+            if (tempDisplay) {
+              tempDisplay.innerHTML = `${currentTemp}<span>°C</span>`
+            }
+          }
+        })
+      
+        btnMode?.addEventListener('click', () => {
+          modeIndex = (modeIndex + 1) % modes.length
+      
+          if (modeValue) {
+            modeValue.textContent = modes[modeIndex].label
+          }
+      
+          if (modeIcon) {
+            modeIcon.textContent = modes[modeIndex].icon
+          }
+        })
+      
+        btnFan?.addEventListener('click', () => {
+          fanIndex = (fanIndex + 1) % fanSpeeds.length
+      
+          if (fanValue) {
+            fanValue.textContent = fanSpeeds[fanIndex]
+          }
+        })
+      })
+      
+      // ─────────────────────────────────────────
+      // 3. テレビ個別操作
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        const keypadToggleBtn = document.getElementById('btn-toggle-keypad')
+      
+        const keypadCloseBtn = document.getElementById('btn-close-keypad')
+      
+        const channelOverlay = document.getElementById('channel-overlay')
+      
+        keypadToggleBtn?.addEventListener('click', () => {
+          channelOverlay?.classList.remove('hidden')
+        })
+      
+        keypadCloseBtn?.addEventListener('click', () => {
+          channelOverlay?.classList.add('hidden')
+        })
+      
+        document.querySelectorAll('[data-key]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-key')
+      
+            if (typeof handleCommand === 'function') {
+              handleCommand(key)
+            }
+      
+            if (key && key.startsWith('ch-')) {
+              channelOverlay?.classList.add('hidden')
+            }
+          })
+        })
+      })
+      
+      // ─────────────────────────────────────────
+      // 4. ライト詳細操作
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        const DEFAULT_CONFIG = {
+          brightness: 80,
+          temp: 4000,
+          color: '#FFBE53'
+        }
+      
+        const sliderBrightness = document.getElementById('slider-brightness')
+      
+        const valBrightness = document.getElementById('val-brightness')
+      
+        const sliderTemp = document.getElementById('slider-temp')
+      
+        const valTemp = document.getElementById('val-temp')
+      
+        const bulbGlow = document.getElementById('bulb-glow')
+      
+        const currentColorDot = document.getElementById('current-color-dot')
+      
+        const btnReset = document.getElementById('btn-light-reset')
+      
+        const paletteOverlay = document.getElementById('rgb-palette-overlay')
+      
+        const btnOpenPalette = document.getElementById('btn-open-palette')
+      
+        const btnClosePalette = document.getElementById('btn-close-palette')
+      
+        const nativePicker = document.getElementById('native-color-picker')
+      
+        const hexInput = document.getElementById('hex-input')
+      
+        btnOpenPalette?.addEventListener('click', () => {
+          paletteOverlay?.classList.remove('hidden')
+        })
+      
+        btnClosePalette?.addEventListener('click', () => {
+          paletteOverlay?.classList.add('hidden')
+        })
+      
+        sliderBrightness?.addEventListener('input', (e) => {
+          const val = e.target.value
+      
+          if (valBrightness) {
+            valBrightness.textContent = `${val}%`
+          }
+      
+          if (bulbGlow) {
+            bulbGlow.style.opacity = Math.max(val / 100, 0.2)
+          }
+        })
+      
+        sliderTemp?.addEventListener('input', (e) => {
+          if (valTemp) {
+            valTemp.textContent = `${e.target.value}K`
+          }
+        })
+      
+        document.querySelectorAll('.preset-dot, .palette-cell').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const color = btn.getAttribute('data-color')
+      
+            if (color) {
+              applyColor(color)
+            }
+          })
+        })
+      
+        nativePicker?.addEventListener('input', (e) => {
+          applyColor(e.target.value)
+        })
+      
+        hexInput?.addEventListener('change', (e) => {
+          let val = e.target.value.trim()
+      
+          if (!val.startsWith('#')) {
+            val = '#' + val
+          }
+      
+          if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+            applyColor(val)
+          }
+        })
+      
+        btnReset?.addEventListener('click', () => {
+          if (sliderBrightness) {
+            sliderBrightness.value = DEFAULT_CONFIG.brightness
+          }
+      
+          if (valBrightness) {
+            valBrightness.textContent = `${DEFAULT_CONFIG.brightness}%`
+          }
+      
+          if (bulbGlow) {
+            bulbGlow.style.opacity = DEFAULT_CONFIG.brightness / 100
+          }
+      
+          if (sliderTemp) {
+            sliderTemp.value = DEFAULT_CONFIG.temp
+          }
+      
+          if (valTemp) {
+            valTemp.textContent = `${DEFAULT_CONFIG.temp}K`
+          }
+      
+          applyColor(DEFAULT_CONFIG.color)
+        })
+      
+        function applyColor(color) {
+          if (currentColorDot) {
+            currentColorDot.style.backgroundColor = color
+          }
+      
+          if (nativePicker) {
+            nativePicker.value = color
+          }
+      
+          if (hexInput) {
+            hexInput.value = color.toUpperCase()
+          }
+      
+          if (bulbGlow) {
+            bulbGlow.style.boxShadow = `0 0 20px ${color}`
+      
+            bulbGlow.style.background = `radial-gradient(circle, ${color}55 0%, rgba(17, 29, 45, 0) 70%)`
+          }
+        }
+      })
+      
+      // ─────────────────────────────────────────
+      // 5. パソコン操作
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        let isPcOn = false
+      
+        const glow = document.getElementById('pc-glow')
+        const dot = document.getElementById('pc-status-dot')
+      
+        const statusText = document.getElementById('pc-status-text')
+      
+        const statusLabel = document.getElementById('pc-status-label')
+      
+        const switchElement = document.getElementById('pc-power-switch')
+      
+        const btnBoot = document.getElementById('btn-pc-boot')
+      
+        const btnShutdown = document.getElementById('btn-pc-shutdown')
+      
+        const overlay = document.getElementById('pc-confirm-overlay')
+      
+        const btnCancel = document.getElementById('btn-cancel-shutdown')
+      
+        const btnExec = document.getElementById('btn-exec-shutdown')
+      
+        window.updatePcState = (online) => {
+          isPcOn = online
+      
+          if (online) {
+            if (glow) glow.className = 'pc-halo on'
+            if (dot) dot.className = 'status-dot on'
+      
+            if (statusText) {
+              statusText.textContent = '起動中 (ONLINE)'
+            }
+      
+            if (statusLabel) {
+              statusLabel.textContent = 'ON'
+            }
+      
+            switchElement?.classList.add('active')
+          } else {
+            if (glow) glow.className = 'pc-halo off'
+            if (dot) dot.className = 'status-dot off'
+      
+            if (statusText) {
+              statusText.textContent = '電源 OFF'
+            }
+      
+            if (statusLabel) {
+              statusLabel.textContent = 'OFF'
+            }
+      
+            switchElement?.classList.remove('active')
+          }
+        }
+      
+        btnBoot?.addEventListener('click', () => {
+          console.log('Sending WoL (Wake on LAN) Magic Packet...')
+        })
+      
+        btnShutdown?.addEventListener('click', () => {
+          overlay?.classList.remove('hidden')
+        })
+      
+        switchElement?.addEventListener('click', () => {
+          if (isPcOn) {
+            overlay?.classList.remove('hidden')
+          } else {
+            console.log('Sending WoL via switch...')
+          }
+        })
+      
+        btnCancel?.addEventListener('click', () => {
+          overlay?.classList.add('hidden')
+        })
+      
+        btnExec?.addEventListener('click', () => {
+          overlay?.classList.add('hidden')
+      
+          console.log('Sending Shutdown Command (RPC / SSH / Agent)...')
+        })
+      })
+      
+      // ─────────────────────────────────────────
+      // 6. ON/OFF トグルスイッチ
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('click', (e) => {
+          const sw = e.target.closest('.power-switch')
+      
+          if (!sw) return
+      
+          const label = sw.querySelector('.power-label')
+      
+          const isCurrentlyOn = sw.classList.contains('on')
+      
+          if (isCurrentlyOn) {
+            sw.classList.remove('on')
+            sw.classList.add('off')
+      
+            sw.dataset.commandName = 'OFF'
+      
+            if (label) {
+              label.textContent = 'OFF'
+            }
+          } else {
+            sw.classList.remove('off')
+            sw.classList.add('on')
+      
+            sw.dataset.commandName = 'ON'
+      
+            if (label) {
+              label.textContent = 'ON'
+            }
+          }
+        })
+      })
+      
+      // ─────────────────────────────────────────
+      // 7. 送信ハンドル & クリック監視
+      //    楽観的更新 + 保護ガード
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        window.sendDeviceAction = async function (deviceId, commandName, parameter = null) {
+          if (!deviceId || !commandName) {
+            console.warn('パラメータが不足しています:', { deviceId, commandName })
+      
+            return
+          }
+      
+          const csrfToken =
+            document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+            document.cookie
+              .split('; ')
+              .find((row) => row.startsWith('csrftoken='))
+              ?.split('=')[1]
+      
+          const formData = new FormData()
+      
+          formData.append('device_id', deviceId)
+          formData.append('command_name', commandName)
+      
+          if (parameter) {
+            formData.append('parameter', parameter)
+          }
+      
+          try {
+            const response = await fetch('', {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': csrfToken
+              },
+              body: formData
+            })
+      
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`)
+            }
+      
+            const data = await response.json()
+      
+            console.log('送信結果:', data)
+      
+            if (data.status !== 'success') {
+              console.error('送信エラー:', data.message)
+            } else if (data.result && data.result.message === 'unknown command') {
+              console.error('送信エラー:', data.result.message)
+            }
+          } catch (error) {
+            console.error('通信エラー:', error)
+          }
+        }
+      
+        // 全ボタンクリックの一括ハンドラ
+        document.addEventListener('click', async (e) => {
+          const btn = e.target.closest('[data-command-name]')
+      
+          if (!btn) return
+      
+          const card = btn.closest('[data-device-id]')
+      
+          const deviceId = card ? card.dataset.deviceId : null
+      
+          let commandName = btn.dataset.commandName
+          let parameter = null
+      
+          // 操作したデバイスを4.5秒間同期から保護
+          if (deviceId) {
+            protectDeviceUI(deviceId, 4500)
+          }
+      
+          if (commandName === 'bright-set') {
+            parameter = btn.closest('#slider-brightness')?.value
+          } else if (commandName === 'temperature-set') {
+            parameter = btn.closest('#slider-temp')?.value
+          } else if (['AirC_temp_display', 'AirC_temp_down', 'AirC_temp_up', 'AirC_fan', 'AirC_mode'].includes(commandName) || card?.dataset.deviceType === 'aircon') {
+            const powerSwitch = card ? card.querySelector('.power-switch') : null
+      
+            const status = powerSwitch?.classList.contains('on') ? 'on' : 'off'
+      
+            const tempElem = card ? card.querySelector('.temperature') : null
+      
+            const temp = tempElem ? parseInt(tempElem.textContent.replace(/[^\d]/g, ''), 10) : null
+      
+            const modeText = card ? card.querySelector('.status-value')?.textContent : null
+      
+            const modeNumber = MODE_MAP[modeText] ?? 2
+      
+            const fanText = card ? card.querySelector('.fan_value')?.textContent.trim() : null
+      
+            const fanNumber = FAN_MAP[fanText] ?? 1
+      
+            commandName = 'AirC_set_all'
+      
+            parameter = `${temp},${modeNumber},${fanNumber},${status}`
+          }
+      
+          if (deviceId && commandName) {
             // デバイス操作を送信
-            await window.sendDeviceAction(
-                deviceId,
-                commandName,
-                parameter
-            );
-
+            await window.sendDeviceAction(deviceId, commandName, parameter)
+      
             // クラウド反映タイムラグを待ってから同期
             setTimeout(() => {
-                syncAllDevices();
-            }, 2500);
-        }
-
-    });
-
-});
-
-
-// ─────────────────────────────────────────
-// 8. 状態反映関数
-//    保護中デバイスの巻き戻りをスキップ
-// ─────────────────────────────────────────
-
-function updateUIFromStatusData(data) {
-
-    Object.entries(data).forEach(([deviceId, res]) => {
-
-        const card =
-            document.querySelector(`[data-device-id="${deviceId}"]`);
-
-        if (!card) return;
-
-
-        // 操作直後のデバイスは上書きをスキップ
-        if (isDeviceProtected(deviceId)) {
-
-            console.log(
-                `[${deviceId}] は操作直後のためUI上書きをスキップ`
-            );
-
-            return;
-        }
-
-
-        if (res.statusCode !== 100 || !res.body) {
-
-            console.warn(
-                `[${deviceId}] ステータス取得エラー:`,
-                res.message
-            );
-
-            return;
-        }
-
-
-        const status = res.body;
-
-
-        // 1. 電源トグル・ソケット発光アイコン
-        const powerState = status.power;
-
-        const powerSwitch =
-            card.querySelector('.power-switch');
-
-        const powerLabel =
-            card.querySelector('.power-label');
-
-        const socketVisual =
-            card.querySelector('#plug-socket-visual');
-
-
-        if (powerState) {
-
-            const isOn =
-                powerState.toUpperCase() === 'ON';
-
+              syncAllDevices()
+            }, 2500)
+          }
+        })
+      })
+      
+      // ─────────────────────────────────────────
+      // 8. 状態反映関数
+      //    保護中デバイスの巻き戻りをスキップ
+      // ─────────────────────────────────────────
+      
+      function updateUIFromStatusData(data) {
+        Object.entries(data).forEach(([deviceId, res]) => {
+          const card = document.querySelector(`[data-device-id="${deviceId}"]`)
+      
+          if (!card) return
+      
+          // 操作直後のデバイスは上書きをスキップ
+          if (isDeviceProtected(deviceId)) {
+            console.log(`[${deviceId}] は操作直後のためUI上書きをスキップ`)
+      
+            return
+          }
+      
+          if (res.statusCode !== 100 || !res.body) {
+            console.warn(`[${deviceId}] ステータス取得エラー:`, res.message)
+      
+            return
+          }
+      
+          const status = res.body
+      
+          // 1. 電源トグル・ソケット発光アイコン
+          const powerState = status.power
+      
+          const powerSwitch = card.querySelector('.power-switch')
+      
+          const powerLabel = card.querySelector('.power-label')
+      
+          const socketVisual = card.querySelector('#plug-socket-visual')
+      
+          if (powerState) {
+            const isOn = powerState.toUpperCase() === 'ON'
+      
             if (powerSwitch) {
-
-                powerSwitch.classList.toggle('on', isOn);
-                powerSwitch.classList.toggle('off', !isOn);
+              powerSwitch.classList.toggle('on', isOn)
+              powerSwitch.classList.toggle('off', !isOn)
             }
-
+      
             if (powerLabel) {
-                powerLabel.textContent = isOn ? 'ON' : 'OFF';
+              powerLabel.textContent = isOn ? 'ON' : 'OFF'
             }
-
+      
             if (socketVisual) {
-                socketVisual.classList.toggle('active', isOn);
+              socketVisual.classList.toggle('active', isOn)
             }
-        }
-
-
-        // 2. 現在の消費電力
-        if (status.weight !== undefined) {
-
-            const currentWattsEl =
-                card.querySelector('#current-watts');
-
+          }
+      
+          // 2. 現在の消費電力
+          if (status.weight !== undefined) {
+            const currentWattsEl = card.querySelector('#current-watts')
+      
             if (currentWattsEl) {
-
-                const watts =
-                    Math.round(status.weight * 10) / 10;
-
-                currentWattsEl.innerHTML =
-                    `${watts}<span>W</span>`;
+              const watts = Math.round(status.weight * 10) / 10
+      
+              currentWattsEl.innerHTML = `${watts}<span>W</span>`
             }
-        }
-
-
-        // 3. 今日の使用量
-        if (status.electricityOfDay !== undefined) {
-
-            const todayKwhEl =
-                card.querySelector('#today-kwh');
-
+          }
+      
+          // 3. 今日の使用量
+          if (status.electricityOfDay !== undefined) {
+            const todayKwhEl = card.querySelector('#today-kwh')
+      
             if (todayKwhEl) {
-
-                const kwh =
-                    (status.electricityOfDay / 1000).toFixed(2);
-
-                todayKwhEl.innerHTML =
-                    `${kwh} <span>kWh</span>`;
+              const kwh = (status.electricityOfDay / 1000).toFixed(2)
+      
+              todayKwhEl.innerHTML = `${kwh} <span>kWh</span>`
             }
-        }
-
-
-        // 4. 明るさスライダー
-        if (status.brightness !== undefined) {
-
-            const brightSlider =
-                card.querySelector('.slider-brightness, #slider-brightness');
-
+          }
+      
+          // 4. 明るさスライダー
+          if (status.brightness !== undefined) {
+            const brightSlider = card.querySelector('.slider-brightness, #slider-brightness')
+      
             if (brightSlider) {
-                brightSlider.value = status.brightness;
+              brightSlider.value = status.brightness
             }
-        }
-
-
-        // 5. 温度
-        if (status.temperature !== undefined) {
-
-            const tempSlider =
-                card.querySelector('.slider-temp, #slider-temp');
-
-            const tempDisplay =
-                card.querySelector('.temp-display');
-
+          }
+      
+          // 5. 温度
+          if (status.temperature !== undefined) {
+            const tempSlider = card.querySelector('.slider-temp, #slider-temp')
+      
+            const tempDisplay = card.querySelector('.temp-display')
+      
             if (tempSlider) {
-                tempSlider.value = status.temperature;
+              tempSlider.value = status.temperature
             }
-
+      
             if (tempDisplay) {
-                tempDisplay.textContent = `${status.temperature}℃`;
+              tempDisplay.textContent = `${status.temperature}℃`
             }
+          }
+        })
+      }
+      
+      // ─────────────────────────────────────────
+      // 9. 一括ステータス同期
+      // ─────────────────────────────────────────
+      
+      let isDeviceSyncing = false
+      
+      async function syncAllDevices() {
+        // 同時に複数の同期を実行しない
+        if (isDeviceSyncing) {
+          console.log('[DeviceSync] 同期中のためスキップ')
+      
+          return
         }
-
-    });
-
-}
-
-
-// ─────────────────────────────────────────
-// 9. 一括ステータス同期
-// ─────────────────────────────────────────
-
-let isDeviceSyncing = false;
-
-async function syncAllDevices() {
-
-    // 同時に複数の同期を実行しない
-    if (isDeviceSyncing) {
-
-        console.log('[DeviceSync] 同期中のためスキップ');
-
-        return;
-    }
-
-    isDeviceSyncing = true;
-
-    try {
-
-        console.log('[DeviceSync] 同期開始');
-
-        const res = await fetch(
-            '/smarthome/api/devices/status/all/'
-        );
-
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
-
-        const data = await res.json();
-
-        updateUIFromStatusData(data.devices || data);
-
-        console.log('[DeviceSync] 同期完了');
-
-    } catch (err) {
-
-        console.error(
-            '一括ステータス取得失敗:',
-            err
-        );
-
-    } finally {
-
-        isDeviceSyncing = false;
-    }
-}
-
-
-// グローバル公開
-window.syncAllDevices = syncAllDevices;
-
-
-// ─────────────────────────────────────────
-// 10. 放置復帰・画面ロック管理
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', async () => {
-
-    console.log('[LockManager] 初期化開始');
-
-    window.updateFullyDebug?.(
-        'ページ読み込み完了\nロック管理初期化中...'
-    );
-
-
-    // click / touchstart を監視
-    ['click', 'touchstart'].forEach(eventType => {
-
-        document.addEventListener(eventType, async (e) => {
-
-            // ロック中は操作を通さない
-            if (LockManager.isCurrentlyLocked()) {
-
-                e.preventDefault();
-                e.stopImmediatePropagation();
-
-                return;
-            }
-
-
-            // 5分放置後の復帰
-            if (LockManager.isIdle()) {
-
-                e.preventDefault();
-                e.stopImmediatePropagation();
-
-                console.log(
-                    '[LockManager] 5分放置後の操作を検知'
-                );
-
-                await LockManager.lockOnly(
-                    '5分放置後のタッチ'
-                );
-
-                return;
-            }
-
-
-            // 通常操作として時刻更新
-            LockManager.markActivity();
-
-        }, true);
-
-    });
-
-
-    // ページロード時の初期ロック
-    console.log('[LockManager] 初回ロック開始');
-
-    await LockManager.lockOnly('初回ページ読み込み');
-
-    console.log('[LockManager] 初期化完了');
-
-});
-
-
-// ─────────────────────────────────────────
-// 11. バッテリー残量取得 & 表示更新
-// ─────────────────────────────────────────
-
-function updateBatteryStatus() {
-
-    const batteryWrap =
-        document.getElementById('battery-status');
-
-    const levelEl =
-        document.getElementById('battery-level');
-
-    const iconEl =
-        document.getElementById('battery-icon');
-
-
-    if (!batteryWrap || !levelEl) return;
-
-
-    let level = null;
-    let isCharging = false;
-
-
-    // 1. Fully Kiosk の JavaScript Interface
-    if (typeof fully !== 'undefined') {
-
+      
+        isDeviceSyncing = true
+      
         try {
-
-            level = fully.getBatteryLevel();
-            isCharging = fully.isPlugged();
-
-        } catch (error) {
-
-            console.warn(
-                '[Battery] Fully API取得失敗:',
-                error
-            );
+          console.log('[DeviceSync] 同期開始')
+      
+          const res = await fetch('/smarthome/api/devices/status/all/')
+      
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`)
+          }
+      
+          const data = await res.json()
+      
+          updateUIFromStatusData(data.devices || data)
+      
+          console.log('[DeviceSync] 同期完了')
+        } catch (err) {
+          console.error('一括ステータス取得失敗:', err)
+        } finally {
+          isDeviceSyncing = false
         }
-    }
-
-
-    if (level !== null && level !== undefined) {
-
-        renderBattery(level, isCharging);
-
-    } else if (navigator.getBattery) {
-
-        // 2. PCブラウザ用フォールバック
-        navigator.getBattery().then(battery => {
-
-            renderBattery(
-                Math.round(battery.level * 100),
-                battery.charging
-            );
-
-        }).catch(error => {
-
-            console.warn('[Battery] 取得失敗:', error);
-
-        });
-    }
-
-
-    function renderBattery(pct, charging) {
-
-        levelEl.textContent = `${pct}%`;
-
-        if (charging) {
-
+      }
+      
+      // グローバル公開
+      window.syncAllDevices = syncAllDevices
+      
+      // ─────────────────────────────────────────
+      // 10. 放置復帰・画面ロック管理
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', async () => {
+        console.log('[LockManager] 初期化開始')
+      
+        window.updateFullyDebug?.('ページ読み込み完了\nロック管理初期化中...')
+      
+        // click / touchstart を監視
+        ;['click', 'touchstart'].forEach((eventType) => {
+          document.addEventListener(
+            eventType,
+            async (e) => {
+              // ロック中は操作を通さない
+              if (LockManager.isCurrentlyLocked()) {
+                e.preventDefault()
+                e.stopImmediatePropagation()
+      
+                return
+              }
+      
+              // 5分放置後の復帰
+              if (LockManager.isIdle()) {
+                e.preventDefault()
+                e.stopImmediatePropagation()
+      
+                console.log('[LockManager] 5分放置後の操作を検知')
+      
+                await LockManager.lockOnly('5分放置後のタッチ')
+      
+                return
+              }
+      
+              // 通常操作として時刻更新
+              LockManager.markActivity()
+            },
+            true
+          )
+        })
+      
+        // ページロード時の初期ロック
+        console.log('[LockManager] 初回ロック開始')
+      
+        await LockManager.lockOnly('初回ページ読み込み')
+      
+        console.log('[LockManager] 初期化完了')
+      })
+      
+      // ─────────────────────────────────────────
+      // 11. バッテリー残量取得 & 表示更新
+      // ─────────────────────────────────────────
+      
+      function updateBatteryStatus() {
+        const batteryWrap = document.getElementById('battery-status')
+        const levelEl = document.getElementById('battery-level')
+        const iconEl = document.getElementById('battery-icon')
+      
+        if (!batteryWrap || !levelEl) return
+      
+        let level = null
+        let isCharging = false
+      
+        // 1. Fully Kiosk の JavaScript Interface
+        if (typeof fully !== 'undefined') {
+          try {
+            level = fully.getBatteryLevel()
+            isCharging = fully.isPlugged()
+          } catch (error) {
+            console.warn('[Battery] Fully API取得失敗:', error)
+          }
+        }
+      
+        if (level !== null && level !== undefined) {
+          renderBattery(level, isCharging)
+        } else if (navigator.getBattery) {
+          // 2. PCブラウザ用フォールバック
+          navigator
+            .getBattery()
+            .then((battery) => {
+              renderBattery(Math.round(battery.level * 100), battery.charging)
+            })
+            .catch((error) => {
+              console.warn('[Battery] 取得失敗:', error)
+            })
+        }
+      
+        function renderBattery(pct, charging) {
+          levelEl.textContent = `${pct}%`
+      
+          if (charging) {
             if (iconEl) {
-                iconEl.textContent = '⚡';
+              iconEl.textContent = '⚡'
             }
-
-            batteryWrap.classList.add('charging');
-            batteryWrap.classList.remove('low');
-
-        } else {
-
-            batteryWrap.classList.remove('charging');
-
+      
+            batteryWrap.classList.add('charging')
+            batteryWrap.classList.remove('low')
+          } else {
+            batteryWrap.classList.remove('charging')
+      
             if (pct <= 20) {
-
-                if (iconEl) {
-                    iconEl.textContent = '🪫';
-                }
-
-                batteryWrap.classList.add('low');
-
+              if (iconEl) {
+                iconEl.textContent = '🪫'
+              }
+      
+              batteryWrap.classList.add('low')
             } else {
-
-                if (iconEl) {
-                    iconEl.textContent = '🔋';
-                }
-
-                batteryWrap.classList.remove('low');
+              if (iconEl) {
+                iconEl.textContent = '🔋'
+              }
+      
+              batteryWrap.classList.remove('low')
             }
+          }
         }
-    }
-}
-
-
-// 初回実行 ＆ 30秒ごとに自動更新
-document.addEventListener('DOMContentLoaded', () => {
-
-    updateBatteryStatus();
-
-    setInterval(
-        updateBatteryStatus,
-        30 * 1000
-    );
-
-});
-
-
-// ─────────────────────────────────────────
-// 12. Fully Kiosk イベント登録
-// ─────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    window.updateFullyDebug?.(
-        'ページ読み込み完了\nFully接続確認中...'
-    );
-
-
-    if (
-        typeof fully === 'undefined' ||
-        typeof fully.bind !== 'function'
-    ) {
-
-        window.updateFullyDebug?.(
-            'エラー：Fully JavaScript Interfaceが利用できません'
-        );
-
-        console.error(
-            '[Fully] JavaScript Interfaceが利用できません'
-        );
-
-        return;
-    }
-
-
-    try {
-
-        window.updateFullyDebug?.(
-            'Fully JavaScript Interface 接続成功\nイベント登録中...'
-        );
-
-
-        // ① 画面点灯イベント
-        fully.bind('screenOn', `
-            console.log('[Fully] Screen On');
-
-            window.updateFullyDebug?.(
-                '画面点灯イベント受信'
-            );
-
-            window.handleProximityOrWakeup?.(
-                '画面点灯'
-            );
-        `);
-
-
-        fully.bind('onMotion', `
-            window.updateFullyDebug?.('① イベント受信');
-
-            try {
-                window.updateFullyDebug?.('② showMotionDetected確認');
-
-                if (typeof window.showMotionDetected !== 'function') {
-                    throw new Error('showMotionDetectedが未定義');
-                }
-
-                window.updateFullyDebug?.('③ アイコン表示実行前');
-
-                window.showMotionDetected();
-
-                window.updateFullyDebug?.('④ アイコン表示実行完了');
-
-            } catch (error) {
-                window.updateFullyDebug?.('エラー: ' + error.message);
-                console.error('[Motion Error]', error);
-            }
-        `);
-
-
-        window.updateFullyDebug?.(
-            '接続成功\nイベント登録完了\n待機中...'
-        );
-
-        console.log('[Fully] イベント登録処理完了');
-
-    } catch (error) {
-
-        console.error(
-            '[Fully] イベント登録エラー:',
-            error
-        );
-
-        window.updateFullyDebug?.(
-            `イベント登録エラー\n${error.message}`
-        );
-    }
-
-});
-
-
-// ─────────────────────────────────────────
-// 13. JavaScript エラー監視
-// ─────────────────────────────────────────
-
-window.addEventListener('error', (event) => {
-
-    console.error(
-        '[JavaScript Error]',
-        event.message,
-        event.filename,
-        event.lineno
-    );
-
-    window.updateFullyDebug?.(
-        `JavaScriptエラー\n${event.message}\n行番号: ${event.lineno}`
-    );
-
-});
-
-
-window.addEventListener('unhandledrejection', (event) => {
-
-    console.error(
-        '[Promise Error]',
-        event.reason
-    );
-
-    window.updateFullyDebug?.(
-        `Promiseエラー\n${event.reason}`
-    );
-
-});
-
-
-// ─────────────────────────────────────────
-// SmartHome JavaScript 終了
-// ─────────────────────────────────────────
-</script>
-
-</body>
+      }
+      
+      // 初回実行 ＆ 30秒ごとに自動更新
+      document.addEventListener('DOMContentLoaded', () => {
+        updateBatteryStatus()
+      
+        setInterval(updateBatteryStatus, 30 * 1000)
+      })
+      
+      // ─────────────────────────────────────────
+      // 12. Fully Kiosk イベント登録
+      // ─────────────────────────────────────────
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        window.updateFullyDebug?.('ページ読み込み完了\nFully接続確認中...')
+      
+        if (typeof fully === 'undefined' || typeof fully.bind !== 'function') {
+          window.updateFullyDebug?.('エラー：Fully JavaScript Interfaceが利用できません')
+      
+          console.error('[Fully] JavaScript Interfaceが利用できません')
+      
+          return
+        }
+      
+        try {
+          window.updateFullyDebug?.('Fully JavaScript Interface 接続成功\nイベント登録中...')
+      
+          // ① 画面点灯イベント
+          fully.bind(
+            'screenOn',
+            `
+                  console.log('[Fully] Screen On');
+      
+                  window.updateFullyDebug?.(
+                      '画面点灯イベント受信'
+                  );
+      
+                  window.handleProximityOrWakeup?.(
+                      '画面点灯'
+                  );
+              `
+          )
+      
+          fully.bind(
+            'onMotion',
+            `
+                  window.updateFullyDebug?.('① イベント受信');
+      
+                  try {
+                      window.updateFullyDebug?.('② showMotionDetected確認');
+      
+                      if (typeof window.showMotionDetected !== 'function') {
+                          throw new Error('showMotionDetectedが未定義');
+                      }
+      
+                      window.showMotionDetected();
+      
+                  } catch (error) {
+                      window.updateFullyDebug?.('エラー: ' + error.message);
+                      console.error('[Motion Error]', error);
+                  }
+              `
+          )
+      
+          window.updateFullyDebug?.('接続成功\nイベント登録完了\n待機中...')
+      
+          console.log('[Fully] イベント登録処理完了')
+        } catch (error) {
+          console.error('[Fully] イベント登録エラー:', error)
+      
+          window.updateFullyDebug?.(`イベント登録エラー\n${error.message}`)
+        }
+      })
+      
+      // ─────────────────────────────────────────
+      // 13. JavaScript エラー監視
+      // ─────────────────────────────────────────
+      
+      window.addEventListener('error', (event) => {
+        console.error('[JavaScript Error]', event.message, event.filename, event.lineno)
+      
+        window.updateFullyDebug?.(`JavaScriptエラー\n${event.message}\n行番号: ${event.lineno}`)
+      })
+      
+      window.addEventListener('unhandledrejection', (event) => {
+        console.error('[Promise Error]', event.reason)
+      
+        window.updateFullyDebug?.(`Promiseエラー\n${event.reason}`)
+      })
+      
+      // ─────────────────────────────────────────
+      // SmartHome JavaScript 終了
+      // ─────────────────────────────────────────
+    </script>
+  </body>
 </html>
