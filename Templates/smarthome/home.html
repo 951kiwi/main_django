@@ -845,17 +845,29 @@
       // 0-3. 動体検知アイコン
       // ─────────────────────────────────────────
       
-      const motionIndicator = document.getElementById('motion-indicator')
-      
-      function showMotionDetected() {
-        motionIndicator?.classList.add('active')
-      
-        clearTimeout(window.motionIndicatorTimer)
-      
+      window.showMotionDetected = function() {
+        const indicator = document.getElementById('motion-indicator');
+
+        if (!indicator) {
+            console.error('motion-indicator が見つかりません');
+            return;
+        }
+
+        indicator.classList.remove('active');
+
+        // アニメーションを再スタート
+        void indicator.offsetWidth;
+
+        indicator.classList.add('active');
+
+        console.log('動体検知アイコン:', indicator.className);
+
+        clearTimeout(window.motionIndicatorTimer);
+
         window.motionIndicatorTimer = setTimeout(() => {
-          motionIndicator?.classList.remove('active')
-        }, 5000)
-      }
+            indicator.classList.remove('active');
+        }, 5000);
+        };
       
       
       // ─────────────────────────────────────────
