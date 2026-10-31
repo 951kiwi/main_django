@@ -2154,24 +2154,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         fully.bind('onMotion', `
-            console.log('[Motion] ① イベント受信');
+            window.updateFullyDebug?.('① イベント受信');
 
-            window.updateFullyDebug?.('① カメラ動体検知イベント受信');
+            try {
+                window.updateFullyDebug?.('② showMotionDetected確認');
 
-            if (typeof window.showMotionDetected === 'function') {
-                console.log('[Motion] ② アイコン処理開始');
+                if (typeof window.showMotionDetected !== 'function') {
+                    throw new Error('showMotionDetectedが未定義');
+                }
+
+                window.updateFullyDebug?.('③ アイコン表示実行前');
+
                 window.showMotionDetected();
-            } else {
-                console.error('[Motion] showMotionDetected が見つからない');
-                window.updateFullyDebug?.('② showMotionDetected が未定義');
-            }
 
-            if (typeof window.handleProximityOrWakeup === 'function') {
-                console.log('[Motion] ③ 起動処理開始');
-                window.handleProximityOrWakeup('カメラ動体検知');
-            } else {
-                console.error('[Motion] handleProximityOrWakeup が見つからない');
-                window.updateFullyDebug?.('③ handleProximityOrWakeup が未定義');
+                window.updateFullyDebug?.('④ アイコン表示実行完了');
+
+            } catch (error) {
+                window.updateFullyDebug?.('エラー: ' + error.message);
+                console.error('[Motion Error]', error);
             }
         `);
 
