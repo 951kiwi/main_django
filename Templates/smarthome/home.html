@@ -1317,18 +1317,7 @@
             }
         }
 
-        async function syncWithLock() {
-            setLocked(true);
-            try {
-                await Promise.all([
-                    syncAllDevices(),
-                    new Promise(resolve => setTimeout(resolve, MIN_LOCK_DISPLAY_MS))
-                ]);
-            } finally {
-                setLocked(false);
-                lastActivityTime = Date.now();
-            }
-        }
+        
 
         // 3分放置後の復帰検知
         ['click', 'touchstart'].forEach(eventType => {
@@ -1409,11 +1398,18 @@ setInterval(updateBatteryStatus, 30 * 1000);
 let lastSyncCompletedTime = Date.now(); // 最後に同期が完了した時刻
 
 // syncWithLock の完了時に時刻を記録するようにラップ/更新
-const originalSyncWithLock = syncWithLock;
-syncWithLock = async function() {
-    await originalSyncWithLock();
-    lastSyncCompletedTime = Date.now();
-};
+async function syncWithLock() {
+    setLocked(true);
+
+    try {
+        await new Promise(resolve =>
+            setTimeout(resolve, MIN_LOCK_DISPLAY_MS)
+        );
+    } finally {
+        setLocked(false);
+        lastActivityTime = Date.now();
+    }
+}
 
 // 接近検知・復帰時のハンドラー関数
 async function handleProximityOrWakeup() {
@@ -1438,29 +1434,51 @@ function showMotionDetected() {
         motionIndicator?.classList.remove('active');
     }, 5000);
 }
+// Fully Kiosk デバッグ表示（グローバル公開）
+window.updateFullyDebug = function(message) {
+    const debug = document.getElementById('fully-debug');
 
-// Fully Kiosk イベント登録
-document.addEventListener('DOMContentLoaded', () => {
-
-    if (typeof fully === 'undefined' || typeof fully.bind !== 'function') {
-        console.error('[Fully] JavaScript Interfaceが利用できません');
+    if (!debug) {
+        console.error('[Fully Debug] 表示欄が見つかりません');
         return;
     }
 
+    const time = new Date().toLocaleTimeString('ja-JP');
+
+    debug.textContent =
+        `Fully Kiosk Debug\n` +
+        `時刻: ${time}\n` +
+        `${message}`;
+};
+// Fully Kiosk イベント登録
+// Fully Kiosk イベント登録
+document.addEventListener('DOMContentLoaded', () => {
+
+    updateFullyDebug('ページ読み込み完了\nFully接続確認中...');
+
+    if (typeof fully === 'undefined' || typeof fully.bind !== 'function') {
+        updateFullyDebug(
+            'エラー：Fully JavaScript Interfaceが利用できません'
+        );
+        return;
+    }
+
+    updateFullyDebug('Fully JavaScript Interface 接続成功\nイベント登録中...');
+
     // ① 画面点灯
     fully.bind('screenOn', `
-        console.log('[Fully] Screen On');
+        updateFullyDebug('画面点灯イベント受信');
         handleProximityOrWakeup();
     `);
 
     // ② カメラ動体検知
     fully.bind('onMotion', `
-        console.log('[Fully] Motion Detected');
+        updateFullyDebug('カメラ動体検知イベント受信');
         showMotionDetected();
         handleProximityOrWakeup();
     `);
 
-    console.log('[Fully] イベント登録完了');
+    updateFullyDebug('接続成功\nイベント登録完了\n待機中...');
 });
 </script>
 
