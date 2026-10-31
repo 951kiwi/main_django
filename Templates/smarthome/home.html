@@ -4,6 +4,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
@@ -118,6 +119,10 @@
             <div></div>
 
             <div class="header-right">
+                <!-- 動き検知 -->
+                <div id="motion-indicator" class="motion-indicator">
+                    <i class="bi bi-person-fill"></i>
+                </div>
                 <!-- 時計・日付エリア -->
                  <div class="battery-status" id="battery-status">
                     <span class="battery-icon" id="battery-icon">🔋</span>
@@ -1279,9 +1284,10 @@
             console.error('一括ステータス取得失敗:', err);
         }
     }
+    const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 
     document.addEventListener('DOMContentLoaded', async () => {
-        const IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3分放置
+         // 3分放置
         const MIN_LOCK_DISPLAY_MS = 600;       // チラつき防止（0.6秒）
         
         let lastActivityTime = Date.now();
@@ -1323,7 +1329,7 @@
                     e.preventDefault();
                     e.stopImmediatePropagation();
 
-                    console.log('3分間放置後の復帰検知: 操作をブロックして同期開始');
+                    console.log('5分間放置後の復帰検知: 操作をブロックして同期開始');
                     await syncWithLock();
                     return;
                 }
@@ -1385,10 +1391,6 @@ function updateBatteryStatus() {
 updateBatteryStatus();
 setInterval(updateBatteryStatus, 30 * 1000);
 
-// ─────────────────────────────────────────
-// Fully Kiosk: 接近検知・画面点灯時の自動更新（5分ルール）
-// ─────────────────────────────────────────
-const MOTION_SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5分（ミリ秒）
 let lastSyncCompletedTime = Date.now(); // 最後に同期が完了した時刻
 
 // syncWithLock の完了時に時刻を記録するようにラップ/更新
@@ -1404,12 +1406,22 @@ async function handleProximityOrWakeup() {
     console.log(`[Fully Kiosk] 接近・復帰検知 (前回同期から: ${Math.round(elapsed / 1000)}秒経過)`);
 
     // 5分（300,000ミリ秒）以上経過している場合のみデータ再読み込み
-    if (elapsed >= MOTION_SYNC_INTERVAL_MS) {
+    if (elapsed >= IDLE_TIMEOUT_MS) {
         console.log('5分以上経過しているため最新データを同期します...');
         await syncWithLock();
     } else {
         console.log('5分以内のため同期をスキップします');
     }
+}
+const motionIndicator = document.getElementById('motion-indicator');
+function showMotionDetected() {
+    motionIndicator?.classList.add('active');
+
+    clearTimeout(window.motionIndicatorTimer);
+
+    window.motionIndicatorTimer = setTimeout(() => {
+        motionIndicator?.classList.remove('active');
+    }, 5000);
 }
 
 // Fully Kiosk Browser が呼び出すグローバルコールバックを登録
@@ -1421,6 +1433,7 @@ window.onFullyScreenOn = function() {
 // ② カメラ動体検知がトリガーされたとき (Motion Detected)
 window.onFullyMotionDetected = function() {
     handleProximityOrWakeup();
+    showMotionDetected();
 };
 </script>
 
