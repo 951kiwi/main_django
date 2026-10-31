@@ -1301,25 +1301,7 @@
     }
     const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-         // 3分放置
-        const MIN_LOCK_DISPLAY_MS = 600;       // チラつき防止（0.6秒）
-        
-        let lastActivityTime = Date.now();
-        let isSyncing = false;
-
-        const lockOverlay = document.getElementById('lock-overlay');
-
-        function setLocked(locked) {
-            isSyncing = locked;
-            if (lockOverlay) {
-                lockOverlay.style.display = locked ? 'flex' : 'none';
-            }
-        }
-
-        
-
-        // 3分放置後の復帰検知
+        // 5分放置後の復帰検知
         ['click', 'touchstart'].forEach(eventType => {
             document.addEventListener(eventType, async (e) => {
                 if (isSyncing) {
@@ -1395,9 +1377,24 @@ function updateBatteryStatus() {
 updateBatteryStatus();
 setInterval(updateBatteryStatus, 30 * 1000);
 
-let lastSyncCompletedTime = Date.now(); // 最後に同期が完了した時刻
+// ロック関連の共通設定
+const MIN_LOCK_DISPLAY_MS = 600;
+const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 
-// syncWithLock の完了時に時刻を記録するようにラップ/更新
+let lastActivityTime = Date.now();
+let isSyncing = false;
+
+const lockOverlay = document.getElementById('lock-overlay');
+
+function setLocked(locked) {
+    isSyncing = locked;
+
+    if (lockOverlay) {
+        lockOverlay.style.display = locked ? 'flex' : 'none';
+    }
+}
+
+// ロック・解除だけを行う
 async function syncWithLock() {
     setLocked(true);
 
