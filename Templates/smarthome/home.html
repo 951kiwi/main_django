@@ -1439,17 +1439,29 @@ function showMotionDetected() {
     }, 5000);
 }
 
-// Fully Kiosk Browser が呼び出すグローバルコールバックを登録
-// ① 画面が点灯したとき (Screen On)
-window.onFullyScreenOn = function() {
-    handleProximityOrWakeup();
-};
+// Fully Kiosk イベント登録
+document.addEventListener('DOMContentLoaded', () => {
 
-// ② カメラ動体検知がトリガーされたとき (Motion Detected)
-window.onFullyMotionDetected = function() {
-    showMotionDetected();
-    handleProximityOrWakeup();
-};
+    if (typeof fully === 'undefined' || typeof fully.bind !== 'function') {
+        console.error('[Fully] JavaScript Interfaceが利用できません');
+        return;
+    }
+
+    // ① 画面点灯
+    fully.bind('screenOn', `
+        console.log('[Fully] Screen On');
+        handleProximityOrWakeup();
+    `);
+
+    // ② カメラ動体検知
+    fully.bind('onMotion', `
+        console.log('[Fully] Motion Detected');
+        showMotionDetected();
+        handleProximityOrWakeup();
+    `);
+
+    console.log('[Fully] イベント登録完了');
+});
 </script>
 
 </body>
