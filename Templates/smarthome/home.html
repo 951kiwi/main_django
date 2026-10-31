@@ -2153,19 +2153,11 @@ document.addEventListener('DOMContentLoaded', () => {
         `);
 
 
-        // ② カメラ動体検知イベント
         fully.bind('onMotion', `
             console.log('[Fully] Motion Detected');
-
-            window.updateFullyDebug?.(
-                'カメラ動体検知イベント受信'
-            );
-
+            window.updateFullyDebug?.('カメラ動体検知イベント受信');
             window.showMotionDetected?.();
-
-            window.handleProximityOrWakeup?.(
-                'カメラ動体検知'
-            );
+            window.handleProximityOrWakeup?.('カメラ動体検知');
         `);
 
 
