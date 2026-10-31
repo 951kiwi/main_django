@@ -1573,7 +1573,7 @@
       window.syncAllDevices = syncAllDevices
       
       // ─────────────────────────────────────────
-      // 10. 放置復帰・画面ロック管理
+      // 10. 画面ロック管理　ローディング
       // ─────────────────────────────────────────
 
       document.addEventListener('DOMContentLoaded', async () => {
@@ -1620,7 +1620,42 @@
       
         console.log('[LockManager] 初期化完了')
       })
-      
+
+      // ─────────────────────────────────────────
+      // 5分自動更新 & 動き検知
+      // ─────────────────────────────────────────
+        const MOTION_SYNC_INTERVAL = 5 * 60 * 1000; // 5分
+        window.lastMotionSyncTime = Date.now();
+        window.motionSyncRunning = false;
+        window.checkMotionSync = async function() {
+            const now = Date.now();
+            const elapsed = now - window.lastMotionSyncTime;
+
+            // すでに更新中なら何もしない
+            if (window.motionSyncRunning) return;
+
+            // 5分経過していなければ何もしない
+            if (elapsed < MOTION_SYNC_INTERVAL) return;
+
+            window.motionSyncRunning = true;
+
+            window.updateFullyDebug?.('5分経過：デバイス情報を更新します');
+
+            try {
+                await syncAllDevices();
+
+                window.lastMotionSyncTime = Date.now();
+
+                window.updateFullyDebug?.('デバイス情報の更新完了');
+
+            } catch (error) {
+                console.error('デバイス更新エラー:', error);
+                window.updateFullyDebug?.('デバイス更新エラー');
+
+            } finally {
+                window.motionSyncRunning = false;
+            }
+        };
       // ─────────────────────────────────────────
       // 11. バッテリー残量取得 & 表示更新
       // ─────────────────────────────────────────
@@ -1733,16 +1768,12 @@
           fully.bind(
             'onMotion',
             `
-                  window.updateFullyDebug?.('① イベント受信');
+                  window.updateFullyDebug('① イベント受信');
       
                   try {
-                      window.updateFullyDebug?.('② showMotionDetected確認');
-      
-                      if (typeof window.showMotionDetected !== 'function') {
-                          throw new Error('showMotionDetectedが未定義');
-                      }
-      
+                      window.updateFullyDebug('② カメラ動き検出');
                       window.showMotionDetected();
+                      window.checkMotionSync();
       
                   } catch (error) {
                       window.updateFullyDebug?.('エラー: ' + error.message);
