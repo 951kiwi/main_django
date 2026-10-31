@@ -858,14 +858,14 @@
 
         // アニメーションを再スタート
         void indicator.offsetWidth;
-        indicator.textContent("a");
+        document.getElementById('motion-indicator').textContent = "a";
 
         console.log('動体検知アイコン:', indicator.className);
 
         clearTimeout(window.motionIndicatorTimer);
 
         window.motionIndicatorTimer = setTimeout(() => {
-            indicator.textContent("b");
+            document.getElementById('motion-indicator').textContent = "b";
         }, 5000);
         };
       
