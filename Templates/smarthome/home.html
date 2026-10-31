@@ -117,7 +117,22 @@
         <!-- ヘッダー -->
         <header class="header">
             <div></div>
-
+            <div id="fully-debug" style="
+                position: fixed;
+                bottom: 10px;
+                left: 10px;
+                z-index: 999999;
+                background: #111;
+                color: #00ff00;
+                padding: 12px;
+                font-size: 14px;
+                border: 1px solid #00ff00;
+                border-radius: 8px;
+                max-width: 90%;
+                white-space: pre-wrap;
+            ">
+                Fully Kiosk 読み込み確認中...
+            </div>
             <div class="header-right">
                 <!-- 動き検知 -->
                 <div id="motion-indicator" class="motion-indicator">
@@ -1435,6 +1450,33 @@ window.onFullyMotionDetected = function() {
     handleProximityOrWakeup();
     showMotionDetected();
 };
+function showFullyDebug(message) {
+    const debug = document.getElementById('fully-debug');
+
+    if (debug) {
+        debug.textContent =
+            new Date().toLocaleTimeString() + '\n' + message;
+    }
+}
+
+if (window.fully && typeof fully.bind === 'function') {
+
+    showFullyDebug('Fully API OK\nMotionイベント登録中...');
+
+    fully.bind('onMotion',
+        'showFullyDebug("動体検知イベント受信！"); showMotionDetected();'
+    );
+
+    showFullyDebug('fully.bind() 実行済み');
+
+} else {
+
+    showFullyDebug(
+        'Fully APIが利用できません\n' +
+        'window.fully: ' + typeof window.fully + '\n' +
+        'fully.bind: ' + typeof window.fully?.bind
+    );
+}
 </script>
 
 </body>
