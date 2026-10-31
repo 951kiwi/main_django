@@ -709,29 +709,6 @@
       
         return true
       }
-      window.showMotionDetected = function() {
-        const indicator = document.getElementById('motion-indicator');
-
-        if (!indicator) {
-            console.error('motion-indicator が見つかりません');
-            return;
-        }
-
-        indicator.classList.remove('active');
-
-        // アニメーションを再スタート
-        void indicator.offsetWidth;
-
-        indicator.classList.add('active');
-
-        console.log('動体検知アイコン:', indicator.className);
-
-        clearTimeout(window.motionIndicatorTimer);
-
-        window.motionIndicatorTimer = setTimeout(() => {
-            indicator.classList.remove('active');
-        }, 5000);
-    };
       
       // ─────────────────────────────────────────
       // 0-1. 共通ロック管理
@@ -880,7 +857,6 @@
         }, 5000)
       }
       
-      window.showMotionDetected = showMotionDetected
       
       // ─────────────────────────────────────────
       // 1. 時刻 & 天気更新（江東区）
@@ -1342,7 +1318,7 @@
       
       // ─────────────────────────────────────────
       // 7. 送信ハンドル & クリック監視
-      //    楽観的更新 + 保護ガード
+      //    更新 + 保護ガード
       // ─────────────────────────────────────────
       
       document.addEventListener('DOMContentLoaded', () => {
