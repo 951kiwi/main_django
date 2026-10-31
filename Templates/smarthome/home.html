@@ -1447,36 +1447,9 @@ window.onFullyScreenOn = function() {
 
 // ② カメラ動体検知がトリガーされたとき (Motion Detected)
 window.onFullyMotionDetected = function() {
-    handleProximityOrWakeup();
     showMotionDetected();
+    handleProximityOrWakeup();
 };
-function showFullyDebug(message) {
-    const debug = document.getElementById('fully-debug');
-
-    if (debug) {
-        debug.textContent =
-            new Date().toLocaleTimeString() + '\n' + message;
-    }
-}
-
-if (window.fully && typeof fully.bind === 'function') {
-
-    showFullyDebug('Fully API OK\nMotionイベント登録中...');
-
-    fully.bind('onMotion',
-        'showFullyDebug("動体検知イベント受信！"); showMotionDetected();'
-    );
-
-    showFullyDebug('fully.bind() 実行済み');
-
-} else {
-
-    showFullyDebug(
-        'Fully APIが利用できません\n' +
-        'window.fully: ' + typeof window.fully + '\n' +
-        'fully.bind: ' + typeof window.fully?.bind
-    );
-}
 </script>
 
 </body>
