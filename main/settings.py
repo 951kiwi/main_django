@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'app_main.middleware.UpdateLastActivityMiddleware',
 ]
 
+
 ROOT_URLCONF = 'main.urls'
 AUTH_PASSWORD_VALIDATORS = []
 TEMPLATES = [

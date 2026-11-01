@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.urls import path
 from . import views
-
+from .webhook import switchbot_webhook
 
 urlpatterns = [
     path("", views.home, name="home"),
     # ⭐ 全デバイス一括取得は単体取得より「前」に置く
     path("api/devices/status/all/", views.get_all_devices_status_view, name="all_devices_status"),
+    path("api/switchbot/webhook/<str:secret>/",switchbot_webhook,name="switchbot_webhook",),
 ]
