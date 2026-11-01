@@ -1,53 +1,36 @@
 
-import hmac
-import json
-import logging
 import os
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.core.management.base import BaseCommand, CommandError
 
-logger = logging.getLogger(__name__)
+from app_smarthome.SwitchBot import setup_switchbot_webhook
 
 
-@csrf_exempt
-@require_POST
-def switchbot_webhook(request, secret):
-    expected_secret = os.getenv("SWITCHBOT_WEBHOOK_SECRET", "")
+class Command(BaseCommand):
+    help = "Register the SwitchBot webhook callback URL"
 
-    # 秘密トークンが未設定、または一致しない場合は拒否
-    if not expected_secret or not hmac.compare_digest(
-        secret, expected_secret
-    ):
-        return JsonResponse(
-            {"success": False, "error": "Forbidden"},
-            status=403,
+    def handle(self, *args, **options):
+        secret = os.getenv("SWITCHBOT_WEBHOOK_SECRET")
+
+        if not secret:
+            raise CommandError(
+                "SWITCHBOT_WEBHOOK_SECRET is not configured."
+            )
+
+        callback_url = (
+            "https://951kiwi.com"
+            f"/smarthome/api/switchbot/webhook/{secret}/"
         )
 
-    try:
-        payload = json.loads(request.body.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
-        return JsonResponse(
-            {"success": False, "error": "Invalid JSON"},
-            status=400,
+        try:
+            result = setup_switchbot_webhook(callback_url)
+        except Exception as exc:
+            raise CommandError(
+                f"Webhook registration failed: {exc}"
+            ) from exc
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"SwitchBot Webhook registration response: {result}"
+            )
         )
-
-    if not isinstance(payload, dict):
-        return JsonResponse(
-            {"success": False, "error": "JSON object required"},
-            status=400,
-        )
-
-    logger.info(
-        "SwitchBot webhook received: eventType=%s eventVersion=%s",
-        payload.get("eventType", "unknown"),
-        payload.get("eventVersion", "unknown"),
-    )
-
-    logger.debug(
-        "SwitchBot webhook payload: %s",
-        json.dumps(payload, ensure_ascii=False),
-    )
-
-    return JsonResponse({"success": True})

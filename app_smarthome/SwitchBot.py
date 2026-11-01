@@ -79,3 +79,35 @@ def fetch_switchbot_status(device_id: str):
     headers = get_switchbot_headers()
     response = requests.get(url, headers=headers, timeout=5)
     return response.json()
+
+
+def setup_switchbot_webhook(callback_url, device_list="ALL"):
+    """
+    SwitchBot Webhookの送信先を登録する。
+    """
+    url = "https://api.switch-bot.com/v1.1/webhook/setupWebhook"
+
+    payload = {
+        "action": "setupWebhook",
+        "url": callback_url,
+        "deviceList": device_list,
+    }
+
+    headers = get_switchbot_headers()
+
+    response = requests.post(
+        url,
+        headers=headers,
+        json=payload,
+        timeout=15,
+    )
+
+    response.raise_for_status()
+    result = response.json()
+
+    if result.get("statusCode") != 100:
+        raise RuntimeError(
+            f"SwitchBot Webhook registration failed: {result}"
+        )
+
+    return result
