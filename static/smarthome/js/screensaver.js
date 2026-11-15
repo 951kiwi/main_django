@@ -6,15 +6,12 @@
     // 設定
     // =====================================
 
-    const IDLE_TIME = 10 * 1000;
+    const IDLE_TIME = 1 * 1000;
 
-    const DEFAULT_IMAGE_DURATION = 10;
+    const DEFAULT_IMAGE_DURATION = 1;
 
     // 同時に先読みする動画の数
     const MAX_VIDEO_PRELOAD = 1;
-
-    // Fully Kiosk カメラプレビュー
-    const CONTROL_CAMERA_PREVIEW = true;
 
     // =====================================
     // DOM
@@ -56,68 +53,9 @@
 
     let isActive = false;
 
-    // Fullyカメラ設定の保存
-    let originalCamPreview = null;
-
     // メディアキャッシュ
     const mediaCache = new Map();
-
-    // =====================================
-    // Fully Kiosk カメラ制御
-    // =====================================
-
-    function setCamPreview(enabled) {
-
-        if (!CONTROL_CAMERA_PREVIEW) {
-            return;
-        }
-
-        if (typeof fully === "undefined") {
-            return;
-        }
-
-        try {
-            fully.setBooleanSetting(
-                "showCamPreview",
-                enabled
-            );
-
-            console.log(
-                "[ScreenSaver] カメラプレビュー:",
-                enabled ? "ON" : "OFF"
-            );
-
-        } catch (error) {
-            console.warn(
-                "[ScreenSaver] カメラ設定変更失敗",
-                error
-            );
-        }
-    }
-
-    function saveCameraSetting() {
-
-        if (typeof fully === "undefined") {
-            return;
-        }
-
-        try {
-            originalCamPreview =
-                fully.getBooleanSetting("showCamPreview");
-
-            console.log(
-                "[ScreenSaver] 元のカメラ設定:",
-                originalCamPreview
-            );
-
-        } catch (error) {
-            console.warn(
-                "[ScreenSaver] カメラ設定取得失敗",
-                error
-            );
-        }
-    }
-
+    
     // =====================================
     // キャッシュ準備
     // =====================================
@@ -267,9 +205,6 @@
 
         isActive = true;
 
-        // カメラプレビューをOFF
-        setCamPreview(false);
-
         screensaver.classList.add("active");
 
         screensaver.setAttribute(
@@ -313,14 +248,6 @@
         }
 
         stage.replaceChildren();
-
-        // カメラ設定を復元
-        if (originalCamPreview !== null) {
-            setCamPreview(
-                originalCamPreview === true ||
-                originalCamPreview === "true"
-            );
-        }
 
         console.log("[ScreenSaver] 解除");
     }
@@ -550,8 +477,6 @@
     // =====================================
     // 初期化
     // =====================================
-
-    saveCameraSetting();
 
     preloadMedia();
 
