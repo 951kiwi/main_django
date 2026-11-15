@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Device, Command, Card
+from .models import Device, Command, Card, ScreenSaverMedia
 from django.utils.safestring import mark_safe
 from django import forms
 
@@ -249,3 +249,22 @@ class CardAdmin(admin.ModelAdmin):
         "width",
         "height",
     )
+# =========================================
+# ScreenSaver
+# =========================================
+
+@admin.register(ScreenSaverMedia)
+class ScreenSaverMediaAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "media_type",
+        "is_active",
+        "order",
+        "duration",
+        "created_at",
+    )
+
+    list_filter = ("media_type", "is_active")
+    search_fields = ("title",)
+    list_editable = ("is_active", "order", "duration")
+    ordering = ("order", "id")

@@ -1,0 +1,299 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>ScreenSaver Settings</title>
+
+    <link rel="stylesheet"
+          href="{% static 'smarthome/css/screensaver_settings.css' %}">
+</head>
+
+<body>
+
+<div class="settings-container">
+
+    <!-- ヘッダー -->
+    <header class="header">
+
+        <div>
+            <h1>ScreenSaver</h1>
+            <p>MEDIA MANAGEMENT</p>
+        </div>
+
+        <a href="{% url 'home' %}" class="back-button">
+            ← スマートホームへ
+        </a>
+
+    </header>
+
+
+    <!-- メッセージ -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+    <!-- 統計 -->
+    <section class="statistics">
+
+        <div class="stat-card">
+            <span>画像</span>
+            <strong>{{ image_count }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>動画</span>
+            <strong>{{ video_count }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>有効メディア</span>
+            <strong>{{ active_count }}</strong>
+        </div>
+
+    </section>
+
+
+    <!-- アップロード -->
+    <section class="upload-section">
+
+        <h2>メディアを追加</h2>
+
+        <form method="POST"
+              enctype="multipart/form-data"
+              class="upload-form">
+
+            {% csrf_token %}
+
+            <input type="hidden"
+                   name="action"
+                   value="upload">
+
+            <label class="file-drop" for="media-file">
+
+                <div class="upload-icon">＋</div>
+
+                <strong>画像・動画を選択</strong>
+
+                <span>
+                    JPG / PNG / WEBP / GIF / MP4 / WEBM / MOV
+                </span>
+
+                <span id="selected-file">
+                    ファイル未選択
+                </span>
+
+            </label>
+
+            <input
+                type="file"
+                id="media-file"
+                name="file"
+                accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov"
+                required
+            >
+
+            <input
+                type="text"
+                name="title"
+                placeholder="タイトル（省略可能）"
+                class="title-input"
+            >
+
+            <button type="submit" class="upload-button">
+                アップロード
+            </button>
+
+            <small>1ファイル最大500MB</small>
+
+        </form>
+
+    </section>
+
+
+    <!-- メディア一覧 -->
+    <section class="media-section">
+
+        <div class="section-heading">
+            <div>
+                <h2>登録済みメディア</h2>
+                <p>{{ media_list|length }} 件登録</p>
+            </div>
+        </div>
+
+
+        <div class="media-grid">
+
+            {% for item in media_list %}
+
+                <article class="media-card">
+
+                    <!-- プレビュー -->
+                    <div class="preview">
+
+                        {% if item.media_type == "image" %}
+
+                            <img
+                                src="{{ item.file.url }}"
+                                alt="{{ item.title }}"
+                                loading="lazy"
+                            >
+
+                        {% else %}
+
+                            <video
+                                src="{{ item.file.url }}"
+                                muted
+                                playsinline
+                                preload="metadata"
+                                controls
+                            ></video>
+
+                            <span class="video-label">VIDEO</span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- 情報 -->
+                    <div class="media-info">
+
+                        <div class="media-title">
+                            <strong>{{ item.title }}</strong>
+
+                            <span class="type-label">
+                                {{ item.get_media_type_display }}
+                            </span>
+                        </div>
+
+
+                        {% if item.media_type == "image" %}
+
+                            <form method="POST" class="duration-form">
+
+                                {% csrf_token %}
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="duration">
+
+                                <input type="hidden"
+                                       name="media_id"
+                                       value="{{ item.id }}">
+
+                                <label>表示時間</label>
+
+                                <input
+                                    type="number"
+                                    name="duration"
+                                    value="{{ item.duration }}"
+                                    min="1"
+                                    max="3600"
+                                >
+
+                                <span>秒</span>
+
+                                <button type="submit">保存</button>
+
+                            </form>
+
+                        {% else %}
+
+                            <p class="video-description">
+                                動画終了後に次のメディアへ進みます。
+                            </p>
+
+                        {% endif %}
+
+
+                        <!-- 操作 -->
+                        <div class="card-actions">
+
+                            <form method="POST">
+
+                                {% csrf_token %}
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="toggle">
+
+                                <input type="hidden"
+                                       name="media_id"
+                                       value="{{ item.id }}">
+
+                                <button type="submit"
+                                    class="{% if item.is_active %}active-button{% else %}inactive-button{% endif %}">
+
+                                    {% if item.is_active %}
+                                        ON
+                                    {% else %}
+                                        OFF
+                                    {% endif %}
+
+                                </button>
+
+                            </form>
+
+
+                            <form method="POST"
+                                  class="delete-form"
+                                  data-title="{{ item.title }}">
+
+                                {% csrf_token %}
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="delete">
+
+                                <input type="hidden"
+                                       name="media_id"
+                                       value="{{ item.id }}">
+
+                                <button type="submit" class="delete-button">
+                                    削除
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% empty %}
+
+                <div class="empty-state">
+
+                    <div>📁</div>
+
+                    <h3>メディアがありません</h3>
+
+                    <p>画像や動画を追加してください。</p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script src="{% static 'smarthome/js/screensaver_settings.js' %}"></script>
+
+</body>
+</html>

@@ -10,6 +10,11 @@ from django.views.decorators.csrf import (  # POSTをJSから叩く場合のCSRF
 )
 import json
 from django.views.decorators.http import require_GET, require_POST
+from .models import ScreenSaverMedia
+from django.shortcuts import redirect
+from django.views.decorators.http import require_http_methods
+from django.contrib import messages
+from pathlib import Path
 
 def home(request):
     # =========================================================
@@ -64,11 +69,26 @@ def home(request):
         "title" : remote.title,
         "sub_title" : remote.sub_title}
         datas.append(data)
+    # スクリーンセイバー用メディア
+    screensaver_media = []
+
+    for media in ScreenSaverMedia.objects.filter(
+        is_active=True
+    ).order_by("order"):
+
+        screensaver_media.append({
+            "title": media.title,
+            "type": media.media_type,
+            "duration": media.duration,
+            "url": media.file.url,
+        })
+    print(screensaver_media)
     return render(
         request,
         "smarthome/home.html",
         {
             "remotes": datas,
+            "screensaver_media": screensaver_media,
         }
     )
 
@@ -123,3 +143,146 @@ def api_status(request):
     }
 
     return JsonResponse(data)
+
+# =========================================
+# スクリーンセイバー設定ページ
+# =========================================
+
+@require_http_methods(["GET", "POST"])
+def screensaver_settings(request):
+
+    if request.method == "POST":
+
+        action = request.POST.get("action")
+
+        # -----------------------------
+        # メディアアップロード
+        # -----------------------------
+
+        if action == "upload":
+
+            uploaded_file = request.FILES.get("file")
+
+            if not uploaded_file:
+                messages.error(request, "ファイルを選択してください。")
+                return redirect("screensaver_settings")
+
+            if uploaded_file.size > 500 * 1024 * 1024:
+                messages.error(request, "ファイルは500MB以下にしてください。")
+                return redirect("screensaver_settings")
+
+            ext = Path(uploaded_file.name).suffix.lower()
+
+            image_ext = [".jpg", ".jpeg", ".png", ".webp", ".gif"]
+            video_ext = [".mp4", ".webm", ".mov"]
+
+            if ext in image_ext:
+                media_type = "image"
+
+            elif ext in video_ext:
+                media_type = "video"
+
+            else:
+                messages.error(request, "対応していないファイル形式です。")
+                return redirect("screensaver_settings")
+
+            title = request.POST.get("title", "").strip()
+
+            if not title:
+                title = Path(uploaded_file.name).stem
+
+            ScreenSaverMedia.objects.create(
+                title=title,
+                media_type=media_type,
+                file=uploaded_file,
+                is_active=True,
+                order=(
+                    ScreenSaverMedia.objects.count() + 1
+                ),
+                duration=10
+            )
+
+            messages.success(request, "メディアを追加しました。")
+
+        # -----------------------------
+        # 削除
+        # -----------------------------
+
+        elif action == "delete":
+
+            media_id = request.POST.get("media_id")
+
+            media = get_object_or_404(
+                ScreenSaverMedia,
+                pk=media_id
+            )
+
+            if media.file:
+                media.file.delete(save=False)
+
+            media.delete()
+
+            messages.success(request, "削除しました。")
+
+        # -----------------------------
+        # 有効・無効
+        # -----------------------------
+
+        elif action == "toggle":
+
+            media = get_object_or_404(
+                ScreenSaverMedia,
+                pk=request.POST.get("media_id")
+            )
+
+            media.is_active = not media.is_active
+            media.save(update_fields=["is_active"])
+
+            messages.success(request, "設定を変更しました。")
+
+        # -----------------------------
+        # 画像表示時間変更
+        # -----------------------------
+
+        elif action == "duration":
+
+            media = get_object_or_404(
+                ScreenSaverMedia,
+                pk=request.POST.get("media_id")
+            )
+
+            if media.media_type == "image":
+                try:
+                    duration = int(request.POST.get("duration", 10))
+
+                    if 1 <= duration <= 3600:
+                        media.duration = duration
+                        media.save(update_fields=["duration"])
+                        messages.success(request, "表示時間を変更しました。")
+                    else:
+                        messages.error(request, "1〜3600秒で指定してください。")
+
+                except (ValueError, TypeError):
+                    messages.error(request, "秒数が正しくありません。")
+
+        return redirect("screensaver_settings")
+
+    # -----------------------------
+    # GET: 一覧表示
+    # -----------------------------
+
+    media_list = ScreenSaverMedia.objects.all()
+
+    print(media_list)
+    context = {
+        "media_list": media_list,
+        "image_count": media_list.filter(media_type="image").count(),
+        "video_count": media_list.filter(media_type="video").count(),
+        "active_count": media_list.filter(is_active=True).count(),
+    }
+
+    return render(
+        request,
+        "smarthome/screensaver_settings.html",
+        context
+    )

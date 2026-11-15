@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.core.validators import FileExtensionValidator
 
 class Device(models.Model):
 
@@ -149,3 +149,39 @@ class DailyPowerConsumption(models.Model):
 
     class Meta:
         unique_together = ("device", "date")
+
+
+def screensaver_upload_path(instance, filename):
+    folder = (
+        "videos"
+        if instance.media_type == "video"
+        else "images"
+    )
+    return f"smarthome/screensaver/{folder}/{filename}"
+
+class ScreenSaverMedia(models.Model):
+    MEDIA_TYPES = [("image", "画像"),("video", "動画"),]
+    title = models.CharField( max_length=100)
+    media_type = models.CharField(max_length=10,choices=MEDIA_TYPES)
+    file = models.FileField(
+        upload_to=screensaver_upload_path,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=[
+                    "jpg", "jpeg", "png", "webp", "gif",
+                    "mp4", "webm", "mov"
+                ]
+            )
+        ]
+    )
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    duration = models.PositiveIntegerField(default=10,help_text="画像の表示秒数。動画の場合は使用しない")
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "スクリーンセイバーメディア"
+        verbose_name_plural = "スクリーンセイバーメディア"
+
+    def __str__(self):
+        return self.title

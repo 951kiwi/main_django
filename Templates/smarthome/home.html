@@ -17,6 +17,10 @@
     <form style="display: none;">
       {% csrf_token %}
     </form>
+    <!-- スクリーンセイバー -->
+    <div id="screensaver" aria-hidden="true">
+        <div id="screensaver-stage"></div>
+    </div>
     <!-- 操作不能用オーバーレイ -->
     <div id="lock-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center; cursor: wait; backdrop-filter: blur(2px);">
       <div style="background: #ffffff; color: #333333; padding: 36px 48px; border-radius: 16px; font-size: 1.25rem; font-weight: 600; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); text-align: center; min-width: 280px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
@@ -72,7 +76,7 @@
             <span>履歴</span>
           </a>
 
-          <a class="menu-item" href="#">
+          <a class="menu-item"  href="{% url 'screensaver_settings' %}">
             <span class="menu-icon">⚙</span>
             <span>設定</span>
           </a>
@@ -659,6 +663,8 @@
         </section>
       </main>
     </div>
+{{ screensaver_media|json_script:"screensaver-data" }}
+<script src="{% static 'smarthome/js/screensaver.js' %}"></script>
 
     <script>
       // ============================================================
@@ -1772,7 +1778,12 @@
       
                   try {
                       window.updateFullyDebug('② カメラ動き検出');
+                      // ① スクリーンセイバーを解除
+                      // ② 無操作タイマーを0秒に戻す
+                      window.resetScreensaverTimer?.('human-detection');
+                      // ③ 既存の動体検知処理
                       window.showMotionDetected();
+                      // ④ 既存の5分同期処理
                       window.checkMotionSync();
       
                   } catch (error) {
@@ -1811,6 +1822,7 @@
       // ─────────────────────────────────────────
       // SmartHome JavaScript 終了
       // ─────────────────────────────────────────
+      
     </script>
   </body>
 </html>

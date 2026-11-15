@@ -20,6 +20,7 @@ from . import views
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("screensaver/",views.screensaver_settings,name="screensaver_settings"),
     # ⭐ 全デバイス一括取得は単体取得より「前」に置く
     path("api/devices/status/all/", views.get_all_devices_status_view, name="all_devices_status"),
 ]
