@@ -6,9 +6,10 @@
     // 設定
     // =========================================
 
-    const IDLE_TIME = 10 * 1000;           // 起動までの待機時間
-    const DEFAULT_IMAGE_DURATION = 10;     // 画像の標準表示秒数
-    const ERROR_RETRY_DELAY = 5000;        // 全メディア失敗時の待機時間
+    const IDLE_TIME = 10 * 1000;
+    const DEFAULT_IMAGE_DURATION = 10;
+    const ERROR_RETRY_DELAY = 5000;
+    const FADE_DURATION = 300;
 
     // =========================================
     // DOM
@@ -36,7 +37,7 @@
         const rawData = JSON.parse(dataElement.textContent || "[]");
 
         mediaList = rawData
-            .map((media) => {
+            .map(media => {
                 const file = media.file;
 
                 return {
@@ -57,12 +58,10 @@
                             : DEFAULT_IMAGE_DURATION
                 };
             })
-            .filter((media) => {
-                return (
-                    media.url &&
-                    ["image", "video"].includes(media.type)
-                );
-            });
+            .filter(media =>
+                media.url &&
+                ["image", "video"].includes(media.type)
+            );
 
     } catch (error) {
         console.error("メディアデータの読み込みに失敗:", error);
@@ -74,18 +73,22 @@
     // =========================================
 
     let isActive = false;
-
-    let currentIndex = 0;
-
     let currentElement = null;
 
     let idleTimer = null;
-
     let mediaTimer = null;
 
     let errorCount = 0;
-
     let destroyed = false;
+
+    // ランダム再生
+    let playOrder = [];
+    let currentIndex = 0;
+    let lastPlayedId = null;
+
+    // 切り替え制御
+    let isTransitioning = false;
+    let transitionToken = 0;
 
     // =========================================
     // タイマー管理
@@ -105,6 +108,62 @@
         }
     }
 
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // =========================================
+    // ランダム再生
+    // =========================================
+
+    function shuffleMedia(list) {
+
+        const shuffled = [...list];
+
+        // Fisher-Yates シャッフル
+        for (let i = shuffled.length - 1; i > 0; i--) {
+
+            const j = Math.floor(Math.random() * (i + 1));
+
+            [shuffled[i], shuffled[j]] =
+                [shuffled[j], shuffled[i]];
+        }
+
+        // 前回の最後と次回の最初が同じになるのを防止
+        if (
+            shuffled.length > 1 &&
+            lastPlayedId !== null &&
+            shuffled[0].id === lastPlayedId
+        ) {
+            const swapIndex = 1 + Math.floor(
+                Math.random() * (shuffled.length - 1)
+            );
+
+            [shuffled[0], shuffled[swapIndex]] =
+                [shuffled[swapIndex], shuffled[0]];
+        }
+
+        return shuffled;
+    }
+
+    function initializePlayOrder() {
+        playOrder = shuffleMedia(mediaList);
+        currentIndex = 0;
+    }
+
+    function getNextMedia() {
+
+        if (currentIndex >= playOrder.length) {
+            initializePlayOrder();
+        }
+
+        const media = playOrder[currentIndex];
+
+        currentIndex++;
+
+        return media;
+    }
+
     // =========================================
     // メディア解放
     // =========================================
@@ -119,35 +178,74 @@
         }
 
         const element = currentElement;
-
         currentElement = null;
 
-        // 動画の完全停止・読み込み解除
         if (element.tagName === "VIDEO") {
 
             element.pause();
 
             element.removeAttribute("src");
 
-            element.querySelectorAll("source").forEach((source) => {
+            element.querySelectorAll("source").forEach(source => {
                 source.removeAttribute("src");
             });
 
             element.load();
         }
 
-        // 画像の参照解除
         if (element.tagName === "IMG") {
-
             element.removeAttribute("src");
             element.removeAttribute("srcset");
         }
 
-        // DOMから削除
         element.remove();
 
-        // ステージ内の残存要素も削除
         stage.replaceChildren();
+    }
+
+    // =========================================
+    // フェードアウト
+    // =========================================
+
+    async function fadeOutCurrent() {
+
+        const element = currentElement;
+
+        if (!element) return;
+
+        element.style.transition =
+            `opacity ${FADE_DURATION}ms ease`;
+
+        element.style.opacity = "0";
+
+        await sleep(FADE_DURATION);
+    }
+
+    // =========================================
+    // フェードイン
+    // =========================================
+
+    function fadeInElement(element) {
+
+        element.style.opacity = "0";
+
+        element.style.transition =
+            `opacity ${FADE_DURATION}ms ease`;
+
+        stage.appendChild(element);
+
+        // 描画を確定してから透明度を変更
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+
+                if (
+                    currentElement === element &&
+                    isActive
+                ) {
+                    element.style.opacity = "1";
+                }
+            });
+        });
     }
 
     // =========================================
@@ -169,9 +267,10 @@
 
         isActive = true;
 
-        currentIndex = 0;
-
         errorCount = 0;
+        lastPlayedId = null;
+
+        initializePlayOrder();
 
         screensaver.classList.add("active");
 
@@ -186,13 +285,16 @@
 
         clearIdleTimer();
 
+        // 非同期切り替え処理を無効化
+        transitionToken++;
+
+        isTransitioning = false;
+
         if (isActive) {
             isActive = false;
-
             screensaver.classList.remove("active");
         }
 
-        // メディアを必ず解放
         releaseCurrentMedia();
 
         errorCount = 0;
@@ -206,30 +308,60 @@
     // 次のメディアへ
     // =========================================
 
-    function playNextMedia() {
+    async function playNextMedia() {
 
-        if (!isActive || destroyed || mediaList.length === 0) {
+        if (
+            !isActive ||
+            destroyed ||
+            mediaList.length === 0 ||
+            isTransitioning
+        ) {
             return;
         }
 
-        // 前の画像・動画を解放
-        releaseCurrentMedia();
+        isTransitioning = true;
 
-        // 全メディアを一周した場合
-        if (currentIndex >= mediaList.length) {
-            currentIndex = 0;
-        }
+        const token = ++transitionToken;
 
-        const media = mediaList[currentIndex];
+        try {
 
-        currentIndex++;
+            // 2枚目以降は前のメディアをフェードアウト
+            if (currentElement) {
+                await fadeOutCurrent();
+            }
 
-        if (media.type === "image") {
-            playImage(media);
-        } else if (media.type === "video") {
-            playVideo(media);
-        } else {
-            handleMediaError();
+            if (
+                !isActive ||
+                destroyed ||
+                token !== transitionToken
+            ) {
+                return;
+            }
+
+            // 前のメディアを解放
+            releaseCurrentMedia();
+
+            const media = getNextMedia();
+
+            if (!media) return;
+
+            lastPlayedId = media.id;
+
+            isTransitioning = false;
+
+            if (media.type === "image") {
+                playImage(media);
+            } else if (media.type === "video") {
+                playVideo(media);
+            } else {
+                handleMediaError();
+            }
+
+        } finally {
+
+            if (token === transitionToken) {
+                isTransitioning = false;
+            }
         }
     }
 
@@ -246,9 +378,7 @@
         currentElement = img;
 
         img.alt = media.title;
-
         img.decoding = "async";
-
         img.draggable = false;
 
         img.addEventListener("load", () => {
@@ -259,11 +389,17 @@
 
             errorCount = 0;
 
+            // 画像読み込み後にフェードイン
+            fadeInElement(img);
+
             clearMediaTimer();
 
             mediaTimer = setTimeout(() => {
 
-                if (currentElement === img) {
+                if (
+                    currentElement === img &&
+                    isActive
+                ) {
                     playNextMedia();
                 }
 
@@ -278,8 +414,6 @@
             }
 
         }, { once: true });
-
-        stage.appendChild(img);
 
         img.src = media.url;
     }
@@ -296,27 +430,44 @@
 
         currentElement = video;
 
-        video.autoplay = true;
-
+        video.autoplay = false;
         video.muted = true;
-
         video.playsInline = true;
-
         video.controls = false;
-
         video.loop = false;
-
         video.preload = "metadata";
-
         video.disablePictureInPicture = true;
 
-        video.addEventListener("playing", () => {
+        video.addEventListener("loadeddata", async () => {
 
-            if (currentElement === video) {
-                errorCount = 0;
+            if (!isActive || currentElement !== video) {
+                return;
             }
 
-        });
+            errorCount = 0;
+
+            // 動画をフェードイン
+            fadeInElement(video);
+
+            try {
+
+                await video.play();
+
+            } catch (error) {
+
+                if (
+                    currentElement !== video ||
+                    !isActive
+                ) {
+                    return;
+                }
+
+                console.warn("動画の再生に失敗:", media.url, error);
+
+                handleMediaError();
+            }
+
+        }, { once: true });
 
         video.addEventListener("ended", () => {
 
@@ -334,27 +485,9 @@
 
         });
 
-        stage.appendChild(video);
-
         video.src = media.url;
 
         video.load();
-
-        const playPromise = video.play();
-
-        if (playPromise !== undefined) {
-
-            playPromise.catch((error) => {
-
-                if (currentElement !== video || !isActive) {
-                    return;
-                }
-
-                console.warn("動画の再生に失敗:", media.url, error);
-
-                handleMediaError();
-            });
-        }
     }
 
     // =========================================
@@ -363,16 +496,16 @@
 
     function handleMediaError() {
 
-        if (!isActive) return;
+        if (!isActive || destroyed) return;
 
         errorCount++;
-
-        releaseCurrentMedia();
 
         // 全メディアが連続して失敗した場合
         if (errorCount >= mediaList.length) {
 
             errorCount = 0;
+
+            releaseCurrentMedia();
 
             clearMediaTimer();
 
@@ -428,11 +561,8 @@
         }
 
         if (isActive) {
-
             hideScreensaver();
-
         } else {
-
             startIdleTimer();
         }
     }
@@ -447,7 +577,7 @@
         "click"
     ];
 
-    activityEvents.forEach((eventName) => {
+    activityEvents.forEach(eventName => {
 
         document.addEventListener(
             eventName,
@@ -466,6 +596,9 @@
         if (document.hidden) {
 
             clearIdleTimer();
+
+            transitionToken++;
+            isTransitioning = false;
 
             if (isActive) {
                 isActive = false;
@@ -495,8 +628,11 @@
 
         destroyed = true;
 
-        clearIdleTimer();
+        transitionToken++;
 
+        isTransitioning = false;
+
+        clearIdleTimer();
         clearMediaTimer();
 
         isActive = false;
@@ -519,7 +655,8 @@
     console.log("スクリーンセイバー初期化完了", {
         mediaCount: mediaList.length,
         idleTime: IDLE_TIME,
-        defaultImageDuration: DEFAULT_IMAGE_DURATION
+        fadeDuration: FADE_DURATION,
+        randomPlayback: true
     });
 
 })();
