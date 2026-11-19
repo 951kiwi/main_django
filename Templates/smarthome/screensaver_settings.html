@@ -1,3 +1,4 @@
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -18,7 +19,6 @@
 
     <!-- ヘッダー -->
     <header class="header">
-
         <div>
             <h1>ScreenSaver</h1>
             <p>MEDIA MANAGEMENT</p>
@@ -27,7 +27,6 @@
         <a href="{% url 'home' %}" class="back-button">
             ← スマートホームへ
         </a>
-
     </header>
 
 
@@ -71,26 +70,27 @@
 
         <form method="POST"
               enctype="multipart/form-data"
-              class="upload-form">
+              class="upload-form"
+              id="upload-form">
 
             {% csrf_token %}
 
-            <input type="hidden"
-                   name="action"
-                   value="upload">
+            <input type="hidden" name="action" value="upload">
 
-            <label class="file-drop" for="media-file">
+            <label class="file-drop"
+                   for="media-file"
+                   id="file-drop">
 
                 <div class="upload-icon">＋</div>
 
-                <strong>画像・動画を選択</strong>
+                <strong>画像・動画をまとめて選択</strong>
 
                 <span>
                     JPG / PNG / WEBP / GIF / MP4 / WEBM / MOV
                 </span>
 
-                <span id="selected-file">
-                    ファイル未選択
+                <span>
+                    クリックまたはドラッグ＆ドロップ
                 </span>
 
             </label>
@@ -98,20 +98,24 @@
             <input
                 type="file"
                 id="media-file"
-                name="file"
+                name="files"
                 accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov"
+                multiple
                 required
             >
 
-            <input
-                type="text"
-                name="title"
-                placeholder="タイトル（省略可能）"
-                class="title-input"
-            >
+            <!-- 選択ファイル -->
+            <div id="selected-files" class="selected-files">
+                ファイル未選択
+            </div>
 
-            <button type="submit" class="upload-button">
-                アップロード
+            <!-- アップロード進捗 -->
+            <div id="upload-progress-list"></div>
+
+            <button type="submit"
+                    class="upload-button"
+                    id="upload-button">
+                一括アップロード
             </button>
 
             <small>1ファイル最大500MB</small>
@@ -170,17 +174,21 @@
                     <div class="media-info">
 
                         <div class="media-title">
+
                             <strong>{{ item.title }}</strong>
 
                             <span class="type-label">
                                 {{ item.get_media_type_display }}
                             </span>
+
                         </div>
 
 
+                        <!-- 画像表示時間 -->
                         {% if item.media_type == "image" %}
 
-                            <form method="POST" class="duration-form">
+                            <form method="POST"
+                                  class="duration-form">
 
                                 {% csrf_token %}
 
@@ -200,11 +208,14 @@
                                     value="{{ item.duration }}"
                                     min="1"
                                     max="3600"
+                                    required
                                 >
 
                                 <span>秒</span>
 
-                                <button type="submit">保存</button>
+                                <button type="submit">
+                                    保存
+                                </button>
 
                             </form>
 
@@ -220,6 +231,7 @@
                         <!-- 操作 -->
                         <div class="card-actions">
 
+                            <!-- ON / OFF -->
                             <form method="POST">
 
                                 {% csrf_token %}
@@ -246,6 +258,7 @@
                             </form>
 
 
+                            <!-- 削除 -->
                             <form method="POST"
                                   class="delete-form"
                                   data-title="{{ item.title }}">
@@ -260,7 +273,8 @@
                                        name="media_id"
                                        value="{{ item.id }}">
 
-                                <button type="submit" class="delete-button">
+                                <button type="submit"
+                                        class="delete-button">
                                     削除
                                 </button>
 
@@ -293,6 +307,7 @@
 </div>
 
 
+<!-- JavaScript -->
 <script src="{% static 'smarthome/js/screensaver_settings.js' %}"></script>
 
 </body>

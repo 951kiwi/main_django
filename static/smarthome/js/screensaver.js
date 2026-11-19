@@ -1,491 +1,525 @@
-(() => {
 
+(() => {
     "use strict";
 
-    // =====================================
+    // =========================================
     // 設定
-    // =====================================
+    // =========================================
 
-    const IDLE_TIME = 1 * 1000;
+    const IDLE_TIME = 10 * 1000;           // 起動までの待機時間
+    const DEFAULT_IMAGE_DURATION = 10;     // 画像の標準表示秒数
+    const ERROR_RETRY_DELAY = 5000;        // 全メディア失敗時の待機時間
 
-    const DEFAULT_IMAGE_DURATION = 1;
-
-    // 同時に先読みする動画の数
-    const MAX_VIDEO_PRELOAD = 1;
-
-    // =====================================
+    // =========================================
     // DOM
-    // =====================================
+    // =========================================
 
     const screensaver = document.getElementById("screensaver");
     const stage = document.getElementById("screensaver-stage");
-    const dataElement = document.getElementById("screensaver-data");
+
+    const dataElement =
+        document.getElementById("screensaver-media-data") ||
+        document.getElementById("screensaver-data");
 
     if (!screensaver || !stage || !dataElement) {
-        console.error("[ScreenSaver] DOMが見つかりません");
+        console.error("スクリーンセイバーのDOMが見つかりません。");
         return;
     }
 
-    // =====================================
-    // メディアデータ
-    // =====================================
+    // =========================================
+    // メディアデータ取得
+    // =========================================
 
     let mediaList = [];
 
     try {
-        mediaList = JSON.parse(dataElement.textContent);
-    } catch (error) {
-        console.error("[ScreenSaver] JSONエラー", error);
-    }
+        const rawData = JSON.parse(dataElement.textContent || "[]");
 
-    if (!Array.isArray(mediaList)) {
+        mediaList = rawData
+            .map((media) => {
+                const file = media.file;
+
+                return {
+                    id: media.id,
+                    title: media.title || "",
+                    type: String(
+                        media.type || media.media_type || ""
+                    ).toLowerCase(),
+
+                    url:
+                        media.url ||
+                        (typeof file === "string" ? file : file?.url) ||
+                        "",
+
+                    duration:
+                        Number(media.duration) > 0
+                            ? Number(media.duration)
+                            : DEFAULT_IMAGE_DURATION
+                };
+            })
+            .filter((media) => {
+                return (
+                    media.url &&
+                    ["image", "video"].includes(media.type)
+                );
+            });
+
+    } catch (error) {
+        console.error("メディアデータの読み込みに失敗:", error);
         mediaList = [];
     }
 
-    // =====================================
+    // =========================================
     // 状態管理
-    // =====================================
-
-    let currentIndex = 0;
-
-    let idleTimer = null;
-    let mediaTimer = null;
+    // =========================================
 
     let isActive = false;
 
-    // メディアキャッシュ
-    const mediaCache = new Map();
-    
-    // =====================================
-    // キャッシュ準備
-    // =====================================
+    let currentIndex = 0;
 
-    function preloadMedia() {
+    let currentElement = null;
 
-        let videoPreloadCount = 0;
+    let idleTimer = null;
 
-        mediaList.forEach((media, index) => {
+    let mediaTimer = null;
 
-            if (!media.url || !media.type) {
-                console.warn(
-                    "[ScreenSaver] メディア情報不足:",
-                    media
-                );
+    let errorCount = 0;
+
+    let destroyed = false;
+
+    // =========================================
+    // タイマー管理
+    // =========================================
+
+    function clearIdleTimer() {
+        if (idleTimer !== null) {
+            clearTimeout(idleTimer);
+            idleTimer = null;
+        }
+    }
+
+    function clearMediaTimer() {
+        if (mediaTimer !== null) {
+            clearTimeout(mediaTimer);
+            mediaTimer = null;
+        }
+    }
+
+    // =========================================
+    // メディア解放
+    // =========================================
+
+    function releaseCurrentMedia() {
+
+        clearMediaTimer();
+
+        if (!currentElement) {
+            stage.replaceChildren();
+            return;
+        }
+
+        const element = currentElement;
+
+        currentElement = null;
+
+        // 動画の完全停止・読み込み解除
+        if (element.tagName === "VIDEO") {
+
+            element.pause();
+
+            element.removeAttribute("src");
+
+            element.querySelectorAll("source").forEach((source) => {
+                source.removeAttribute("src");
+            });
+
+            element.load();
+        }
+
+        // 画像の参照解除
+        if (element.tagName === "IMG") {
+
+            element.removeAttribute("src");
+            element.removeAttribute("srcset");
+        }
+
+        // DOMから削除
+        element.remove();
+
+        // ステージ内の残存要素も削除
+        stage.replaceChildren();
+    }
+
+    // =========================================
+    // スクリーンセイバー表示
+    // =========================================
+
+    function showScreensaver() {
+
+        if (
+            destroyed ||
+            isActive ||
+            mediaList.length === 0 ||
+            document.hidden
+        ) {
+            return;
+        }
+
+        clearIdleTimer();
+
+        isActive = true;
+
+        currentIndex = 0;
+
+        errorCount = 0;
+
+        screensaver.classList.add("active");
+
+        playNextMedia();
+    }
+
+    // =========================================
+    // スクリーンセイバー終了
+    // =========================================
+
+    function hideScreensaver() {
+
+        clearIdleTimer();
+
+        if (isActive) {
+            isActive = false;
+
+            screensaver.classList.remove("active");
+        }
+
+        // メディアを必ず解放
+        releaseCurrentMedia();
+
+        errorCount = 0;
+
+        if (!destroyed && !document.hidden) {
+            startIdleTimer();
+        }
+    }
+
+    // =========================================
+    // 次のメディアへ
+    // =========================================
+
+    function playNextMedia() {
+
+        if (!isActive || destroyed || mediaList.length === 0) {
+            return;
+        }
+
+        // 前の画像・動画を解放
+        releaseCurrentMedia();
+
+        // 全メディアを一周した場合
+        if (currentIndex >= mediaList.length) {
+            currentIndex = 0;
+        }
+
+        const media = mediaList[currentIndex];
+
+        currentIndex++;
+
+        if (media.type === "image") {
+            playImage(media);
+        } else if (media.type === "video") {
+            playVideo(media);
+        } else {
+            handleMediaError();
+        }
+    }
+
+    // =========================================
+    // 画像再生
+    // =========================================
+
+    function playImage(media) {
+
+        if (!isActive) return;
+
+        const img = document.createElement("img");
+
+        currentElement = img;
+
+        img.alt = media.title;
+
+        img.decoding = "async";
+
+        img.draggable = false;
+
+        img.addEventListener("load", () => {
+
+            if (!isActive || currentElement !== img) {
                 return;
             }
 
-            if (mediaCache.has(media.url)) {
-                return;
+            errorCount = 0;
+
+            clearMediaTimer();
+
+            mediaTimer = setTimeout(() => {
+
+                if (currentElement === img) {
+                    playNextMedia();
+                }
+
+            }, media.duration * 1000);
+
+        }, { once: true });
+
+        img.addEventListener("error", () => {
+
+            if (currentElement === img) {
+                handleMediaError();
             }
 
-            // ---------------------------------
-            // 画像
-            // ---------------------------------
+        }, { once: true });
 
-            if (media.type === "image") {
+        stage.appendChild(img);
 
-                const img = new Image();
+        img.src = media.url;
+    }
 
-                const cacheItem = {
-                    type: "image",
-                    element: img,
-                    loaded: false,
-                    failed: false
-                };
+    // =========================================
+    // 動画再生
+    // =========================================
 
-                mediaCache.set(media.url, cacheItem);
+    function playVideo(media) {
 
-                img.onload = () => {
-                    cacheItem.loaded = true;
+        if (!isActive) return;
 
-                    console.log(
-                        "[ScreenSaver] 画像キャッシュ完了:",
-                        media.title
-                    );
-                };
+        const video = document.createElement("video");
 
-                img.onerror = () => {
-                    cacheItem.failed = true;
+        currentElement = video;
 
-                    console.error(
-                        "[ScreenSaver] 画像キャッシュ失敗:",
-                        media.url
-                    );
-                };
+        video.autoplay = true;
 
-                img.src = media.url;
+        video.muted = true;
 
-            }
+        video.playsInline = true;
 
-            // ---------------------------------
-            // 動画
-            // ---------------------------------
+        video.controls = false;
 
-            else if (
-                media.type === "video" &&
-                videoPreloadCount < MAX_VIDEO_PRELOAD
-            ) {
+        video.loop = false;
 
-                const video = document.createElement("video");
+        video.preload = "metadata";
 
-                video.preload = "auto";
-                video.muted = true;
-                video.playsInline = true;
-                video.src = media.url;
+        video.disablePictureInPicture = true;
 
-                const cacheItem = {
-                    type: "video",
-                    element: video,
-                    loaded: false,
-                    failed: false
-                };
+        video.addEventListener("playing", () => {
 
-                mediaCache.set(media.url, cacheItem);
-
-                video.addEventListener("canplay", () => {
-
-                    cacheItem.loaded = true;
-
-                    console.log(
-                        "[ScreenSaver] 動画キャッシュ準備完了:",
-                        media.title
-                    );
-
-                }, { once: true });
-
-                video.addEventListener("error", () => {
-
-                    cacheItem.failed = true;
-
-                    console.error(
-                        "[ScreenSaver] 動画キャッシュ失敗:",
-                        media.url
-                    );
-
-                }, { once: true });
-
-                videoPreloadCount++;
-
-            }
-
-            else if (media.type === "video") {
-
-                // 後続動画は再生時に読み込む
-                mediaCache.set(media.url, {
-                    type: "video",
-                    element: null,
-                    loaded: false,
-                    failed: false
-                });
-
+            if (currentElement === video) {
+                errorCount = 0;
             }
 
         });
 
-        console.log(
-            "[ScreenSaver] キャッシュ開始:",
-            mediaCache.size,
-            "件"
-        );
-    }
+        video.addEventListener("ended", () => {
 
-    // =====================================
-    // スクリーンセーバー表示
-    // =====================================
+            if (currentElement === video) {
+                playNextMedia();
+            }
 
-    function showScreensaver() {
+        });
 
-        if (isActive || mediaList.length === 0) {
-            console.warn("[ScreenSaver] 起動できません", {
-                isActive,
-                mediaCount: mediaList.length
+        video.addEventListener("error", () => {
+
+            if (currentElement === video) {
+                handleMediaError();
+            }
+
+        });
+
+        stage.appendChild(video);
+
+        video.src = media.url;
+
+        video.load();
+
+        const playPromise = video.play();
+
+        if (playPromise !== undefined) {
+
+            playPromise.catch((error) => {
+
+                if (currentElement !== video || !isActive) {
+                    return;
+                }
+
+                console.warn("動画の再生に失敗:", media.url, error);
+
+                handleMediaError();
             });
-            return;
         }
-
-        isActive = true;
-
-        screensaver.classList.add("active");
-
-        screensaver.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-        console.log("[ScreenSaver] 表示開始");
-
-        playCurrentMedia();
     }
 
-    // =====================================
-    // スクリーンセーバー解除
-    // =====================================
+    // =========================================
+    // メディアエラー処理
+    // =========================================
 
-    function hideScreensaver() {
+    function handleMediaError() {
 
-        if (!isActive) {
+        if (!isActive) return;
+
+        errorCount++;
+
+        releaseCurrentMedia();
+
+        // 全メディアが連続して失敗した場合
+        if (errorCount >= mediaList.length) {
+
+            errorCount = 0;
+
+            clearMediaTimer();
+
+            mediaTimer = setTimeout(() => {
+
+                if (isActive) {
+                    playNextMedia();
+                }
+
+            }, ERROR_RETRY_DELAY);
+
             return;
         }
+
+        // 次のメディアへ
+        playNextMedia();
+    }
+
+    // =========================================
+    // 操作がない時間を計測
+    // =========================================
+
+    function startIdleTimer() {
+
+        clearIdleTimer();
+
+        if (
+            destroyed ||
+            document.hidden ||
+            isActive ||
+            mediaList.length === 0
+        ) {
+            return;
+        }
+
+        idleTimer = setTimeout(() => {
+
+            idleTimer = null;
+
+            showScreensaver();
+
+        }, IDLE_TIME);
+    }
+
+    // =========================================
+    // ユーザー操作検知
+    // =========================================
+
+    function handleUserActivity() {
+
+        if (destroyed || document.hidden) {
+            return;
+        }
+
+        if (isActive) {
+
+            hideScreensaver();
+
+        } else {
+
+            startIdleTimer();
+        }
+    }
+
+    const activityEvents = [
+        "pointerdown",
+        "pointermove",
+        "keydown",
+        "wheel",
+        "scroll",
+        "touchstart",
+        "click"
+    ];
+
+    activityEvents.forEach((eventName) => {
+
+        document.addEventListener(
+            eventName,
+            handleUserActivity,
+            { passive: true }
+        );
+
+    });
+
+    // =========================================
+    // タブの表示・非表示
+    // =========================================
+
+    function handleVisibilityChange() {
+
+        if (document.hidden) {
+
+            clearIdleTimer();
+
+            if (isActive) {
+                isActive = false;
+                screensaver.classList.remove("active");
+            }
+
+            releaseCurrentMedia();
+
+            errorCount = 0;
+
+        } else {
+
+            startIdleTimer();
+        }
+    }
+
+    document.addEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+    );
+
+    // =========================================
+    // ページ終了時の解放
+    // =========================================
+
+    function handlePageHide() {
+
+        destroyed = true;
+
+        clearIdleTimer();
+
+        clearMediaTimer();
 
         isActive = false;
 
         screensaver.classList.remove("active");
 
-        screensaver.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-        clearTimeout(mediaTimer);
-
-        // 再生中の動画を停止
-        const video = stage.querySelector("video");
-
-        if (video) {
-            video.pause();
-            video.removeAttribute("src");
-            video.load();
-        }
-
-        stage.replaceChildren();
-
-        console.log("[ScreenSaver] 解除");
+        releaseCurrentMedia();
     }
 
-    // =====================================
-    // 次のメディア
-    // =====================================
+    window.addEventListener("pagehide", handlePageHide);
 
-    function nextMedia() {
-
-        if (!isActive || mediaList.length === 0) {
-            return;
-        }
-
-        currentIndex++;
-
-        if (currentIndex >= mediaList.length) {
-            currentIndex = 0;
-        }
-
-        playCurrentMedia();
-    }
-
-    // =====================================
-    // メディア再生
-    // =====================================
-
-    function playCurrentMedia() {
-
-        if (!isActive || mediaList.length === 0) {
-            return;
-        }
-
-        clearTimeout(mediaTimer);
-
-        const media = mediaList[currentIndex];
-
-        stage.replaceChildren();
-
-        console.log(
-            "[ScreenSaver] 再生:",
-            media.title
-        );
-
-        // ---------------------------------
-        // 画像
-        // ---------------------------------
-
-        if (media.type === "image") {
-
-            const cached = mediaCache.get(media.url);
-
-            const img = new Image();
-
-            img.alt = media.title || "";
-
-            // キャッシュが読み込み済みなら再利用
-            if (
-                cached &&
-                cached.type === "image" &&
-                cached.loaded
-            ) {
-                img.src = cached.element.src;
-            } else {
-                img.src = media.url;
-            }
-
-            img.onload = () => {
-
-                if (!isActive) {
-                    return;
-                }
-
-                const duration = Math.max(
-                    1,
-                    Number(media.duration) ||
-                    DEFAULT_IMAGE_DURATION
-                );
-
-                mediaTimer = setTimeout(
-                    nextMedia,
-                    duration * 1000
-                );
-
-            };
-
-            img.onerror = () => {
-
-                console.error(
-                    "[ScreenSaver] 画像読み込み失敗:",
-                    media.url
-                );
-
-                nextMedia();
-
-            };
-
-            stage.appendChild(img);
-
-        }
-
-        // ---------------------------------
-        // 動画
-        // ---------------------------------
-
-        else if (media.type === "video") {
-
-            const cached = mediaCache.get(media.url);
-
-            // キャッシュ動画を再利用
-            const video =
-                cached &&
-                cached.type === "video" &&
-                cached.element
-                    ? cached.element
-                    : document.createElement("video");
-
-            video.pause();
-
-            video.removeAttribute("src");
-
-            video.src = media.url;
-
-            video.autoplay = true;
-            video.muted = true;
-            video.playsInline = true;
-            video.preload = "auto";
-            video.controls = false;
-
-            video.onended = nextMedia;
-
-            video.onerror = () => {
-
-                console.error(
-                    "[ScreenSaver] 動画読み込み失敗:",
-                    media.url
-                );
-
-                nextMedia();
-
-            };
-
-            stage.appendChild(video);
-
-            video.play().catch(error => {
-
-                console.error(
-                    "[ScreenSaver] 動画再生失敗:",
-                    error
-                );
-
-                nextMedia();
-
-            });
-
-        }
-
-        // ---------------------------------
-        // 未対応
-        // ---------------------------------
-
-        else {
-
-            console.warn(
-                "[ScreenSaver] 未対応の種類:",
-                media.type
-            );
-
-            nextMedia();
-
-        }
-    }
-
-    // =====================================
-    // 無操作タイマー
-    // =====================================
-
-    function resetScreensaverTimer(source = "user") {
-
-        hideScreensaver();
-
-        clearTimeout(idleTimer);
-
-        idleTimer = setTimeout(() => {
-
-            console.log("[ScreenSaver] 無操作時間経過");
-
-            showScreensaver();
-
-        }, IDLE_TIME);
-
-        console.log(
-            `[ScreenSaver] タイマーリセット: ${source}`
-        );
-    }
-
-    // Fully Kioskから呼び出せるようにする
-    window.resetScreensaverTimer = resetScreensaverTimer;
-
-    // =====================================
-    // ユーザー操作検知
-    // =====================================
-
-    const events = [
-        "pointerdown",
-        "pointermove",
-        "keydown",
-        "touchstart",
-        "wheel"
-    ];
-
-    events.forEach(eventName => {
-
-        document.addEventListener(
-            eventName,
-            () => {
-                resetScreensaverTimer(eventName);
-            },
-            {
-                passive: true,
-                capture: true
-            }
-        );
-
-    });
-
-    // =====================================
+    // =========================================
     // 初期化
-    // =====================================
+    // =========================================
 
-    preloadMedia();
+    releaseCurrentMedia();
 
-    resetScreensaverTimer("initialization");
+    startIdleTimer();
 
-    console.log(
-        "[ScreenSaver] 初期化完了:",
-        mediaList.length,
-        "件"
-    );
+    console.log("スクリーンセイバー初期化完了", {
+        mediaCount: mediaList.length,
+        idleTime: IDLE_TIME,
+        defaultImageDuration: DEFAULT_IMAGE_DURATION
+    });
 
 })();

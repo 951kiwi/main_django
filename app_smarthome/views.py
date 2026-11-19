@@ -155,26 +155,57 @@ def screensaver_settings(request):
 
         action = request.POST.get("action")
 
+        
         # -----------------------------
         # メディアアップロード
         # -----------------------------
 
         if action == "upload":
 
+            is_ajax = (
+                request.headers.get("X-Requested-With")
+                == "XMLHttpRequest"
+            )
+
+            def upload_response(success, message, status=200):
+                if is_ajax:
+                    return JsonResponse({
+                        "success": success,
+                        "message": message,
+                    }, status=status)
+
+                if success:
+                    messages.success(request, message)
+                else:
+                    messages.error(request, message)
+
+                return redirect("screensaver_settings")
+
             uploaded_file = request.FILES.get("file")
 
             if not uploaded_file:
-                messages.error(request, "ファイルを選択してください。")
-                return redirect("screensaver_settings")
+                return upload_response(
+                    False,
+                    "ファイルを選択してください。",
+                    400
+                )
 
             if uploaded_file.size > 500 * 1024 * 1024:
-                messages.error(request, "ファイルは500MB以下にしてください。")
-                return redirect("screensaver_settings")
+                return upload_response(
+                    False,
+                    "ファイルは500MB以下にしてください。",
+                    400
+                )
 
             ext = Path(uploaded_file.name).suffix.lower()
 
-            image_ext = [".jpg", ".jpeg", ".png", ".webp", ".gif"]
-            video_ext = [".mp4", ".webm", ".mov"]
+            image_ext = [
+                ".jpg", ".jpeg", ".png", ".webp", ".gif"
+            ]
+
+            video_ext = [
+                ".mp4", ".webm", ".mov"
+            ]
 
             if ext in image_ext:
                 media_type = "image"
@@ -183,26 +214,45 @@ def screensaver_settings(request):
                 media_type = "video"
 
             else:
-                messages.error(request, "対応していないファイル形式です。")
-                return redirect("screensaver_settings")
+                return upload_response(
+                    False,
+                    "対応していないファイル形式です。",
+                    400
+                )
 
-            title = request.POST.get("title", "").strip()
+            title = Path(uploaded_file.name).stem
 
-            if not title:
-                title = Path(uploaded_file.name).stem
+            try:
 
-            ScreenSaverMedia.objects.create(
-                title=title,
-                media_type=media_type,
-                file=uploaded_file,
-                is_active=True,
-                order=(
-                    ScreenSaverMedia.objects.count() + 1
-                ),
-                duration=10
-            )
+                ScreenSaverMedia.objects.create(
+                    title=title,
+                    media_type=media_type,
+                    file=uploaded_file,
+                    is_active=True,
+                    order=(
+                        ScreenSaverMedia.objects.count() + 1
+                    ),
+                    duration=10
+                )
 
-            messages.success(request, "メディアを追加しました。")
+                return upload_response(
+                    True,
+                    f"{title} を追加しました。"
+                )
+
+            except Exception as error:
+
+                print(
+                    "ScreenSaver upload error:",
+                    error
+                )
+
+                return upload_response(
+                    False,
+                    "ファイルの保存に失敗しました。",
+                    500
+                )
+
 
         # -----------------------------
         # 削除
