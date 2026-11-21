@@ -1,0 +1,24 @@
+{% extends "app_wifi/base.html" %}
+{% block title %}Wi-Fiリンク管理{% endblock %}
+{% block content %}
+<div class="panel">
+  <h1>Wi-Fiプロファイル管理</h1>
+  <p class="muted">ダウンロード用リンクの発行・管理を行います。</p>
+  <a class="btn" href="{% url 'app_wifi:create_link' %}">＋ ダウンロードリンクを作成</a>
+</div>
+<div class="panel">
+  <h2>発行済みリンク</h2>
+  {% if links %}
+  <table><thead><tr><th>ID</th><th>発行日時</th><th>有効期限</th><th>状態</th><th>操作</th></tr></thead><tbody>
+  {% for link in links %}
+  <tr>
+    <td>#{{ link.pk }}</td><td>{{ link.created_at|date:"Y/m/d H:i" }}</td>
+    <td>{% if link.expires_at %}{{ link.expires_at|date:"Y/m/d H:i" }}{% else %}無制限{% endif %}</td>
+    <td>{% if not link.is_active %}<span class="status expired">無効</span>{% elif link.is_expired %}<span class="status expired">期限切れ</span>{% else %}<span class="status active">有効</span>{% endif %}</td>
+    <td>{% if link.is_available %}<form method="post" action="{% url 'app_wifi:disable_link' link.pk %}">{% csrf_token %}<button class="btn btn-danger" type="submit" onclick="return confirm('このリンクを無効化しますか？')">無効化</button></form>{% else %}—{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody></table>
+  {% else %}<p class="muted">まだリンクは発行されていません。</p>{% endif %}
+</div>
+{% endblock %}
