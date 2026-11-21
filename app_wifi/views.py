@@ -46,9 +46,12 @@ def create_link(request):
                 expires_at=form.get_expires_at(),
                 created_by=request.user,
             )
-            download_url = request.build_absolute_uri(
-                reverse("app_wifi:download_page", kwargs={"token": raw_token})
-            )
+            download_path = reverse("app_wifi:download_page", kwargs={"token": raw_token})
+            if settings.DEBUG:
+                download_url = request.build_absolute_uri(download_path)
+            else:
+                # Nginx等のリバースプロキシ配下でもQRコードは必ずHTTPSにする
+                download_url = f"https://{request.get_host()}{download_path}"
             return render(request, "app_wifi/link_created.html", {
                 "link": link,
                 "download_url": download_url,
