@@ -34,7 +34,7 @@ def build_mobileconfig():
         "SSID_STR": ssid,
         "HIDDEN_NETWORK": False,
         "AutoJoin": True,
-        "EncryptionType": encryption,
+        "EncryptionType": "WPA2",
         "Password": password,
     }
     profile = {
