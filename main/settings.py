@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'app_fileuploader',
     'app_Xmas',
     'app_smarthome',
+    'app_wifi',
     'app_Quoridor',
     'channels',
     'sslserver',
@@ -181,3 +182,9 @@ else:
 AUTH_USER_MODEL = 'app_main.CustomUser'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Wi-Fi profile settings (values are loaded from .env)
+WIFI_SSID = os.getenv("WIFI_SSID", "")
+WIFI_PASSWORD = os.getenv("WIFI_PASSWORD", "")
+WIFI_PROFILE_NAME = os.getenv("WIFI_PROFILE_NAME", "Wi-Fi接続設定")
+WIFI_ENCRYPTION_TYPE = os.getenv("WIFI_ENCRYPTION_TYPE", "Any")
