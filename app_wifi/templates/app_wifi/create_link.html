@@ -1,0 +1,18 @@
+{% extends "app_wifi/base.html" %}
+{% block title %}リンク作成{% endblock %}
+{% block content %}
+<div class="panel">
+  <h1>Wi-Fiダウンロードリンク作成</h1>
+  <p class="muted">作成後に専用URLとQRコードを発行します。利用者側にはダウンロード機能だけを表示します。</p>
+  <form method="post">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <label for="{{ form.expiry.id_for_label }}">有効期限</label>{{ form.expiry }}{{ form.expiry.errors }}
+    <div id="custom-date-wrap" hidden><label for="{{ form.custom_date.id_for_label }}">有効期限の日付（当日23:59まで）</label>{{ form.custom_date }}{{ form.custom_date.errors }}</div>
+    <button class="btn btn-block" type="submit" style="margin-top:22px">リンクを作成する</button>
+  </form>
+  <p style="margin-top:18px"><a href="{% url 'app_wifi:profile_list' %}">← リンク一覧に戻る</a></p>
+</div>
+<script>
+(()=>{const s=document.getElementById("id_expiry"),w=document.getElementById("custom-date-wrap");function update(){w.hidden=s.value!=="custom"}s.addEventListener("change",update);update()})();
+</script>
+{% endblock %}
