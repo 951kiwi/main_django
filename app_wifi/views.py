@@ -1,10 +1,12 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django.views.decorators.cache import never_cache
 
 from .forms import WifiProfileCreateForm
 from .models import WifiProfileLink
@@ -58,14 +60,16 @@ def create_link(request):
 
 
 @require_GET
+@never_cache
 def download_page(request, token):
     link = get_object_or_404(WifiProfileLink, token_hash=hash_token(token))
     if not link.is_available:
         return render(request, "app_wifi/link_unavailable.html", status=410)
-    return render(request, "app_wifi/download.html", {"profile_name": getattr(__import__("django.conf").conf.settings, "WIFI_PROFILE_NAME", "Wi-Fi接続設定")})
+    return render(request, "app_wifi/download.html", {"profile_name": settings.WIFI_PROFILE_NAME, "download_url": reverse("app_wifi:download_profile", kwargs={"token": token})})
 
 
 @require_GET
+@never_cache
 def download_profile(request, token):
     link = get_object_or_404(WifiProfileLink, token_hash=hash_token(token))
     if not link.is_available:
