@@ -658,20 +658,11 @@
         fadeDuration: FADE_DURATION,
         randomPlayback: true
     });
+    // Fully Kiosk から呼び出せるように公開
+        window.hideScreensaver = hideScreensaver;
 
+        // 初期化
+        releaseCurrentMedia();
+
+        startIdleTimer();
 })();
-
-
-// =========================================
-// 外部JavaScriptから呼び出せるようにする
-// =========================================
-
-window.hideScreensaver = hideScreensaver;
-
-// =========================================
-// 初期化
-// =========================================
-
-releaseCurrentMedia();
-
-startIdleTimer();
