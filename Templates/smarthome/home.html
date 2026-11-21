@@ -1780,7 +1780,7 @@
                       window.updateFullyDebug('② カメラ動き検出');
                       // ① スクリーンセイバーを解除
                       // ② 無操作タイマーを0秒に戻す
-                      window.resetScreensaverTimer?.('human-detection');
+                      window.hideScreensaver?.();
                       // ③ 既存の動体検知処理
                       window.showMotionDetected();
                       // ④ 既存の5分同期処理
