@@ -5,7 +5,7 @@
   <div style="font-size:48px">⌁</div>
   <h1>{{ profile_name }}</h1>
   <p class="muted">iPhone用のWi-Fi接続プロファイルをダウンロードできます。</p>
-  <a class="btn btn-block" href="{% url 'app_wifi:download_profile' token=request.resolver_match.kwargs.token %}">プロファイルをダウンロード</a>
+  <a class="btn btn-block" href="{{ download_url }}">プロファイルをダウンロード</a>
   <p class="muted" style="font-size:.88rem;margin-top:20px">ダウンロード後、「設定」アプリの「プロファイルがダウンロード済み」からインストールしてください。</p>
 </div>
 {% endblock %}
