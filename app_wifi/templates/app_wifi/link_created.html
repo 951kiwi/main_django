@@ -1,0 +1,18 @@
+{% extends "app_wifi/base.html" %}
+{% block title %}リンク発行完了{% endblock %}
+{% block content %}
+<div class="panel center">
+  <h1>ダウンロードリンクを作成しました</h1>
+  <p class="muted">このQRコードをiPhoneのカメラで読み取ってください。</p>
+  <img class="qr" src="{{ qr_data_uri }}" alt="ダウンロードページのQRコード">
+  <h2>ダウンロード専用URL</h2>
+  <p><a href="{{ download_url }}">{{ download_url }}</a></p>
+  <button class="btn btn-secondary" type="button" onclick="navigator.clipboard.writeText('{{ download_url|escapejs }}').then(()=>alert('URLをコピーしました'))">URLをコピー</button>
+  <div class="notice" style="text-align:left">
+    <strong>有効期限：</strong>{% if link.expires_at %}{{ link.expires_at|date:"Y/m/d H:i" }}{% else %}無制限{% endif %}<br>
+    <strong>発行日時：</strong>{{ link.created_at|date:"Y/m/d H:i" }}
+  </div>
+  <p class="muted">このURLは発行時にのみ表示されます。必要な場合は安全な場所に保存してください。</p>
+  <div class="actions" style="justify-content:center"><a class="btn" href="{% url 'app_wifi:profile_list' %}">リンク一覧へ</a><a class="btn btn-secondary" href="{% url 'app_wifi:create_link' %}">もう一つ作成</a></div>
+</div>
+{% endblock %}
